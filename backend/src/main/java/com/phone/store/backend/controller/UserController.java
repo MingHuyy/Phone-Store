@@ -25,29 +25,15 @@ public class UserController {
     @Autowired
     private  UserRepository userRepository;
 
-    public UserController(UserService userService) {
-        this.userService = userService;
-    }
-
-    @GetMapping("/")
-    public ResponseEntity<List<UserEntity>> getAllUsers1() {
-        List<UserEntity> users = userRepository.findAll();
-        System.out.println("Số lượng user trong DB: " + users.size());
-        return ResponseEntity.ok(users);
-    }
-
-
     @GetMapping("/{id}")
-    public UserEntity getUser(@PathVariable long id) {
+    public UserResponse getUser(@PathVariable long id) {
         return userService.getUserEntityById(id);
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<UserEntity>> getAllUsers() {
-        List<UserEntity> users = userRepository.findAll();
-        System.out.println("Số lượng user tìm thấy: " + users.size());
-        return ResponseEntity.ok().body(users);
+    public List<UserResponse> getAllUsers() {
+        System.out.println(userService.getAllUsers().size());
+        return userService.getAllUsers();
     }
-
 
 }

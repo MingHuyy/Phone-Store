@@ -1,14 +1,15 @@
 package com.phone.store.backend.controller;
 
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-@Controller
+@RestController
 @RequestMapping("/")
 public class HomeController {
-    @GetMapping
-    public String home() {
-        return "home"; // Spring sẽ tìm file home.html trong thư mục templates
+
+    @GetMapping(produces = "text/plain")
+    public String getHelloWorld() {
+        return "Hello World";
     }
 }

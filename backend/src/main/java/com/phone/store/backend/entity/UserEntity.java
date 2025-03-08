@@ -8,10 +8,10 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "users")
-@Setter
-@Getter
 @AllArgsConstructor
 @NoArgsConstructor
+@Setter
+@Getter
 
 public class UserEntity {
     @Id
@@ -31,8 +31,10 @@ public class UserEntity {
     @Column(nullable = false)
     private Role role = Role.USER;
 
+    @Column
+    private String phone;
+
     public enum Role {
         USER, ADMIN
     }
-
 }
