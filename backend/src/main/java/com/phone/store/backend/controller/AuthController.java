@@ -2,6 +2,9 @@ package com.phone.store.backend.controller;
 
 
 import com.phone.store.backend.model.dto.LoginDTO;
+import com.phone.store.backend.model.response.TokenResponse;
+import com.phone.store.backend.service.AuthService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -12,19 +15,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class LoginController {
+public class AuthController {
 
     @Autowired
     private AuthenticationManagerBuilder authenticationManagerBuilder;
+    @Autowired
+    private AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<LoginDTO> login(@RequestBody LoginDTO loginDTO) {
-
-        UsernamePasswordAuthenticationToken authenticationToken =
-                new UsernamePasswordAuthenticationToken(
-                        loginDTO.getUsername(), loginDTO.getPassword());
-
-        Authentication authentication = authenticationManagerBuildergit git .getObject().authenticate(authenticationToken);
-        return ResponseEntity.ok().body(loginDTO);
+    public ResponseEntity<TokenResponse> login(@Valid @RequestBody LoginDTO loginDTO) {
+        return authService.login(loginDTO);
     }
 }
