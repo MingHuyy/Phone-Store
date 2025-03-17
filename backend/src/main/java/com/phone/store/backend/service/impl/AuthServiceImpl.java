@@ -1,6 +1,5 @@
 package com.phone.store.backend.service.impl;
 
-import com.phone.store.backend.entity.UserEntity;
 import com.phone.store.backend.model.dto.LoginDTO;
 import com.phone.store.backend.model.response.TokenResponse;
 import com.phone.store.backend.respository.UserRepository;
@@ -30,7 +29,7 @@ public class AuthServiceImpl implements AuthService {
                         loginDTO.getUsername(), loginDTO.getPassword());
         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
 
-        String accessToken = jwtTokenUtil.createToken(authentication);
+        String accessToken = jwtTokenUtil.createAccessToken(authentication);
         TokenResponse jwtToken = new TokenResponse();
         jwtToken.setAccessToken(accessToken);
         return ResponseEntity.ok(jwtToken);

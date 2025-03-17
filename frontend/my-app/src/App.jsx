@@ -1,15 +1,16 @@
-import { useState } from 'react'
 import './App.css'
-import HomePage from './pages/HomePage'
+import LoginPage from "./pages/login";
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <HomePage />
-    </>
-  )
+    <div id="app-container">
+      <TopNav />
+      <Header />
+      <main className="main-content">
+      </main>
+      <Footer />
+    </div>
+  );
 }
 
-export default App
+export default App;

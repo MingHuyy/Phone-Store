@@ -1,0 +1,178 @@
+/* Header Container */
+.header-container {
+    position: fixed;
+    top: 40px;
+    /* Đặt header ngay dưới topnav */
+    left: 0;
+    right: 0;
+    width: 100%;
+    z-index: 99;
+    background-color: white;
+    padding: 10px 20px;
+    border-bottom: 3px solid #e1e1e1;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* Header */
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Logo */
+.logo {
+    flex: 0 0 180px;
+}
+
+.logo img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Search Box */
+.search-box {
+    flex: 1;
+    display: flex;
+    margin: 0 20px;
+    max-width: 500px;
+    border: 2px solid #ddd;
+    border-radius: 4px;
+    overflow: hidden;
+    height: 40px;
+}
+
+.search-input {
+    flex: 1;
+    padding: 0 15px;
+    border: none;
+    outline: none;
+    font-size: 14px;
+}
+
+.search-button {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background-color: #f5f5f5;
+    border: none;
+    border-left: 1px solid #ddd;
+    padding: 0 15px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+}
+
+.search-button:hover {
+    background-color: #e5e5e5;
+}
+
+/* Header Actions */
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.account-button,
+.cart-button {
+    position: relative;
+}
+
+.account-button a,
+.cart-button a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #333;
+    text-decoration: none;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.account-button a:hover,
+.cart-button a:hover {
+    color: #007bff;
+}
+
+.icon {
+    font-size: 20px;
+    margin-bottom: 5px;
+}
+
+/* Account Dropdown */
+.account-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    min-width: 150px;
+    margin-top: 10px;
+    z-index: 100;
+}
+
+.account-dropdown a {
+    display: block;
+    padding: 10px 15px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.account-dropdown a:last-child {
+    border-bottom: none;
+}
+
+.account-dropdown a:hover {
+    background: #f5f5f5;
+}
+
+/* Cart Count */
+.cart-count {
+    position: absolute;
+    top: -5px;
+    right: 25px;
+    background: red;
+    color: white;
+    font-size: 12px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .header {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .logo {
+        flex: 0 0 100%;
+        text-align: center;
+        margin-bottom: 10px;
+    }
+
+    .search-box {
+        flex: 0 0 100%;
+        margin: 0 0 15px 0;
+        max-width: 100%;
+    }
+
+    .header-actions {
+        width: 100%;
+        justify-content: space-around;
+    }
+}

@@ -1,0 +1,51 @@
+/* Footer.css */
+.footer-container {
+    width: 100vw;
+    margin-top: auto;
+}
+
+.support-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    background-color: #f5f5f5;
+    padding: 10px 20px;
+}
+
+
+.support-item {
+    flex-grow: 1;
+    text-align: center;
+    padding: 5px;
+    min-width: 150px;
+    margin: 5px;
+    color: black;
+    position: relative;
+    padding: 0 10px;
+    /* Khoảng cách giữa các mục */
+}
+
+.support-item:not(:last-child) {
+    border-right: 1px solid black;
+}
+
+
+.copyright {
+    width: 100%;
+    background-color: #222;
+    color: #aaa;
+    text-align: center;
+    padding: 15px 0;
+    font-size: 14px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.copyright p {
+    margin: 0;
+}
+
+.copyright span {
+    color: #fff;
+    font-weight: bold;
+}

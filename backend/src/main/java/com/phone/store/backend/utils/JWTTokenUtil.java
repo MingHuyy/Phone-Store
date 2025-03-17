@@ -19,7 +19,10 @@ public class JWTTokenUtil {
     private String baseSecret;
 
     @Value("${phonestore.jwt.token-validity-in-seconds}")
-    private long jwtExpiration;
+    private long jwtExpirationHour;
+
+    @Value("${phonestore.jwt.token-validity-in-day}")
+    private long jwtExpirationDay;
 
     private final JwtEncoder jwtEncoder;
 
@@ -29,12 +32,10 @@ public class JWTTokenUtil {
 
     public static final MacAlgorithm JWT_ALGORITHM = MacAlgorithm.HS512;
 
-    public String createToken(Authentication authentication) {
+    public String createAccessToken(Authentication authentication) {
         Instant now = Instant.now();
-        Instant validity = now.plus(jwtExpiration, ChronoUnit.SECONDS);
+        Instant validity = now.plus(jwtExpirationHour, ChronoUnit.SECONDS);
 
-
-        // @formatter:off
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuedAt(now)
                 .expiresAt(validity)
@@ -46,4 +47,20 @@ public class JWTTokenUtil {
         return this.jwtEncoder.encode(JwtEncoderParameters.from(jwsHeader,
                 claims)).getTokenValue();
     }
+
+    public String createRefreshToken(Authentication authentication) {
+        Instant now = Instant.now();
+        Instant validity = now.plus(jwtExpirationDay, ChronoUnit.DAYS);
+
+        JwtClaimsSet claims = JwtClaimsSet.builder()
+                .issuedAt(now)
+                .expiresAt(validity)
+                .subject(authentication.getName())
+                .claim("jwt", authentication)
+                .build();
+
+        JwsHeader jwsHeader = JwsHeader.with(JWT_ALGORITHM).build();
+        return this.jwtEncoder.encode(JwtEncoderParameters.from(jwsHeader, claims)).getTokenValue();
+    }
+
 }
