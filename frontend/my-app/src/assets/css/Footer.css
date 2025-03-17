@@ -1,51 +1,181 @@
-/* Footer.css */
-.footer-container {
-    width: 100vw;
-    margin-top: auto;
+.plc {
+    background-color: #f8f9fa;
+    padding: 20px 0;
+    border-top: 1px solid #e9ecef;
+    border-bottom: 1px solid #e9ecef;
 }
 
-.support-info {
+.plc section {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 15px;
+}
+
+.plc ul.flexContain {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    list-style: none;
     flex-wrap: wrap;
-    background-color: #f5f5f5;
-    padding: 10px 20px;
-}
-
-
-.support-item {
-    flex-grow: 1;
-    text-align: center;
-    padding: 5px;
-    min-width: 150px;
-    margin: 5px;
-    color: black;
-    position: relative;
-    padding: 0 10px;
-    /* Khoảng cách giữa các mục */
-}
-
-.support-item:not(:last-child) {
-    border-right: 1px solid black;
-}
-
-
-.copyright {
-    width: 100%;
-    background-color: #222;
-    color: #aaa;
-    text-align: center;
-    padding: 15px 0;
-    font-size: 14px;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-.copyright p {
     margin: 0;
+    padding: 0;
 }
 
-.copyright span {
-    color: #fff;
+.plc ul.flexContain li {
+    flex: 1;
+    min-width: 200px;
+    padding: 15px;
+    text-align: center;
+    font-size: 14px;
+    color: #495057;
+    position: relative;
+    line-height: 1.5;
+}
+
+.plc ul.flexContain li:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 70%;
+    width: 1px;
+    background-color: #dee2e6;
+}
+
+.plc ul.flexContain li a {
+    text-decoration: none;
+    color: #288ad6;
     font-weight: bold;
+    transition: color 0.2s;
+}
+
+.plc ul.flexContain li a:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
+
+/* Alert Box */
+#alert {
+    display: none;
+    /* Hidden by default */
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    min-width: 300px;
+    background-color: #fff;
+    border-left: 5px solid #4caf50;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 15px;
+    border-radius: 4px;
+    z-index: 1000;
+    animation: slideIn 0.5s;
+}
+
+@keyframes slideIn {
+    from {
+        right: -300px;
+        opacity: 0;
+    }
+
+    to {
+        right: 20px;
+        opacity: 1;
+    }
+}
+
+#closebtn {
+    margin-left: 15px;
+    color: #888;
+    font-weight: bold;
+    float: right;
+    font-size: 22px;
+    line-height: 20px;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+#closebtn:hover {
+    color: #333;
+}
+
+/* Copyright Section */
+.copy-right {
+    background-color: #343a40;
+    color: #adb5bd;
+    text-align: center;
+    padding: 20px 15px;
+    font-size: 14px;
+}
+
+.copy-right p {
+    margin: 0;
+    line-height: 1.5;
+}
+
+.copy-right a {
+    color: #adb5bd;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.copy-right a:hover {
+    color: #fff;
+    text-decoration: underline;
+}
+
+/* Responsive Styles */
+@media (max-width: 992px) {
+    .plc ul.flexContain {
+        justify-content: center;
+    }
+
+    .plc ul.flexContain li {
+        flex: 0 0 33.333%;
+        margin-bottom: 10px;
+    }
+
+    .plc ul.flexContain li::after {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .plc ul.flexContain li {
+        flex: 0 0 50%;
+    }
+}
+
+@media (max-width: 576px) {
+    .plc ul.flexContain li {
+        flex: 0 0 100%;
+    }
+
+    #alert {
+        min-width: auto;
+        left: 20px;
+        right: 20px;
+    }
+}
+
+/* JavaScript functionality for alert box */
+/* Add this to make the alert box functional with JavaScript */
+.alert-show {
+    display: block !important;
+}
+
+.alert-success {
+    border-left-color: #4caf50;
+}
+
+.alert-info {
+    border-left-color: #2196f3;
+}
+
+.alert-warning {
+    border-left-color: #ff9800;
+}
+
+.alert-error {
+    border-left-color: #f44336;
 }

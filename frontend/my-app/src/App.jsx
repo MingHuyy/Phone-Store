@@ -1,16 +1,28 @@
 import './App.css'
-import LoginPage from "./pages/login";
+import { Outlet, useLocation } from 'react-router-dom'
+import Header from './layout/header.jsx'
+import Footer from './layout/footer.jsx'
 
 function App() {
+  const location = useLocation();
+  const hideHeaderFooter = ["/login", "/register", "/forgot-password"].includes(location.pathname);
+
   return (
-    <div id="app-container">
-      <TopNav />
-      <Header />
-      <main className="main-content">
-      </main>
-      <Footer />
-    </div>
-  );
+    <>
+      <div>
+        {!hideHeaderFooter && (
+          <div className='header'>
+            <Header />
+          </div>
+        )}
+
+        <div className='main'>
+          <Outlet />
+        </div>
+        {!hideHeaderFooter && <Footer />}
+      </div>
+    </>
+  )
 }
 
-export default App;
+export default App

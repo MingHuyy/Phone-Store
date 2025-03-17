@@ -1,27 +1,62 @@
-/* Header Container */
-.header-container {
-    position: fixed;
-    top: 40px;
-    /* Đặt header ngay dưới topnav */
-    left: 0;
-    right: 0;
-    width: 100%;
-    z-index: 99;
-    background-color: white;
-    padding: 10px 20px;
-    border-bottom: 3px solid #e1e1e1;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+/* General Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-/* Header */
+/* Header Styles */
+header {
+    font-family: "Roboto", Arial, sans-serif;
+    width: 100%;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background-color: white;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.top-nav {
+    background-color: #f8f9fa;
+    padding: 8px 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.top-nav-quicklink {
+    display: flex;
+    justify-content: center;
+    list-style: none;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 15px;
+}
+
+.top-nav-quicklink li {
+    margin: 0 15px;
+}
+
+.top-nav-quicklink li a {
+    color: #495057;
+    text-decoration: none;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    transition: color 0.2s ease;
+}
+
+.top-nav-quicklink li a svg {
+    margin-right: 5px;
+}
+
+.top-nav-quicklink li a:hover {
+    color: #007bff;
+}
+
+/* Main Header */
 .header {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 10px 20px;
+    padding: 15px;
     max-width: 1200px;
     margin: 0 auto;
 }
@@ -36,143 +71,217 @@
     height: auto;
 }
 
-/* Search Box */
-.search-box {
+/* Content Area */
+.content {
     flex: 1;
     display: flex;
-    margin: 0 20px;
-    max-width: 500px;
-    border: 2px solid #ddd;
-    border-radius: 4px;
-    overflow: hidden;
-    height: 40px;
+    justify-content: space-between;
+    align-items: center;
 }
 
-.search-input {
+/* Search Bar */
+.search-header {
     flex: 1;
-    padding: 0 15px;
-    border: none;
-    outline: none;
-    font-size: 14px;
+    max-width: 400px;
+
 }
 
-.search-button {
+.input-search {
     display: flex;
-    align-items: center;
-    gap: 5px;
-    background-color: #f5f5f5;
-    border: none;
-    border-left: 1px solid #ddd;
-    padding: 0 15px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
-    color: #333;
-}
-
-.search-button:hover {
-    background-color: #e5e5e5;
-}
-
-/* Header Actions */
-.header-actions {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-}
-
-.account-button,
-.cart-button {
     position: relative;
 }
 
-.account-button a,
-.cart-button a {
+.autocomplete {
+    width: 100%;
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    color: #333;
-    text-decoration: none;
-    cursor: pointer;
-    font-size: 14px;
 }
 
-.account-button a:hover,
-.cart-button a:hover {
+.autocomplete input {
+    flex: 1;
+    padding: 10px 15px;
+    border: 2px solid #ddd;
+    border-radius: 5px 0 0 5px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.autocomplete input:focus {
+    border-color: #007bff;
+}
+
+.autocomplete button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 0 20px;
+    border-radius: 0 5px 5px 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: background-color 0.2s;
+}
+
+.autocomplete button svg {
+    margin-right: 5px;
+}
+
+.autocomplete button:hover {
+    background-color: #0069d9;
+}
+
+.tags {
+    margin-top: 5px;
+    font-size: 12px;
+    color: #6c757d;
+}
+
+/* User Tools */
+.tools-member {
+    display: flex;
+    align-items: center;
+}
+
+.member,
+.cart {
+    margin-left: 20px;
+    position: relative;
+}
+
+.member a,
+.cart a {
+    display: flex;
+    align-items: center;
+    color: #343a40;
+    text-decoration: none;
+    font-size: 14px;
+    transition: color 0.2s;
+}
+
+.member a svg,
+.cart a svg {
+    margin-right: 5px;
+    font-size: 18px;
+}
+
+.member a:hover,
+.cart a:hover {
     color: #007bff;
 }
 
-.icon {
-    font-size: 20px;
-    margin-bottom: 5px;
-}
-
-/* Account Dropdown */
-.account-dropdown {
+/* Dropdown Menu */
+.menuMember {
     position: absolute;
     top: 100%;
     right: 0;
-    background: white;
+    background-color: white;
     border: 1px solid #ddd;
     border-radius: 4px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     min-width: 150px;
-    margin-top: 10px;
-    z-index: 100;
+    z-index: 10;
+    margin-top: 5px;
+    display: flex;
+    flex-direction: column;
 }
 
-.account-dropdown a {
-    display: block;
+.menuMember a {
     padding: 10px 15px;
-    text-align: left;
-    border-bottom: 1px solid #eee;
+    color: #343a40;
+    text-decoration: none;
+    transition: background-color 0.2s;
 }
 
-.account-dropdown a:last-child {
-    border-bottom: none;
+.menuMember a:hover {
+    background-color: #f8f9fa;
+    color: #007bff;
 }
 
-.account-dropdown a:hover {
-    background: #f5f5f5;
-}
-
-/* Cart Count */
-.cart-count {
-    position: absolute;
-    top: -5px;
-    right: 25px;
-    background: red;
+/* Shopping Cart */
+.cart-number {
+    background-color: #dc3545;
     color: white;
-    font-size: 12px;
+    border-radius: 50%;
     width: 18px;
     height: 18px;
-    border-radius: 50%;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
+    font-size: 12px;
+    margin-left: 5px;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
+/* Responsive Styles */
+@media (max-width: 992px) {
     .header {
-        flex-wrap: wrap;
-        justify-content: center;
+        flex-direction: column;
     }
 
     .logo {
-        flex: 0 0 100%;
-        text-align: center;
+        margin-bottom: 15px;
+    }
+
+    .content {
+        flex-direction: column;
+    }
+
+    .search-header {
+        width: 100%;
+        max-width: 100%;
+        margin-bottom: 15px;
+        left: 0 !important;
+        top: 0 !important;
+    }
+
+    .tools-member {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 768px) {
+    .top-nav-quicklink {
+        flex-wrap: wrap;
+    }
+
+    .top-nav-quicklink li {
+        margin: 5px 10px;
+    }
+
+    .autocomplete {
+        flex-direction: column;
+    }
+
+    .autocomplete input {
+        border-radius: 5px;
         margin-bottom: 10px;
     }
 
-    .search-box {
-        flex: 0 0 100%;
-        margin: 0 0 15px 0;
-        max-width: 100%;
+    .autocomplete button {
+        border-radius: 5px;
+    }
+}
+
+@media (max-width: 576px) {
+    .tools-member {
+        flex-direction: column;
+        align-items: center;
     }
 
-    .header-actions {
-        width: 100%;
-        justify-content: space-around;
+    .member,
+    .cart {
+        margin: 10px 0;
     }
+}
+
+/* Utility Classes */
+.flexContain {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.group:after {
+    content: "";
+    display: table;
+    clear: both;
 }

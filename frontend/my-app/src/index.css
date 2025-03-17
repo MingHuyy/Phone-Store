@@ -1,44 +1,59 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
-  color: rgba(33, 53, 71, 1);
-  background-color: #000;
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 255, 255, 255;
-  --background-end-rgb: 255, 255, 255;
-}
-
-body {
   margin: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-width: 320px;
-  min-height: 100vh;
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(to bottom, transparent, rgb(var(--background-end-rgb))) rgb(var(--background-start-rgb));
+  padding: 0;
+  outline: none;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
 a {
   font-weight: 500;
   color: #646cff;
-  text-decoration: none;
+  text-decoration: inherit;
 }
 
 a:hover {
   color: #535bf2;
+}
+
+.group:before,
+.group:after {
+  content: "";
+  display: table;
+}
+
+.group:after {
+  clear: both;
+}
+
+.group {
+  zoom: 1;
+  /* For IE 6/7 (trigger hasLayout) */
+}
+
+body {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
 }
 
 button {
@@ -51,7 +66,6 @@ button {
   background-color: #1a1a1a;
   cursor: pointer;
   transition: border-color 0.25s;
-  color: white;
 }
 
 button:hover {
@@ -63,22 +77,17 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
-@media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: light) {
   :root {
-    color: rgba(255, 255, 255, 0.87);
-    background-color: #242424;
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
+    color: #213547;
+    background-color: #ffffff;
+  }
+
+  a:hover {
+    color: #747bff;
   }
 
   button {
-    background-color: #333;
-  }
-}
-
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
+    background-color: #f9f9f9;
   }
 }
