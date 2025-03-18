@@ -1,0 +1,194 @@
+/* Banner Component Styles */
+
+.banner {
+    width: 100%;
+    max-width: 1000px;
+    margin: 20px auto;
+    padding: 0 15px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+/* Banner Image Styles */
+.banner img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+/* Fix for the peek-a-boo issue - hide adjacent slides */
+.banner .slick-list {
+    overflow: hidden;
+    margin: 0;
+    padding: 0 !important;
+}
+
+.banner .slick-slide {
+    visibility: hidden;
+    transition: visibility 0s linear;
+}
+
+.banner .slick-slide.slick-active {
+    visibility: visible;
+}
+
+/* Prevent any margin or padding on slides */
+.banner .slick-track {
+    display: flex;
+    align-items: center;
+}
+
+.banner .slick-slide>div {
+    width: 100%;
+    line-height: 0;
+}
+
+/* Custom Slick Slider Styles */
+
+/* Arrows */
+.banner .slick-prev,
+.banner .slick-next {
+    width: 40px;
+    height: 40px;
+    z-index: 10;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.banner .slick-prev {
+    left: 15px;
+}
+
+.banner .slick-next {
+    right: 15px;
+}
+
+.banner .slick-prev:hover,
+.banner .slick-next:hover {
+    background: rgba(255, 255, 255, 1);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.banner .slick-prev:before,
+.banner .slick-next:before {
+    color: #333;
+    font-size: 24px;
+    opacity: 0.8;
+}
+
+/* Dots */
+.banner .slick-dots {
+    bottom: 15px;
+}
+
+.banner .slick-dots li button:before {
+    font-size: 12px;
+    color: white;
+    opacity: 0.7;
+}
+
+.banner .slick-dots li.slick-active button:before {
+    color: white;
+    opacity: 1;
+}
+
+/* Slide Animation - modified to avoid showing adjacent slides */
+.banner .slick-slide {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.banner .slick-slide.slick-active {
+    opacity: 1;
+}
+
+/* Responsive Styles */
+@media (max-width: 992px) {
+    .banner {
+        margin: 15px auto;
+    }
+}
+
+@media (max-width: 768px) {
+
+    .banner .slick-prev,
+    .banner .slick-next {
+        width: 30px;
+        height: 30px;
+    }
+
+    .banner .slick-prev:before,
+    .banner .slick-next:before {
+        font-size: 20px;
+    }
+
+    .banner .slick-dots {
+        bottom: 10px;
+    }
+}
+
+@media (max-width: 576px) {
+    .banner {
+        margin: 10px auto;
+        border-radius: 6px;
+    }
+
+    .banner img {
+        border-radius: 6px;
+    }
+
+    .banner .slick-prev {
+        left: 5px;
+    }
+
+    .banner .slick-next {
+        right: 5px;
+    }
+
+    .banner .slick-dots {
+        bottom: 5px;
+    }
+
+    .banner .slick-dots li button:before {
+        font-size: 8px;
+    }
+}
+
+/* Optional: Add a loading state */
+.banner.loading {
+    min-height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f8f9fa;
+}
+
+/* Optional: Add hover effect on banner */
+.banner:hover .slick-prev,
+.banner:hover .slick-next {
+    opacity: 1;
+}
+
+.banner .slick-prev,
+.banner .slick-next {
+    opacity: 0.5;
+    transition: opacity 0.3s ease;
+}
+
+/* Optional: Add a gradient overlay for better text visibility if needed */
+.banner .slick-slide:after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 100%);
+    border-radius: 0 0 8px 8px;
+    pointer-events: none;
+}

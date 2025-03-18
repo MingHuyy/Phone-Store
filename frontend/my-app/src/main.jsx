@@ -10,6 +10,8 @@ import Contact from './pages/contact.jsx';
 import Login from './components/auth/login.jsx';
 import Register from './components/auth/register.jsx';
 import ForgotPassword from './components/auth/forgotpassword.jsx';
+import UserInfo from './components/user/userinfo.jsx';
+import ChangePassword from './components/user/changepassword.jsx';
 
 
 const router = createBrowserRouter([
@@ -36,6 +38,14 @@ const router = createBrowserRouter([
       {
         path: '/forgot-password',
         element: <ForgotPassword />
+      },
+      {
+        path: '/userinfo',
+        element: <UserInfo />
+      },
+      {
+        path: '/changepassword',
+        element: <ChangePassword />
       },
     ]
   }
