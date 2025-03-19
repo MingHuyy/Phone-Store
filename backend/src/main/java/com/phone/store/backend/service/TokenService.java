@@ -8,4 +8,6 @@ public interface TokenService {
     String deleteToken(Long tokenId);
 
     TokenEntity getByName(String name);
+
+    public String getUsernameFromToken(String token);
 }

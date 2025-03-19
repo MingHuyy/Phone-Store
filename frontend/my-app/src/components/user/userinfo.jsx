@@ -5,8 +5,16 @@ import { FaUser, FaEnvelope, FaPhone, FaUserTag, FaPen, FaKey, FaSave, FaTimes }
 import "../../assets/css/userinfo.css";
 
 const UserInfo = () => {
-    // Giả lập dữ liệu người dùng từ API
-    const [user, setUser] = useState(null);
+    const API_BASE_URL = "http://localhost:1111";
+
+    // State cho dữ liệu người dùng
+    const [user, setUser] = useState(
+        {
+            username: "",
+            email: "",
+            phone: "",
+            role: "",
+        });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -16,86 +24,106 @@ const UserInfo = () => {
         username: "",
         email: "",
         phone: "",
+        role: "",
     });
     const [formErrors, setFormErrors] = useState({});
     const [saveLoading, setSaveLoading] = useState(false);
     const [saveSuccess, setSaveSuccess] = useState(false);
 
-    const useFetchUserData = () => {
-        const [user, setUser] = useState(null);
-        const [loading, setLoading] = useState(true);
-        const [error, setError] = useState(null);
+    // Hàm gọi API với xác thực
+    const callApiWithAuth = async (url, options = {}) => {
+        const accessToken = localStorage.getItem("accessToken");
 
-        useEffect(() => {
-            const fetchUserData = async () => {
-                const accessToken = localStorage.getItem("accessToken");
-                if (!accessToken) {
-                    setError("Bạn chưa đăng nhập!");
-                    setLoading(false);
-                    return;
+        // Thêm header Authorization nếu có token
+        options.headers = {
+            ...options.headers,
+            "Content-Type": "application/json",
+            Authorization: accessToken ? `Bearer ${accessToken}` : "",
+        };
+
+        try {
+            let response = await fetch(`${API_BASE_URL}${url}`, options);
+
+            // Xử lý token hết hạn
+            if (response.status === 401) {
+                // Thử refresh token
+                const newToken = await refreshToken();
+                if (!newToken) {
+                    throw new Error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
                 }
 
+                // Gọi lại API với token mới
+                options.headers.Authorization = `Bearer ${newToken}`;
+                response = await fetch(`${API_BASE_URL}${url}`, options);
+            }
+
+            // Xử lý phản hồi lỗi
+            if (!response.ok) {
+                let errorMessage;
                 try {
-                    const response = await fetch("http://localhost:1111/user", {
-                        method: "GET",
-                        headers: {
-                            "Content-Type": "application/json",
-                            Authorization: `Bearer ${accessToken}`,
-                        },
-                    });
-
-                    if (response.status === 401) {
-                        // Nếu token hết hạn, gọi hàm refreshAccessToken
-                        return await refreshAccessToken();
-                    }
-
-                    if (!response.ok) throw new Error("Lỗi khi lấy thông tin người dùng");
-
-                    const userData = await response.json();
-                    setUser(userData);
-                } catch (err) {
-                    setError(err.message);
-                } finally {
-                    setLoading(false);
+                    // Thử đọc lỗi dạng JSON
+                    const errorData = await response.json();
+                    errorMessage = errorData.message || `Lỗi HTTP ${response.status}`;
+                } catch (e) {
+                    // Nếu không phải JSON, đọc dạng text
+                    errorMessage = await response.text() || `Lỗi HTTP ${response.status}`;
                 }
-            };
+                throw new Error(errorMessage);
+            }
 
-            const refreshAccessToken = async () => {
-                const refreshToken = localStorage.getItem("refreshToken");
-                if (!refreshToken) {
-                    setError("Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại.");
-                    setLoading(false);
-                    return;
-                }
-
-                try {
-                    const response = await fetch("https://your-api.com/auth/refresh", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify({ refreshToken }),
-                    });
-
-                    if (!response.ok) throw new Error("Không thể làm mới phiên đăng nhập.");
-
-                    const { accessToken } = await response.json();
-                    localStorage.setItem("accessToken", accessToken);
-
-                    // Gọi lại API lấy thông tin user sau khi có access token mới
-                    return await fetchUserData();
-                } catch (err) {
-                    setError(err.message);
-                }
-            };
-
-            fetchUserData();
-        }, []);
-
-        return { user, loading, error };
+            return await response.json();
+        } catch (err) {
+            console.error("API error:", err);
+            throw err;
+        }
     };
 
+    // Hàm refresh token
+    const refreshToken = async () => {
+        const refreshToken = localStorage.getItem("refreshToken");
+        if (!refreshToken) return null;
 
+        try {
+            const response = await fetch(`${API_BASE_URL}/refresh`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ refreshToken }),
+            });
+
+            if (!response.ok) return null;
+
+            const data = await response.json();
+            localStorage.setItem("accessToken", data.accessToken);
+            return data.accessToken;
+        } catch (err) {
+            console.error("Lỗi khi làm mới token:", err);
+            return null;
+        }
+    };
+
+    // Lấy thông tin người dùng khi component được mount
+    useEffect(() => {
+        const fetchUserData = async () => {
+            try {
+                const userData = await callApiWithAuth("/users/info");
+
+                setFormData({
+                    username: userData.username,
+                    email: userData.email,
+                    phone: userData.phone || "",
+                    role: userData.role,
+                });
+                setUser(userData);
+                console.log("hello ", userData, user, formData)
+            } catch (err) {
+                setError(err.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchUserData();
+    }, []);
 
     // Xử lý thay đổi form
     const handleChange = (e) => {
@@ -137,42 +165,52 @@ const UserInfo = () => {
     };
 
     // Xử lý lưu thông tin
-    const handleSave = (e) => {
+    const handleSave = async (e) => {
         e.preventDefault();
 
         if (validateForm()) {
             setSaveLoading(true);
 
-            // Giả lập API call
-            setTimeout(() => {
-                // Cập nhật thông tin người dùng
-                setUser({
-                    ...user,
-                    username: formData.username,
-                    email: formData.email,
-                    phone: formData.phone,
+            try {
+                // Gọi API để cập nhật thông tin người dùng
+                const updatedData = await callApiWithAuth("/users/update", {
+                    method: "PUT",
+                    body: JSON.stringify(formData),
                 });
 
-                setSaveLoading(false);
-                setIsEditing(false);
+                // Cập nhật thông tin người dùng trong state
+                setUser({
+                    ...user,
+                    ...updatedData
+                });
+
                 setSaveSuccess(true);
+                setIsEditing(false);
 
                 // Ẩn thông báo thành công sau 3 giây
                 setTimeout(() => {
                     setSaveSuccess(false);
                 }, 3000);
-            }, 1500);
+            } catch (err) {
+                setError(err.message);
+            } finally {
+                setSaveLoading(false);
+            }
         }
     };
 
     // Hủy chỉnh sửa
     const handleCancel = () => {
         setIsEditing(false);
-        setFormData({
-            username: user.username,
-            email: user.email,
-            phone: user.phone || "",
-        });
+        // Khôi phục lại dữ liệu ban đầu
+        if (user) {
+            setFormData({
+                username: user.username,
+                email: user.email,
+                phone: user.phone || "",
+                role: user.role,
+            });
+        }
         setFormErrors({});
     };
 

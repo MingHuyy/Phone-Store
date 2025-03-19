@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Set;
+
 @Data
 @Builder
 @AllArgsConstructor
@@ -13,6 +15,6 @@ public class UserResponse {
     private Long id;
     private String username;
     private String email;
-    private String role;
+    private String roles;
     private String phone;
 }

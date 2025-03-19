@@ -12,6 +12,7 @@ import Register from './components/auth/register.jsx';
 import ForgotPassword from './components/auth/forgotpassword.jsx';
 import UserInfo from './components/user/userinfo.jsx';
 import ChangePassword from './components/user/changepassword.jsx';
+import Cart from './components/product/cart.jsx';
 
 
 const router = createBrowserRouter([
@@ -21,6 +22,7 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
+        path: '/',
         element: <Home />
       },
       {
@@ -40,12 +42,16 @@ const router = createBrowserRouter([
         element: <ForgotPassword />
       },
       {
-        path: '/userinfo',
+        path: '/users/info',
         element: <UserInfo />
       },
       {
         path: '/changepassword',
         element: <ChangePassword />
+      },
+      {
+        path: '/cart',
+        element: <Cart />
       },
     ]
   }

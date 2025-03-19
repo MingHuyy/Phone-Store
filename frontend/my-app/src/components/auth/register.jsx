@@ -191,7 +191,7 @@ const Register = () => {
                             <div className="form-group">
                                 <label htmlFor="confirmPassword">Xác nhận mật khẩu</label>
                                 <div className="input-group">
-                                    <input
+                                        <input
                                         type={showConfirmPassword ? "text" : "password"}
                                         id="confirmPassword"
                                         name="confirmPassword"

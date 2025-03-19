@@ -1,24 +1,42 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import logo from "../assets/img/logo.jpg";
 import '../assets/css/header.css';
 import { FaUser, FaShoppingCart, FaSearch, FaHome, FaInfoCircle, FaWrench, FaPhone } from 'react-icons/fa';
 
 const Header = () => {
+    const navigate = useNavigate();
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [showMenu, setShowMenu] = useState(false);
 
     useEffect(() => {
         const token = localStorage.getItem("accessToken");
         setIsLoggedIn(!!token);
-    }, []);
+
+        if (showMenu) {
+            const handleClickOutside = (event) => {
+                if (!event.target.closest(".member")) {
+                    setShowMenu(false);
+                }
+            };
+
+            document.addEventListener("click", handleClickOutside);
+
+            return () => {
+                document.removeEventListener("click", handleClickOutside);
+            };
+        }
+    }, [showMenu]);
+
 
     const logOut = () => {
         if (window.confirm("Xác nhận đăng xuất ?")) {
-            localStorage.clear;
+            localStorage.clear();
             setIsLoggedIn(false);
             setShowMenu(false);
-            console.log("Đăng xuất thành công");
+            alert("Đăng xuất thành công");
+            navigate("/");
         }
     };
 
@@ -66,7 +84,7 @@ const Header = () => {
                                 <div className="menuMember">
                                     {isLoggedIn ? (
                                         <>
-                                            <Link to="/userinfo">Trang người dùng</Link>
+                                            <Link to="/users/info">Trang người dùng</Link>
                                             <a onClick={logOut} style={{ cursor: "pointer" }}>Đăng xuất</a>
                                         </>
                                     ) : (
@@ -81,7 +99,7 @@ const Header = () => {
 
                         <div className="cart">
                             <Link
-                                to={isLoggedIn ? "/giohang" : "#"}
+                                to={isLoggedIn ? "/cart" : "#"}
                                 onClick={(e) => {
                                     if (!isLoggedIn) {
                                         e.preventDefault(); // Ngăn chặn chuyển trang
