@@ -65,13 +65,13 @@ public class UserController {
             }
 
             UserResponse userResponse = userConverter.convertToResponse(user);
+            String role = userResponse.getRoles();
+            System.out.println(role);
             return ResponseEntity.ok(userResponse);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("message", "Token không hợp lệ hoặc đã hết hạn."));
         }
     }
-
-
 
 }

@@ -127,6 +127,12 @@
     align-items: center;
 }
 
+.input-icon {
+    position: absolute;
+    left: 15px;
+    color: #6c757d;
+}
+
 .input-group input {
     width: 100%;
     padding: 12px 15px 12px 45px;
@@ -342,6 +348,35 @@
 
 .back-to-login:hover {
     color: #4e54c8;
+}
+
+.checkbox-group {
+    margin-bottom: 20px;
+}
+
+.checkbox-container {
+    display: flex;
+    align-items: flex-start;
+}
+
+.checkbox-container input[type="checkbox"] {
+    margin-right: 10px;
+    margin-top: 3px;
+    /* Canh chỉnh checkbox với text */
+}
+
+.checkbox-container label {
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.checkbox-container a {
+    color: #4a90e2;
+    text-decoration: none;
+}
+
+.checkbox-container a:hover {
+    text-decoration: underline;
 }
 
 /* Success message */

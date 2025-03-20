@@ -36,7 +36,7 @@ const Header = () => {
             setIsLoggedIn(false);
             setShowMenu(false);
             alert("Đăng xuất thành công");
-            navigate("/");
+            window.location.reload();
         }
     };
 
@@ -84,7 +84,8 @@ const Header = () => {
                                 <div className="menuMember">
                                     {isLoggedIn ? (
                                         <>
-                                            <Link to="/users/info">Trang người dùng</Link>
+                                            <Link to="/users/info" onClick={() => setShowMenu(false)}>Trang người dùng
+                                            </Link>
                                             <a onClick={logOut} style={{ cursor: "pointer" }}>Đăng xuất</a>
                                         </>
                                     ) : (

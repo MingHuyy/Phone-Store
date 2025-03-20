@@ -4,8 +4,9 @@ import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { FaLock, FaEye, FaEyeSlash, FaArrowLeft, FaKey } from "react-icons/fa"
 import "../../assets/css/userinfo.css"
+import { callApiWithAuth } from "../../utils/AuthService"
 
-const ChangePassword = () => {
+const ResetPassword = () => {
     const navigate = useNavigate()
 
     const [formData, setFormData] = useState({
@@ -66,23 +67,39 @@ const ChangePassword = () => {
         return Object.keys(newErrors).length === 0
     }
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault()
 
         if (validateForm()) {
             setLoading(true)
 
-            // Giả lập API call
-            setTimeout(() => {
-                console.log("Đổi mật khẩu:", formData)
-                setLoading(false)
-                setSuccess(true)
+            try {
+                // Sử dụng callApiWithAuth để gửi yêu cầu đổi mật khẩu
+                const response = await callApiWithAuth("/reset-password", {
+                    method: "POST",
+                    body: JSON.stringify({
+                        oldPassword: formData.currentPassword,
+                        newPassword: formData.newPassword,
+                        confirmPassword: formData.confirmPassword
+                    })
+                });
 
-                // Chuyển hướng sau khi đổi mật khẩu thành công
+                console.log("Đổi mật khẩu thành công:", response);
+                setSuccess(true);
+
                 setTimeout(() => {
-                    navigate("/userinfo")
-                }, 3000)
-            }, 1500)
+                    navigate("/users/info");
+                }, 3000);
+            } catch (error) {
+                alert("Lỗi khi đổi mật khẩu: " + error.message);
+
+                setErrors({
+                    ...errors,
+                    general: error.message || "Đã xảy ra lỗi khi thay đổi mật khẩu. Vui lòng thử lại."
+                });
+            } finally {
+                setLoading(false);
+            }
         }
     }
 
@@ -97,7 +114,7 @@ const ChangePassword = () => {
                 </div>
 
                 <div className="back-link">
-                    <Link to="/userinfo">
+                    <Link to="/users/info">
                         <FaArrowLeft /> Quay lại thông tin tài khoản
                     </Link>
                 </div>
@@ -208,5 +225,5 @@ const ChangePassword = () => {
     )
 }
 
-export default ChangePassword
+export default ResetPassword
 

@@ -1,7 +1,8 @@
+// src/utils/api.js
 const API_BASE_URL = "http://localhost:1111";
 
-const fetchWithAuth = async (url, options = {}) => {
-    let accessToken = localStorage.getItem("accessToken");
+export const callApiWithAuth = async (url, options = {}) => {
+    const accessToken = localStorage.getItem("accessToken");
 
     // Thêm header Authorization nếu có token
     options.headers = {
@@ -10,32 +11,45 @@ const fetchWithAuth = async (url, options = {}) => {
         Authorization: accessToken ? `Bearer ${accessToken}` : "",
     };
 
-    let response = await fetch(`${API_BASE_URL}${url}`, options);
+    try {
+        let response = await fetch(`${API_BASE_URL}${url}`, options);
 
-    if (response.status === 401) {
-        // Token hết hạn, thử refresh token
-        const newAccessToken = await refreshAccessToken();
-        if (!newAccessToken) throw new Error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
+        // Xử lý token hết hạn
+        if (response.status === 401) {
+            const newToken = await refreshToken();
+            if (!newToken) {
+                throw new Error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
+            }
 
-        // Gọi lại API với token mới
-        options.headers.Authorization = `Bearer ${newAccessToken}`;
-        response = await fetch(`${API_BASE_URL}${url}`, options);
+            options.headers.Authorization = `Bearer ${newToken}`;
+            response = await fetch(`${API_BASE_URL}${url}`, options);
+        }
+
+        // Xử lý phản hồi lỗi
+        if (!response.ok) {
+            let errorMessage;
+            try {
+                const errorData = await response.json();
+                errorMessage = errorData.message || `Lỗi HTTP ${response.status}`;
+            } catch (e) {
+                errorMessage = await response.text() || `Lỗi HTTP ${response.status}`;
+            }
+            throw new Error(errorMessage);
+        }
+
+        return await response.json();
+    } catch (err) {
+        console.error("API error:", err);
+        throw err;
     }
-
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Lỗi khi gọi API");
-    }
-
-    return response.json();
 };
 
-const refreshAccessToken = async () => {
+export const refreshToken = async () => {
     const refreshToken = localStorage.getItem("refreshToken");
     if (!refreshToken) return null;
 
     try {
-        const response = await fetch("http://localhost:1111/refresh", {
+        const response = await fetch(`${API_BASE_URL}/refresh`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ refreshToken }),
@@ -43,12 +57,11 @@ const refreshAccessToken = async () => {
 
         if (!response.ok) return null;
 
-        const { accessToken } = await response.json();
-        localStorage.setItem("accessToken", accessToken);
-        return accessToken;
+        const data = await response.json();
+        localStorage.setItem("accessToken", data.accessToken);
+        return data.accessToken;
     } catch (err) {
+        console.error("Lỗi khi làm mới token:", err);
         return null;
     }
 };
-
-export { fetchWithAuth };

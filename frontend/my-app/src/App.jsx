@@ -5,7 +5,7 @@ import Footer from './layout/footer.jsx'
 
 function App() {
   const location = useLocation();
-  const hideHeaderFooter = ["/login", "/register", "/forgot-password", "/userinfo", '/changepassword'].includes(location.pathname);
+  const hideHeaderFooter = ["/login", "/register", "/forgot-password", "/userinfo", '/resetpassword'].includes(location.pathname);
 
   return (
     <>

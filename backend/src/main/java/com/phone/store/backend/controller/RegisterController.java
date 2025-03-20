@@ -31,7 +31,7 @@ public class RegisterController {
     @PostMapping
     public UserResponse register(@Valid @RequestBody UserDTO userDTO) {
         String hashPassword = passwordEncoder.encode(userDTO.getPassword());
-
+        System.out.println(userDTO.getPassword());
         UserEntity userEntity = new UserEntity();
         userEntity.setUsername(userDTO.getUserName());
         userEntity.setEmail(userDTO.getEmail());

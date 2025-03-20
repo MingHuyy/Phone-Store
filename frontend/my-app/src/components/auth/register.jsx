@@ -7,12 +7,11 @@ import "../../assets/css/auth.css";
 
 const Register = () => {
     const [formData, setFormData] = useState({
-        username: "", // Đổi từ fullName -> username
+        username: "",
         email: "",
         phone: "",
         password: "",
         confirmPassword: "",
-        agreeTerms: false,
     })
     const [errors, setErrors] = useState({})
     const [showPassword, setShowPassword] = useState(false)
@@ -81,21 +80,50 @@ const Register = () => {
         return Object.keys(newErrors).length === 0
     }
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault()
-
+        console.log(formData)
         if (validateForm()) {
             setLoading(true)
 
-            // Giả lập API call
-            setTimeout(() => {
-                console.log("Đăng ký với:", formData)
-                setLoading(false)
-                navigate("/login")
-                alert("Đăng ký thành công! Vui lòng đăng nhập.")
-            }, 1500)
+            try {
+                // Gửi dữ liệu đăng ký lên server
+                const response = await fetch('http://localhost:1111/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        userName: formData.username,
+                        email: formData.email,
+                        phone: formData.phone,
+                        password: formData.password,
+                        confirmPassword: formData.confirmPassword,
+                    }),
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Đăng ký thất bại');
+                }
+
+                const data = await response.json();
+                console.log('Đăng ký thành công:', data);
+                alert('Đăng ký thành công! Vui lòng đăng nhập.');
+                navigate('/login');
+
+            } catch (error) {
+                console.error('Lỗi đăng ký:', error);
+                setErrors({
+                    ...errors,
+                    general: error.message || 'Đã xảy ra lỗi khi đăng ký. Vui lòng thử lại.'
+                });
+            } finally {
+                setLoading(false);
+            }
         }
     }
+
 
     const togglePasswordVisibility = () => {
         setShowPassword(!showPassword)
@@ -191,7 +219,7 @@ const Register = () => {
                             <div className="form-group">
                                 <label htmlFor="confirmPassword">Xác nhận mật khẩu</label>
                                 <div className="input-group">
-                                        <input
+                                    <input
                                         type={showConfirmPassword ? "text" : "password"}
                                         id="confirmPassword"
                                         name="confirmPassword"
@@ -205,6 +233,22 @@ const Register = () => {
                                     </button>
                                 </div>
                                 {errors.confirmPassword && <span className="error-message">{errors.confirmPassword}</span>}
+                            </div>
+                            <div className="form-group checkbox-group">
+                                <div className="checkbox-container">
+                                    <input
+                                        type="checkbox"
+                                        id="agreeTerms"
+                                        name="agreeTerms"
+                                        checked={formData.agreeTerms}
+                                        onChange={handleChange}
+                                        className={errors.agreeTerms ? "error" : ""}
+                                    />
+                                    <label htmlFor="agreeTerms">
+                                        Tôi đồng ý với Điều khoản và Chính sách bảo mật
+                                    </label>
+                                </div>
+                                {errors.agreeTerms && <span className="error-message">{errors.agreeTerms}</span>}
                             </div>
 
                             <button type="submit" className="auth-button" disabled={loading}>

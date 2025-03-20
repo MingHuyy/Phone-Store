@@ -3,18 +3,15 @@ import { Link } from "react-router-dom";
 import { FaHome } from "react-icons/fa";
 import { FaUser, FaEnvelope, FaPhone, FaUserTag, FaPen, FaKey, FaSave, FaTimes } from "react-icons/fa";
 import "../../assets/css/userinfo.css";
+import { callApiWithAuth } from "../../utils/AuthService";
 
 const UserInfo = () => {
-    const API_BASE_URL = "http://localhost:1111";
-
-    // State cho dữ liệu người dùng
-    const [user, setUser] = useState(
-        {
-            username: "",
-            email: "",
-            phone: "",
-            role: "",
-        });
+    const [user, setUser] = useState({
+        username: "",
+        email: "",
+        phone: "",
+        role: "",
+    });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -30,77 +27,6 @@ const UserInfo = () => {
     const [saveLoading, setSaveLoading] = useState(false);
     const [saveSuccess, setSaveSuccess] = useState(false);
 
-    // Hàm gọi API với xác thực
-    const callApiWithAuth = async (url, options = {}) => {
-        const accessToken = localStorage.getItem("accessToken");
-
-        // Thêm header Authorization nếu có token
-        options.headers = {
-            ...options.headers,
-            "Content-Type": "application/json",
-            Authorization: accessToken ? `Bearer ${accessToken}` : "",
-        };
-
-        try {
-            let response = await fetch(`${API_BASE_URL}${url}`, options);
-
-            // Xử lý token hết hạn
-            if (response.status === 401) {
-                // Thử refresh token
-                const newToken = await refreshToken();
-                if (!newToken) {
-                    throw new Error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
-                }
-
-                // Gọi lại API với token mới
-                options.headers.Authorization = `Bearer ${newToken}`;
-                response = await fetch(`${API_BASE_URL}${url}`, options);
-            }
-
-            // Xử lý phản hồi lỗi
-            if (!response.ok) {
-                let errorMessage;
-                try {
-                    // Thử đọc lỗi dạng JSON
-                    const errorData = await response.json();
-                    errorMessage = errorData.message || `Lỗi HTTP ${response.status}`;
-                } catch (e) {
-                    // Nếu không phải JSON, đọc dạng text
-                    errorMessage = await response.text() || `Lỗi HTTP ${response.status}`;
-                }
-                throw new Error(errorMessage);
-            }
-
-            return await response.json();
-        } catch (err) {
-            console.error("API error:", err);
-            throw err;
-        }
-    };
-
-    // Hàm refresh token
-    const refreshToken = async () => {
-        const refreshToken = localStorage.getItem("refreshToken");
-        if (!refreshToken) return null;
-
-        try {
-            const response = await fetch(`${API_BASE_URL}/refresh`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ refreshToken }),
-            });
-
-            if (!response.ok) return null;
-
-            const data = await response.json();
-            localStorage.setItem("accessToken", data.accessToken);
-            return data.accessToken;
-        } catch (err) {
-            console.error("Lỗi khi làm mới token:", err);
-            return null;
-        }
-    };
-
     // Lấy thông tin người dùng khi component được mount
     useEffect(() => {
         const fetchUserData = async () => {
@@ -111,10 +37,8 @@ const UserInfo = () => {
                     username: userData.username,
                     email: userData.email,
                     phone: userData.phone || "",
-                    role: userData.role,
                 });
                 setUser(userData);
-                console.log("hello ", userData, user, formData)
             } catch (err) {
                 setError(err.message);
             } finally {
@@ -199,16 +123,13 @@ const UserInfo = () => {
         }
     };
 
-    // Hủy chỉnh sửa
     const handleCancel = () => {
         setIsEditing(false);
-        // Khôi phục lại dữ liệu ban đầu
         if (user) {
             setFormData({
                 username: user.username,
                 email: user.email,
                 phone: user.phone || "",
-                role: user.role,
             });
         }
         setFormErrors({});
@@ -244,17 +165,11 @@ const UserInfo = () => {
             <div className="user-card">
                 <div className="user-header">
                     <div className="user-avatar">
-                        <div className="avatar-circle">
-                            {user.username.charAt(0).toUpperCase()}
-                        </div>
+                        <div className="avatar-circle">{user.username.charAt(0).toUpperCase()}</div>
                     </div>
                     <h1>Thông tin tài khoản</h1>
                     {!isEditing && (
-                        <button
-                            className="edit-button"
-                            onClick={() => setIsEditing(true)}
-                            aria-label="Chỉnh sửa thông tin"
-                        >
+                        <button className="edit-button" onClick={() => setIsEditing(true)} aria-label="Chỉnh sửa thông tin">
                             <FaPen />
                             <span>Chỉnh sửa</span>
                         </button>
@@ -315,32 +230,11 @@ const UserInfo = () => {
                                 {formErrors.phone && <span className="error-text">{formErrors.phone}</span>}
                             </div>
 
-                            <div className="form-group">
-                                <label>
-                                    <FaUserTag className="field-icon" /> Vai trò
-                                </label>
-                                <input
-                                    type="text"
-                                    value={user.role}
-                                    disabled
-                                    className="disabled"
-                                />
-                                <span className="helper-text">Vai trò không thể thay đổi</span>
-                            </div>
-
                             <div className="form-actions">
-                                <button
-                                    type="button"
-                                    className="cancel-button"
-                                    onClick={handleCancel}
-                                >
+                                <button type="button" className="cancel-button" onClick={handleCancel}>
                                     <FaTimes /> Hủy
                                 </button>
-                                <button
-                                    type="submit"
-                                    className="save-button"
-                                    disabled={saveLoading}
-                                >
+                                <button type="submit" className="save-button" disabled={saveLoading}>
                                     {saveLoading ? (
                                         <>
                                             <div className="button-spinner"></div> Đang lưu...
@@ -378,16 +272,6 @@ const UserInfo = () => {
                                 </div>
                                 <div className="info-value">{user.phone || "Chưa cập nhật"}</div>
                             </div>
-
-                            <div className="info-item">
-                                <div className="info-label">
-                                    <FaUserTag className="field-icon" />
-                                    <span>Vai trò:</span>
-                                </div>
-                                <div className="info-value">
-                                    <span className="role-badge">{user.role}</span>
-                                </div>
-                            </div>
                         </div>
                     )}
                 </div>
@@ -396,13 +280,13 @@ const UserInfo = () => {
                     <Link to="/" className="home-button">
                         <FaHome /> Trang chủ
                     </Link>
-                    <Link to="/change-password" className="change-password-button">
+                    <Link to="/resetpassword" className="change-password-button">
                         <FaKey /> Thay đổi mật khẩu
                     </Link>
                 </div>
             </div>
         </div>
-    );
+    )
 };
 
 export default UserInfo;

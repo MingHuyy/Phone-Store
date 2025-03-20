@@ -35,15 +35,17 @@
 }
 
 .avatar-circle {
-    width: 70px;
-    height: 70px;
+    width: 80px;
+    /* Tăng kích thước avatar */
+    height: 80px;
     background: linear-gradient(135deg, #4e54c8, #8f94fb);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
-    font-size: 28px;
+    font-size: 32px;
+    /* Tăng kích thước font */
     font-weight: bold;
     box-shadow: 0 4px 10px rgba(78, 84, 200, 0.3);
 }
@@ -63,7 +65,8 @@
 }
 
 .user-header h1 {
-    font-size: 1.8rem;
+    font-size: 2rem;
+    /* Tăng kích thước font */
     color: #333;
     margin: 0;
 }
@@ -119,38 +122,48 @@
 .user-info {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 25px;
+    /* Tăng khoảng cách giữa các mục */
 }
 
 .info-item {
     display: flex;
     align-items: flex-start;
-    padding-bottom: 15px;
+    padding-bottom: 20px;
+    /* Tăng padding dưới */
     border-bottom: 1px solid #eee;
 }
 
 .info-label {
-    width: 180px;
+    width: 200px;
+    /* Tăng chiều rộng của nhãn */
     display: flex;
     align-items: center;
     color: #6c757d;
     font-weight: 500;
+    font-size: 1.1rem;
+    /* Tăng kích thước font */
 }
 
 .info-label svg {
-    margin-right: 10px;
+    margin-right: 12px;
+    /* Tăng khoảng cách giữa icon và text */
     color: #4e54c8;
+    font-size: 1.2rem;
+    /* Tăng kích thước icon */
 }
 
 .info-value {
     flex: 1;
     font-weight: 500;
     color: #333;
+    font-size: 1.1rem;
+    /* Tăng kích thước font */
 }
 
 .role-badge {
     display: inline-block;
-    padding: 10px 20px;
+    padding: 4px 10px;
     background-color: #4e54c8;
     color: white;
     border-radius: 20px;
@@ -161,7 +174,8 @@
 .user-form {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 25px;
+    /* Tăng khoảng cách giữa các trường */
 }
 
 .form-group {
@@ -172,21 +186,29 @@
 .form-group label {
     display: flex;
     align-items: center;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
+    /* Tăng margin dưới */
     font-weight: 500;
     color: #495057;
+    font-size: 1.1rem;
+    /* Tăng kích thước font */
 }
 
 .field-icon {
-    margin-right: 8px;
+    margin-right: 12px;
+    /* Tăng khoảng cách */
     color: #4e54c8;
+    font-size: 1.2rem;
+    /* Tăng kích thước icon */
 }
 
 .form-group input {
-    padding: 12px 15px;
+    padding: 14px 18px;
+    /* Tăng padding */
     border: 1px solid #ced4da;
     border-radius: 6px;
-    font-size: 1rem;
+    font-size: 1.1rem;
+    /* Tăng kích thước font */
     transition: all 0.3s;
 }
 
@@ -255,8 +277,25 @@
 .form-actions {
     display: flex;
     justify-content: flex-end;
-    gap: 15px;
-    margin-top: 10px;
+    gap: 20px;
+    /* Tăng khoảng cách giữa các nút */
+    margin-top: 15px;
+}
+
+.cancel-button,
+.save-button {
+    padding: 14px 25px;
+    /* Tăng padding */
+    font-size: 1.05rem;
+    /* Tăng kích thước font */
+}
+
+.cancel-button svg,
+.save-button svg {
+    margin-right: 10px;
+    /* Tăng khoảng cách */
+    font-size: 1.1rem;
+    /* Tăng kích thước icon */
 }
 
 .cancel-button {
@@ -313,10 +352,34 @@
 /* Footer */
 .user-footer {
     border-top: 1px solid #eee;
-    padding-top: 20px;
+    padding-top: 25px;
+    /* Tăng padding trên */
     display: flex;
     justify-content: center;
-    gap: 15px;
+    gap: 20px;
+    /* Tăng khoảng cách giữa các nút */
+}
+
+.change-password-button,
+.home-button {
+    display: flex;
+    align-items: center;
+    padding: 12px 25px;
+    /* Tăng padding */
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 1.05rem;
+    /* Tăng kích thước font */
+    text-decoration: none;
+    transition: all 0.3s;
+}
+
+.change-password-button svg,
+.home-button svg {
+    margin-right: 10px;
+    /* Tăng khoảng cách */
+    font-size: 1.1rem;
+    /* Tăng kích thước icon */
 }
 
 .change-password-button,
@@ -420,7 +483,6 @@
     border-radius: 50%;
     display: flex;
     align-items: center #4e54c8, #8f94fb;
-    );
     color: white;
     border-radius: 50%;
     display: flex;

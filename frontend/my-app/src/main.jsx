@@ -11,7 +11,7 @@ import Login from './components/auth/login.jsx';
 import Register from './components/auth/register.jsx';
 import ForgotPassword from './components/auth/forgotpassword.jsx';
 import UserInfo from './components/user/userinfo.jsx';
-import ChangePassword from './components/user/changepassword.jsx';
+import ResetPassword from './components/auth/resetpassword.jsx';
 import Cart from './components/product/cart.jsx';
 
 
@@ -46,8 +46,8 @@ const router = createBrowserRouter([
         element: <UserInfo />
       },
       {
-        path: '/changepassword',
-        element: <ChangePassword />
+        path: '/resetpassword',
+        element: <ResetPassword />
       },
       {
         path: '/cart',
