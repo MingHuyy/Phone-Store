@@ -10,9 +10,6 @@ Frontend: ReactJS
 
 Build Tool: Maven
 
-<<<<<<< HEAD
-IDE: IntelliJ IDEA 
-=======
 IDE: IntelliJ IDEA
 
 💬 Liên hệ
