@@ -14,7 +14,6 @@ Build Tool: Maven
 IDE: IntelliJ IDEA 
 =======
 IDE: IntelliJ IDEA
->>>>>>> 82cc44e (update resetpassword)
 
 💬 Liên hệ
 📧 Email: HuyLM.B22CN383@stu.ptit.edu.vn
