@@ -2,9 +2,7 @@ package com.phone.store.backend.controller;
 
 
 import com.phone.store.backend.entity.UserEntity;
-import com.phone.store.backend.model.dto.LoginDTO;
-import com.phone.store.backend.model.dto.ResetPasswordDTO;
-import com.phone.store.backend.model.dto.TokenDTO;
+import com.phone.store.backend.model.dto.*;
 import com.phone.store.backend.model.response.StatusResponse;
 import com.phone.store.backend.model.response.TokenResponse;
 import com.phone.store.backend.respository.UserRepository;
@@ -18,10 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -48,7 +43,6 @@ public class AuthController {
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(HttpServletRequest request,
                                            @RequestBody ResetPasswordDTO resetPasswordDTO) {
-        // Lấy token từ request
         String authorizationHeader = request.getHeader("Authorization");
         if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -67,4 +61,25 @@ public class AuthController {
         }
     }
 
+    @PostMapping("/auth/logout")
+    public ResponseEntity<?> logout(HttpServletRequest request) {
+        String authorizationHeader = request.getHeader("Authorization");
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new StatusResponse("Không tìm thấy token hợp lệ.", 401));
+        }
+
+        String accessToken = authorizationHeader.substring(7);
+        return authService.logout(accessToken);
+    }
+    @PutMapping("/update")
+    public ResponseEntity<?> update(HttpServletRequest request, @RequestBody UpdateUserDTO updateUserDTO){
+        String authorizationHeader = request.getHeader("Authorization");
+
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", "Không tìm thấy token hợp lệ."));
+        }
+        return authService.update(updateUserDTO);
+        }
 }

@@ -25,17 +25,18 @@ export const callApiWithAuth = async (url, options = {}) => {
             response = await fetch(`${API_BASE_URL}${url}`, options);
         }
 
-        // Xử lý phản hồi lỗi
         if (!response.ok) {
-            let errorMessage;
+            let errorMessage = `Lỗi HTTP ${response.status}`;
+
             try {
-                const errorData = await response.json();
-                errorMessage = errorData.message || `Lỗi HTTP ${response.status}`;
+                const text = await response.text();
+                errorMessage = JSON.parse(text).message || text;
             } catch (e) {
-                errorMessage = await response.text() || `Lỗi HTTP ${response.status}`;
             }
+
             throw new Error(errorMessage);
         }
+
 
         return await response.json();
     } catch (err) {

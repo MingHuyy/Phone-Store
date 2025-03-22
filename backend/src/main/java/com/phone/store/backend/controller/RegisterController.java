@@ -38,7 +38,6 @@ public class RegisterController {
         userEntity.setPassword(hashPassword);
         userEntity.setPhone(userDTO.getPhone());
 
-        // Nếu không gửi role, mặc định là USER
         Set<RoleEntity> roles = new HashSet<>();
         RoleEntity roleEntity = roleRepository.findById(roleUser)
                 .orElseThrow(() -> new ResourceNotFoundException("Role does not exist!"));

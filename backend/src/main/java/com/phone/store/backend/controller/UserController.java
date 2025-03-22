@@ -3,6 +3,7 @@ package com.phone.store.backend.controller;
 
 import com.phone.store.backend.Converter.UserConverter;
 import com.phone.store.backend.entity.UserEntity;
+import com.phone.store.backend.model.dto.UserDTO;
 import com.phone.store.backend.model.response.UserResponse;
 import com.phone.store.backend.respository.UserRepository;
 import com.phone.store.backend.service.TokenService;
@@ -65,8 +66,6 @@ public class UserController {
             }
 
             UserResponse userResponse = userConverter.convertToResponse(user);
-            String role = userResponse.getRoles();
-            System.out.println(role);
             return ResponseEntity.ok(userResponse);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)

@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import logo from "../assets/img/logo.jpg";
 import '../assets/css/header.css';
 import { FaUser, FaShoppingCart, FaSearch, FaHome, FaInfoCircle, FaWrench, FaPhone } from 'react-icons/fa';
+import { callApiWithAuth } from "../utils/AuthService";
 
 const Header = () => {
     const navigate = useNavigate();
@@ -30,15 +31,29 @@ const Header = () => {
     }, [showMenu]);
 
 
-    const logOut = () => {
-        if (window.confirm("Xác nhận đăng xuất ?")) {
-            localStorage.clear();
+    const logOut = async (e) => {
+        if (!window.confirm("Xác nhận đăng xuất ?")) return;
+
+        try {
+            const response = await callApiWithAuth("/auth/logout", {
+                method: "POST"  // Thay đổi thành phương thức mà API yêu cầu
+            });
+
+            localStorage.removeItem("accessToken");
+            localStorage.removeItem("refreshToken");
+
             setIsLoggedIn(false);
             setShowMenu(false);
+
             alert("Đăng xuất thành công");
             window.location.reload();
+        } catch (error) {
+            alert("Đăng xuất không thành công");
+            console.error("Lỗi logout:", error);
         }
     };
+
+
 
     return (
         <header>

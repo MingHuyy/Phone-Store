@@ -18,10 +18,9 @@ const UserInfo = () => {
     // State cho chế độ chỉnh sửa
     const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState({
-        username: "",
+        userName: "",
         email: "",
         phone: "",
-        role: "",
     });
     const [formErrors, setFormErrors] = useState({});
     const [saveLoading, setSaveLoading] = useState(false);
@@ -57,7 +56,6 @@ const UserInfo = () => {
             [name]: value,
         });
 
-        // Xóa lỗi khi người dùng bắt đầu nhập lại
         if (formErrors[name]) {
             setFormErrors({
                 ...formErrors,
@@ -97,7 +95,7 @@ const UserInfo = () => {
 
             try {
                 // Gọi API để cập nhật thông tin người dùng
-                const updatedData = await callApiWithAuth("/users/update", {
+                const updatedData = await callApiWithAuth("/update", {
                     method: "PUT",
                     body: JSON.stringify(formData),
                 });
@@ -194,10 +192,10 @@ const UserInfo = () => {
                                     id="username"
                                     name="username"
                                     value={formData.username}
-                                    onChange={handleChange}
-                                    className={formErrors.username ? "error" : ""}
+                                    disabled
+                                    className="disabled"
                                 />
-                                {formErrors.username && <span className="error-text">{formErrors.username}</span>}
+                                <span className="helper-text">Tên đăng nhập không thể thay đổi</span>
                             </div>
 
                             <div className="form-group">
@@ -280,7 +278,7 @@ const UserInfo = () => {
                     <Link to="/" className="home-button">
                         <FaHome /> Trang chủ
                     </Link>
-                    <Link to="/resetpassword" className="change-password-button">
+                    <Link to="/change-password" className="change-password-button">
                         <FaKey /> Thay đổi mật khẩu
                     </Link>
                 </div>
