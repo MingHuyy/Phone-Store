@@ -18,6 +18,7 @@ import com.phone.store.backend.service.TokenService;
 import com.phone.store.backend.utils.JWTTokenUtil;
 import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -107,16 +108,50 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public ResponseEntity<?> update(UpdateUserDTO updateUserDTO) {
-        UserEntity user = userRepository.findByUsername(updateUserDTO.getUserName());
+        UserEntity user = userRepository.findByUsername(updateUserDTO.getUsername());
         if (user == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("Người dùng không tồn tại");
+                    .body(Map.of("message", "Người dùng không tồn tại"));
+        }
+
+        if (!user.getEmail().equals(updateUserDTO.getEmail())) {
+            UserEntity existingUserWithEmail = userRepository.findByEmail(updateUserDTO.getEmail());
+            if (existingUserWithEmail != null && !existingUserWithEmail.getId().equals(user.getId())) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(Map.of("message", "Email đã được sử dụng bởi tài khoản khác"));
+            }
+        }
+
+        if (updateUserDTO.getPhone() != null && !updateUserDTO.getPhone().isEmpty()) {
+            if (user.getPhone() == null || !user.getPhone().equals(updateUserDTO.getPhone())) {
+                UserEntity existingUserWithPhone = userRepository.findByPhone(updateUserDTO.getPhone());
+                if (existingUserWithPhone != null && !existingUserWithPhone.getId().equals(user.getId())) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body(Map.of("message", "Số điện thoại đã được sử dụng bởi tài khoản khác"));
+                }
+            }
         }
 
         user.setPhone(updateUserDTO.getPhone());
         user.setEmail(updateUserDTO.getEmail());
-        userRepository.save(user);
-        UserResponse response = userConverter.convertToResponse(user);
-        return ResponseEntity.ok(response);
+
+        try {
+            userRepository.save(user);
+            UserResponse response = userConverter.convertToResponse(user);
+            return ResponseEntity.ok(response);
+        } catch (DataIntegrityViolationException e) {
+            String errorMessage = e.getMessage();
+            if (errorMessage.contains("Duplicate entry") && errorMessage.contains("email")) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(Map.of("message", "Email đã được sử dụng bởi tài khoản khác"));
+            } else if (errorMessage.contains("Duplicate entry") && errorMessage.contains("phone")) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(Map.of("message", "Số điện thoại đã được sử dụng bởi tài khoản khác"));
+            }
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "Lỗi khi cập nhật thông tin người dùng"));
+        }
     }
+
 }

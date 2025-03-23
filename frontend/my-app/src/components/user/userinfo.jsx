@@ -15,7 +15,6 @@ const UserInfo = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // State cho chế độ chỉnh sửa
     const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState({
         userName: "",
@@ -26,7 +25,6 @@ const UserInfo = () => {
     const [saveLoading, setSaveLoading] = useState(false);
     const [saveSuccess, setSaveSuccess] = useState(false);
 
-    // Lấy thông tin người dùng khi component được mount
     useEffect(() => {
         const fetchUserData = async () => {
             try {
@@ -48,7 +46,6 @@ const UserInfo = () => {
         fetchUserData();
     }, []);
 
-    // Xử lý thay đổi form
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData({
@@ -64,7 +61,6 @@ const UserInfo = () => {
         }
     };
 
-    // Xác thực form
     const validateForm = () => {
         const errors = {};
 
@@ -86,7 +82,6 @@ const UserInfo = () => {
         return Object.keys(errors).length === 0;
     };
 
-    // Xử lý lưu thông tin
     const handleSave = async (e) => {
         e.preventDefault();
 
@@ -94,13 +89,15 @@ const UserInfo = () => {
             setSaveLoading(true);
 
             try {
-                // Gọi API để cập nhật thông tin người dùng
-                const updatedData = await callApiWithAuth("/update", {
+                console.log("Đang gửi dữ liệu cập nhật:", formData);
+
+                const updatedData = await callApiWithAuth("/update1", {
                     method: "PUT",
                     body: JSON.stringify(formData),
                 });
 
-                // Cập nhật thông tin người dùng trong state
+                console.log("Dữ liệu nhận về sau khi cập nhật:", updatedData);
+
                 setUser({
                     ...user,
                     ...updatedData
@@ -109,11 +106,11 @@ const UserInfo = () => {
                 setSaveSuccess(true);
                 setIsEditing(false);
 
-                // Ẩn thông báo thành công sau 3 giây
                 setTimeout(() => {
                     setSaveSuccess(false);
                 }, 3000);
             } catch (err) {
+                console.error("Chi tiết lỗi khi cập nhật:", err);
                 setError(err.message);
             } finally {
                 setSaveLoading(false);
@@ -121,11 +118,12 @@ const UserInfo = () => {
         }
     };
 
+
     const handleCancel = () => {
         setIsEditing(false);
         if (user) {
             setFormData({
-                username: user.username,
+                userName: user.username,
                 email: user.email,
                 phone: user.phone || "",
             });

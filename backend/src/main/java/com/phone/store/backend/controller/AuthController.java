@@ -72,7 +72,7 @@ public class AuthController {
         String accessToken = authorizationHeader.substring(7);
         return authService.logout(accessToken);
     }
-    @PutMapping("/update")
+    @PutMapping("/update1")
     public ResponseEntity<?> update(HttpServletRequest request, @RequestBody UpdateUserDTO updateUserDTO){
         String authorizationHeader = request.getHeader("Authorization");
 
@@ -80,6 +80,7 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("message", "Không tìm thấy token hợp lệ."));
         }
+        System.out.println(updateUserDTO.getUsername());
         return authService.update(updateUserDTO);
         }
 }

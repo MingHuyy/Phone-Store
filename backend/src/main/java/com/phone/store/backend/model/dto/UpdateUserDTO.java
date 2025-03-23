@@ -12,7 +12,7 @@ import lombok.*;
 @NoArgsConstructor
 public class UpdateUserDTO {
     @NotEmpty(message = "Username cannot be empty")
-    private String userName;
+    private String username;
     @Email(message = "Email should correct format")
     private String email;
     @Pattern(regexp = "^\\d{10}$", message = "Phone number must be exactly 10 digits")
