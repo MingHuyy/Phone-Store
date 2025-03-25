@@ -1,7 +1,7 @@
 import './App.css'
 import { Outlet, useLocation } from 'react-router-dom'
-import Header from './layout/header.jsx'
-import Footer from './layout/footer.jsx'
+import Header from './components/header.jsx'
+import Footer from './components/footer.jsx'
 
 function App() {
   const location = useLocation();

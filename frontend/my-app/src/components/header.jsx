@@ -1,3 +1,5 @@
+"use client"
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
@@ -14,38 +16,18 @@ const Header = () => {
     useEffect(() => {
         const token = localStorage.getItem("accessToken");
         setIsLoggedIn(!!token);
+    }, []);
 
-        if (showMenu) {
-            const handleClickOutside = (event) => {
-                if (!event.target.closest(".member")) {
-                    setShowMenu(false);
-                }
-            };
-
-            document.addEventListener("click", handleClickOutside);
-
-            return () => {
-                document.removeEventListener("click", handleClickOutside);
-            };
-        }
-    }, [showMenu]);
-
-
-    const logOut = async (e) => {
-        if (!window.confirm("Xác nhận đăng xuất ?")) return;
-
+    const logOut = async () => {
+        if (!window.confirm("Xác nhận đăng xuất?")) return;
         try {
-            const response = await callApiWithAuth("/auth/logout", {
-                method: "POST"  // Thay đổi thành phương thức mà API yêu cầu
-            });
-
+            await callApiWithAuth("/auth/logout", { method: "POST" });
             localStorage.removeItem("accessToken");
             localStorage.removeItem("refreshToken");
-
             setIsLoggedIn(false);
             setShowMenu(false);
-
             alert("Đăng xuất thành công");
+            navigate("/");
             window.location.reload();
         } catch (error) {
             alert("Đăng xuất không thành công");
@@ -53,17 +35,15 @@ const Header = () => {
         }
     };
 
-
-
     return (
         <header>
             <div className="top-nav group">
                 <section>
                     <ul className="top-nav-quicklink flexContain">
                         <li><Link to="/"><FaHome /> Trang chủ</Link></li>
-                        <li><Link to="/gioithieu"><FaInfoCircle /> Giới thiệu</Link></li>
-                        <li><Link to="/trungtambaohanh"><FaWrench /> Bảo hành</Link></li>
-                        <li><Link to="/lienhe"><FaPhone /> Liên hệ</Link></li>
+                        <li><Link to="/aboutus"><FaInfoCircle /> Giới thiệu</Link></li>
+                        <li><Link to="/baohanh"><FaWrench /> Bảo hành</Link></li>
+                        <li><Link to="/contact"><FaPhone /> Liên hệ</Link></li>
                     </ul>
                 </section>
             </div>
@@ -76,7 +56,7 @@ const Header = () => {
                 </div>
 
                 <div className="content">
-                    <div className="search-header" style={{ position: "relative", left: "162px", top: "1px" }}>
+                    <div className="search-header">
                         <form className="input-search" method="get" action="/">
                             <div className="autocomplete">
                                 <input id="search-box" name="search" autoComplete="off" type="text" placeholder="Nhập từ khóa tìm kiếm..." />
@@ -86,7 +66,7 @@ const Header = () => {
                             </div>
                         </form>
                         <div className="tags">
-                            <strong>Từ khóa: </strong>
+                            <strong>Từ khóa: </strong><span>iPhone</span> • <span>Samsung</span> • <span>Xiaomi</span> • <span>OPPO</span>
                         </div>
                     </div>
 
@@ -99,8 +79,7 @@ const Header = () => {
                                 <div className="menuMember">
                                     {isLoggedIn ? (
                                         <>
-                                            <Link to="/users/info" onClick={() => setShowMenu(false)}>Trang người dùng
-                                            </Link>
+                                            <Link to="/users/info" onClick={() => setShowMenu(false)}>Trang người dùng</Link>
                                             <a onClick={logOut} style={{ cursor: "pointer" }}>Đăng xuất</a>
                                         </>
                                     ) : (
@@ -118,17 +97,17 @@ const Header = () => {
                                 to={isLoggedIn ? "/cart" : "#"}
                                 onClick={(e) => {
                                     if (!isLoggedIn) {
-                                        e.preventDefault(); // Ngăn chặn chuyển trang
+                                        e.preventDefault();
                                         alert("Bạn phải đăng nhập để vào giỏ hàng!");
                                     }
+                                    setShowMenu(false);
                                 }}
                             >
                                 <FaShoppingCart />
                                 <span>Giỏ hàng</span>
-                                <span className="cart-number"></span>
+                                <span className="cart-number">3</span>
                             </Link>
                         </div>
-
                     </div>
                 </div>
             </div>

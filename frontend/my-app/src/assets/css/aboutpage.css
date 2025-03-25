@@ -1,0 +1,336 @@
+/* AboutUs.css */
+
+.about-us-container {
+    background: linear-gradient(to bottom, #f0f4ff, #ffffff);
+    padding: 60px 0;
+    font-family: "Roboto", Arial, sans-serif;
+}
+
+.about-us-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Header Section */
+.about-us-header {
+    text-align: center;
+    margin-bottom: 60px;
+}
+
+.about-us-icon-container {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+    background-color: #e6efff;
+    border-radius: 50%;
+    margin-bottom: 20px;
+}
+
+.about-us-icon {
+    font-size: 28px;
+    color: #1a56db;
+}
+
+.about-us-title {
+    font-size: 36px;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0 0 16px 0;
+}
+
+.about-us-highlight {
+    color: #1a56db;
+}
+
+.about-us-divider {
+    height: 4px;
+    width: 80px;
+    background: linear-gradient(90deg, #1a56db, #3b82f6);
+    margin: 0 auto 20px;
+    border-radius: 2px;
+}
+
+.about-us-subtitle {
+    font-size: 18px;
+    color: #6b7280;
+    max-width: 700px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+/* Main Card */
+.about-us-card {
+    background-color: #ffffff;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    margin-bottom: 60px;
+}
+
+.about-us-card-content {
+    display: flex;
+    flex-direction: column;
+}
+
+@media (min-width: 768px) {
+    .about-us-card-content {
+        flex-direction: row;
+    }
+}
+
+/* Image Section */
+.about-us-image-section {
+    position: relative;
+    background: linear-gradient(135deg, #1a56db, #3b82f6);
+    overflow: hidden;
+}
+
+@media (min-width: 768px) {
+    .about-us-image-section {
+        width: 40%;
+    }
+}
+
+.about-us-image-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, #1a56db, #3b82f6);
+    opacity: 0.9;
+}
+
+.about-us-image-container {
+    position: relative;
+    padding: 40px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.about-us-image {
+    max-width: 100%;
+    border-radius: 12px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Text Section */
+.about-us-text-section {
+    padding: 40px;
+}
+
+@media (min-width: 768px) {
+    .about-us-text-section {
+        width: 60%;
+    }
+}
+
+.about-us-paragraph {
+    color: #4b5563;
+    font-size: 16px;
+    line-height: 1.7;
+    margin-bottom: 24px;
+}
+
+.about-us-button-container {
+    display: inline-block;
+    margin-top: 10px;
+}
+
+.about-us-button {
+    display: inline-flex;
+    align-items: center;
+    padding: 12px 24px;
+    background: linear-gradient(90deg, #1a56db, #3b82f6);
+    color: white;
+    border-radius: 30px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(26, 86, 219, 0.3);
+}
+
+.about-us-button:hover {
+    background: linear-gradient(90deg, #1e429f, #1a56db);
+    box-shadow: 0 6px 15px rgba(26, 86, 219, 0.4);
+}
+
+.about-us-button-icon {
+    width: 16px;
+    height: 16px;
+    margin-left: 8px;
+}
+
+/* Values Section */
+.about-us-values-section {
+    margin-bottom: 60px;
+}
+
+.about-us-section-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1f2937;
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.about-us-values-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+}
+
+@media (min-width: 768px) {
+    .about-us-values-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.about-us-value-card {
+    background-color: #ffffff;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    border: 1px solid #f0f0f0;
+    transition: all 0.3s ease;
+}
+
+.about-us-value-card:hover {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.about-us-value-content {
+    display: flex;
+    align-items: flex-start;
+}
+
+.about-us-value-icon-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    background-color: #f3f4f6;
+    border-radius: 50%;
+    margin-right: 16px;
+    flex-shrink: 0;
+}
+
+.value-icon {
+    font-size: 24px;
+}
+
+.value-icon-green {
+    color: #10b981;
+}
+
+.value-icon-yellow {
+    color: #f59e0b;
+}
+
+.value-icon-blue {
+    color: #3b82f6;
+}
+
+.value-icon-purple {
+    color: #8b5cf6;
+}
+
+.about-us-value-text {
+    flex: 1;
+}
+
+.about-us-value-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0 0 8px 0;
+}
+
+.about-us-value-description {
+    font-size: 15px;
+    color: #6b7280;
+    margin: 0;
+    line-height: 1.6;
+}
+
+/* Stats Section */
+.about-us-stats-section {
+    background: linear-gradient(135deg, #1a56db, #3b82f6);
+    border-radius: 16px;
+    padding: 40px;
+    color: white;
+    box-shadow: 0 10px 30px rgba(26, 86, 219, 0.3);
+}
+
+.about-us-stats-title {
+    font-size: 28px;
+    font-weight: 700;
+    text-align: center;
+    margin: 0 0 40px 0;
+}
+
+.about-us-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+    text-align: center;
+}
+
+@media (min-width: 768px) {
+    .about-us-stats-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+.about-us-stat-item {
+    padding: 16px;
+}
+
+.about-us-stat-number {
+    font-size: 36px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.about-us-stat-label {
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+    .about-us-title {
+        font-size: 28px;
+    }
+
+    .about-us-subtitle {
+        font-size: 16px;
+    }
+
+    .about-us-image-container {
+        padding: 20px;
+    }
+
+    .about-us-text-section {
+        padding: 30px 20px;
+    }
+
+    .about-us-section-title,
+    .about-us-stats-title {
+        font-size: 24px;
+    }
+
+    .about-us-stat-number {
+        font-size: 28px;
+    }
+
+    .about-us-stats-section {
+        padding: 30px 20px;
+    }
+}

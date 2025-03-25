@@ -75,7 +75,7 @@ const ResetPassword = () => {
 
             try {
                 // Sử dụng callApiWithAuth để gửi yêu cầu đổi mật khẩu
-                const response = await callApiWithAuth("/reset-password", {
+                const response = await callApiWithAuth("/auth/reset-password", {
                     method: "POST",
                     body: JSON.stringify({
                         oldPassword: formData.currentPassword,

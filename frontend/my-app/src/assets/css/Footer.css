@@ -1,14 +1,44 @@
+/* Footer Styles - Đơn giản và đồng bộ với header */
+/* General Styles */
+:root {
+    --primary-color: #4e54c8;
+    --primary-gradient: linear-gradient(135deg, #4e54c8, #8f94fb);
+    --secondary-color: #288ad6;
+    --dark-color: #343a40;
+    --light-color: #f8f9fa;
+    --text-color: #495057;
+    --border-color: #e9ecef;
+    --success-color: #4caf50;
+    --warning-color: #ff9800;
+    --error-color: #f44336;
+}
+
+/* PLC Section - Policy highlights */
 .plc {
     background-color: #f8f9fa;
     padding: 20px 0;
     border-top: 1px solid #e9ecef;
-    border-bottom: 1px solid #e9ecef;
+    position: relative;
+    overflow: hidden;
+}
+
+.plc:before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%234e54c8' fill-opacity='0.05' fill-rule='evenodd'/%3E%3C/svg%3E");
+    opacity: 0.5;
 }
 
 .plc section {
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 15px;
+    position: relative;
+    z-index: 1;
 }
 
 .plc ul.flexContain {
@@ -29,6 +59,14 @@
     color: #495057;
     position: relative;
     line-height: 1.5;
+    transition: all 0.3s ease;
+    border-radius: 8px;
+}
+
+.plc ul.flexContain li:hover {
+    background-color: rgba(78, 84, 200, 0.05);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(78, 84, 200, 0.1);
 }
 
 .plc ul.flexContain li:not(:last-child)::after {
@@ -40,6 +78,7 @@
     height: 70%;
     width: 1px;
     background-color: #dee2e6;
+    background: linear-gradient(to bottom, transparent, var(--border-color), transparent);
 }
 
 .plc ul.flexContain li a {
@@ -47,11 +86,27 @@
     color: #288ad6;
     font-weight: bold;
     transition: color 0.2s;
+    position: relative;
+    display: inline-block;
+}
+
+.plc ul.flexContain li a:after {
+    content: "";
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background-color: var(--secondary-color);
+    transition: width 0.3s ease;
 }
 
 .plc ul.flexContain li a:hover {
-    color: #0056b3;
-    text-decoration: underline;
+    color: #4e54c8;
+}
+
+.plc ul.flexContain li a:hover:after {
+    width: 100%;
 }
 
 /* Alert Box */
@@ -68,17 +123,18 @@
     padding: 15px;
     border-radius: 4px;
     z-index: 1000;
-    animation: slideIn 0.5s;
+    animation: slideIn 0.5s ease;
+    font-family: "Roboto", Arial, sans-serif;
 }
 
 @keyframes slideIn {
     from {
-        right: -300px;
+        transform: translateX(100%);
         opacity: 0;
     }
 
     to {
-        right: 20px;
+        transform: translateX(0);
         opacity: 1;
     }
 }
@@ -96,32 +152,95 @@
 
 #closebtn:hover {
     color: #333;
+    transform: rotate(90deg);
+}
+
+/* Alert Types */
+.alert-success {
+    border-left-color: #4caf50 !important;
+}
+
+.alert-warning {
+    border-left-color: #ff9800 !important;
+}
+
+.alert-error {
+    border-left-color: #f44336 !important;
 }
 
 /* Copyright Section */
 .copy-right {
-    background-color: #343a40;
-    color: #adb5bd;
+    background: linear-gradient(135deg, #4e54c8, #8f94fb);
+    /* Đồng bộ với header */
+    color: white;
     text-align: center;
     padding: 20px 15px;
     font-size: 14px;
+    position: relative;
+    overflow: hidden;
+}
+
+.copy-right:before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--primary-gradient);
 }
 
 .copy-right p {
     margin: 0;
     line-height: 1.5;
+    position: relative;
+    z-index: 1;
 }
 
 .copy-right a {
-    color: #adb5bd;
+    color: white;
     text-decoration: none;
-    font-weight: 500;
+    font-weight: 600;
     transition: color 0.2s;
+    position: relative;
+    display: inline-block;
+    padding: 0 5px;
+}
+
+.copy-right a:before {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 8px;
+    background-color: rgba(78, 84, 200, 0.2);
+    z-index: -1;
+    transform: translateY(2px);
+    transition: all 0.3s ease;
 }
 
 .copy-right a:hover {
-    color: #fff;
+    color: #f8f9fa;
     text-decoration: underline;
+}
+
+.copy-right a:hover:before {
+    height: 100%;
+    transform: translateY(0);
+}
+
+/* Wave Animation at the bottom */
+.copy-right:after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 15px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120' preserveAspectRatio='none'%3E%3Cpath d='M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z' opacity='.25' fill='%234e54c8'%3E%3C/path%3E%3Cpath d='M0,0V15.81C13,36.92,27.64,56.86,47.69,72.05,99.41,111.27,165,111,224.58,91.58c31.15-10.15,60.09-26.07,89.67-39.8,40.92-19,84.73-46,130.83-49.67,36.26-2.85,70.9,9.42,98.6,31.56,31.77,25.39,62.32,62,103.63,73,40.44,10.79,81.35-6.69,119.13-24.28s75.16-39,116.92-43.05c59.73-5.85,113.28,22.88,168.9,38.84,30.2,8.66,59,6.17,87.09-7.5,22.43-10.89,48-26.93,60.65-49.24V0Z' opacity='.5' fill='%234e54c8'%3E%3C/path%3E%3Cpath d='M0,0V5.63C149.93,59,314.09,71.32,475.83,42.57c43-7.64,84.23-20.12,127.61-26.46,59-8.63,112.48,12.24,165.56,35.4C827.93,77.22,886,95.24,951.2,90c86.53-7,172.46-45.71,248.8-84.81V0Z' fill='%234e54c8'%3E%3C/path%3E%3C/svg%3E");
+    background-size: cover;
+    opacity: 0.1;
 }
 
 /* Responsive Styles */
@@ -135,7 +254,7 @@
         margin-bottom: 10px;
     }
 
-    .plc ul.flexContain li::after {
+    .plc ul.flexContain li:not(:last-child)::after {
         display: none;
     }
 }
@@ -143,12 +262,6 @@
 @media (max-width: 768px) {
     .plc ul.flexContain li {
         flex: 0 0 50%;
-    }
-}
-
-@media (max-width: 576px) {
-    .plc ul.flexContain li {
-        flex: 0 0 100%;
     }
 
     #alert {
@@ -158,24 +271,46 @@
     }
 }
 
-/* JavaScript functionality for alert box */
-/* Add this to make the alert box functional with JavaScript */
+@media (max-width: 576px) {
+    .plc ul.flexContain li {
+        flex: 0 0 100%;
+    }
+
+    .copy-right {
+        padding: 20px 10px;
+    }
+}
+
+/* Animation for showing the alert */
 .alert-show {
     display: block !important;
 }
 
-.alert-success {
-    border-left-color: #4caf50;
+/* Utility Classes */
+.flexContain {
+    display: flex;
+    flex-wrap: wrap;
 }
 
-.alert-info {
-    border-left-color: #2196f3;
-}
-
-.alert-warning {
-    border-left-color: #ff9800;
-}
-
-.alert-error {
-    border-left-color: #f44336;
-}
+/* Add this JavaScript to make the alert functional */
+/*
+  function showAlert(message, type = 'success') {
+    const alertBox = document.getElementById('alert');
+    if (alertBox) {
+      // Add content to the alert
+      alertBox.innerHTML = `
+        <span id="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+        <p>${message}</p>
+      `;
+      
+      // Add classes
+      alertBox.className = 'alert-show';
+      alertBox.classList.add(`alert-${type}`);
+      
+      // Auto hide after 5 seconds
+      setTimeout(() => {
+        alertBox.className = '';
+      }, 5000);
+    }
+  }
+  */

@@ -31,6 +31,10 @@ public class ProductEntity {
     @Column(nullable = false)
     private int stock;
 
-    private String imageUrl;
+    @Column(nullable = false, name = "image_url")
+    private String image;
+
+    @OneToOne(mappedBy = "product", cascade = CascadeType.ALL)
+    private ProductDetailEntity productDetail;
 
 }

@@ -91,7 +91,7 @@ const UserInfo = () => {
             try {
                 console.log("Đang gửi dữ liệu cập nhật:", formData);
 
-                const updatedData = await callApiWithAuth("/update1", {
+                const updatedData = await callApiWithAuth("/auth/update", {
                     method: "PUT",
                     body: JSON.stringify(formData),
                 });
@@ -276,7 +276,7 @@ const UserInfo = () => {
                     <Link to="/" className="home-button">
                         <FaHome /> Trang chủ
                     </Link>
-                    <Link to="/change-password" className="change-password-button">
+                    <Link to="/resetpassword" className="change-password-button">
                         <FaKey /> Thay đổi mật khẩu
                     </Link>
                 </div>

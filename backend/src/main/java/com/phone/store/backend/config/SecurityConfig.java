@@ -47,7 +47,7 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .csrf(c -> c.disable())
                 .authorizeHttpRequests(
-                authorizeRequests -> authorizeRequests.requestMatchers("/", "/login", "/register").permitAll()
+                authorizeRequests -> authorizeRequests.requestMatchers("/", "/auth/login", "/register", "/products").permitAll()
                         .anyRequest().authenticated())
                         .oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults()))
                 .formLogin(f -> f.disable())

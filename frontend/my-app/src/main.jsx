@@ -13,6 +13,8 @@ import ForgotPassword from './components/auth/forgotpassword.jsx';
 import UserInfo from './components/user/userinfo.jsx';
 import ResetPassword from './components/auth/resetpassword.jsx';
 import Cart from './components/product/cart.jsx';
+import AboutUs from './pages/aboutpage.jsx';
+import ServiceCenters from './pages/servicecenters.jsx';
 
 
 const router = createBrowserRouter([
@@ -52,6 +54,14 @@ const router = createBrowserRouter([
       {
         path: '/cart',
         element: <Cart />
+      },
+      {
+        path: '/aboutus',
+        element: <AboutUs />
+      },
+      {
+        path: '/baohanh',
+        element: <ServiceCenters />
       },
     ]
   }

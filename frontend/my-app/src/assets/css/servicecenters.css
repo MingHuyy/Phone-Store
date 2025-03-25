@@ -1,0 +1,232 @@
+/* ServiceCenters.css */
+.service-centers-container {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 0 20px;
+    font-family: "Roboto", Arial, sans-serif;
+}
+
+/* Header styles */
+.service-centers-header {
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.service-centers-header h2 {
+    font-size: 28px;
+    color: #1a56db;
+    margin-bottom: 15px;
+    position: relative;
+    display: inline-block;
+    padding-bottom: 10px;
+}
+
+.service-centers-header h2::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 3px;
+    background: linear-gradient(90deg, #1a56db, #3b82f6);
+    border-radius: 3px;
+}
+
+.service-centers-marquee {
+    background: linear-gradient(90deg, #1a56db, #3b82f6);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 30px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 4px 10px rgba(26, 86, 219, 0.2);
+}
+
+.marquee-content {
+    display: inline-block;
+    white-space: nowrap;
+    animation: marquee 20s linear infinite;
+}
+
+@keyframes marquee {
+    0% {
+        transform: translateX(100%);
+    }
+
+    100% {
+        transform: translateX(-100%);
+    }
+}
+
+.marquee-content span {
+    font-size: 16px;
+    font-weight: 500;
+}
+
+/* Service center cards */
+.service-centers-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.service-center-card {
+    display: flex;
+    background-color: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.service-center-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+}
+
+.service-center-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 60px;
+    background: linear-gradient(135deg, #1a56db, #3b82f6);
+    color: white;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.service-center-content {
+    flex: 1;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.service-center-item {
+    display: flex;
+    align-items: flex-start;
+}
+
+.service-center-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background-color: #f0f4ff;
+    border-radius: 50%;
+    margin-right: 15px;
+    color: #1a56db;
+    flex-shrink: 0;
+}
+
+.service-center-info {
+    flex: 1;
+}
+
+.service-center-info h3 {
+    font-size: 14px;
+    color: #6b7280;
+    margin: 0 0 5px 0;
+    font-weight: 500;
+}
+
+.service-center-info p {
+    margin: 0;
+    font-size: 16px;
+    color: #1f2937;
+}
+
+.service-center-link {
+    display: flex;
+    align-items: center;
+    color: #1a56db;
+    text-decoration: none;
+    font-size: 16px;
+    transition: color 0.2s ease;
+}
+
+.service-center-link:hover {
+    color: #3b82f6;
+    text-decoration: underline;
+}
+
+.link-icon {
+    font-size: 12px;
+    margin-left: 5px;
+    opacity: 0;
+    transform: translateX(-5px);
+    transition: all 0.3s ease;
+}
+
+.service-center-link:hover .link-icon {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* Note section */
+.service-centers-note {
+    background-color: #f9fafb;
+    border-left: 4px solid #1a56db;
+    padding: 15px 20px;
+    border-radius: 0 8px 8px 0;
+    margin-top: 20px;
+}
+
+.service-centers-note p {
+    margin: 5px 0;
+    color: #4b5563;
+    font-size: 15px;
+}
+
+.service-centers-note strong {
+    color: #1a56db;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+    .service-centers-header h2 {
+        font-size: 24px;
+    }
+
+    .service-center-card {
+        flex-direction: column;
+    }
+
+    .service-center-number {
+        width: 100%;
+        padding: 10px 0;
+        font-size: 20px;
+    }
+
+    .service-center-content {
+        padding: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .service-centers-header h2 {
+        font-size: 20px;
+    }
+
+    .marquee-content span {
+        font-size: 14px;
+    }
+
+    .service-center-icon {
+        width: 35px;
+        height: 35px;
+    }
+
+    .service-center-info h3 {
+        font-size: 13px;
+    }
+
+    .service-center-info p,
+    .service-center-link {
+        font-size: 15px;
+    }
+}

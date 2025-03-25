@@ -18,7 +18,6 @@ const Footer = () => {
                 </section>
             </div>
 
-            {/* Alert Box */}
             <div id="alert">
                 <span id="closebtn">&otimes;</span>
             </div>

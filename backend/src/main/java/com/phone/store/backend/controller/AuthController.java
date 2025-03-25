@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
+@RequestMapping("/auth")
 public class AuthController {
 
     @Autowired
@@ -61,7 +62,7 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/auth/logout")
+    @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletRequest request) {
         String authorizationHeader = request.getHeader("Authorization");
         if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
@@ -72,7 +73,7 @@ public class AuthController {
         String accessToken = authorizationHeader.substring(7);
         return authService.logout(accessToken);
     }
-    @PutMapping("/update1")
+    @PutMapping("/update")
     public ResponseEntity<?> update(HttpServletRequest request, @RequestBody UpdateUserDTO updateUserDTO){
         String authorizationHeader = request.getHeader("Authorization");
 
