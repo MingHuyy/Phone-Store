@@ -24,10 +24,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -93,7 +96,7 @@ public class AuthServiceImpl implements AuthService {
         user.setPassword(passwordEncoder.encode(resetPasswordDTO.getNewPassword()));
         userRepository.save(user);
         return ResponseEntity.ok
-                (Map.of("message", "Mật khẩu cũ không đúng"));
+                (Map.of("message", "Đổi mật khẩu thành công"));
     }
 
     @Override
@@ -134,6 +137,7 @@ public class AuthServiceImpl implements AuthService {
 
         user.setPhone(updateUserDTO.getPhone());
         user.setEmail(updateUserDTO.getEmail());
+        user.setImg(updateUserDTO.getImg());
 
         try {
             userRepository.save(user);
@@ -153,5 +157,52 @@ public class AuthServiceImpl implements AuthService {
                     .body(Map.of("message", "Lỗi khi cập nhật thông tin người dùng"));
         }
     }
+
+    public ResponseEntity<TokenResponse> refresh(String refreshToken) {
+        try {
+            // Kiểm tra refreshToken có hợp lệ không
+            if (!tokenService.validateToken(refreshToken)) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(null);
+            }
+
+            String username = tokenService.getUsernameFromToken(refreshToken);
+            UserEntity user = userRepository.findByUsername(username);
+
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(null);
+            }
+
+            Authentication authentication =
+                    new UsernamePasswordAuthenticationToken(username, null, getAuthorities(user));
+
+            String newAccessToken = jwtTokenUtil.createAccessToken(authentication);
+            String newRefreshToken = jwtTokenUtil.createRefreshToken(authentication);
+
+            TokenEntity token = new TokenEntity();
+            token.setUserName(username);
+            token.setAccessToken(newAccessToken);
+            token.setRefreshToken(newRefreshToken);
+            tokenService.saveToken(token);
+
+            TokenResponse tokenResponse = new TokenResponse();
+            tokenResponse.setAccessToken(newAccessToken);
+            tokenResponse.setRefreshToken(newRefreshToken);
+            tokenResponse.setUserId(user.getId());
+
+            return ResponseEntity.ok(tokenResponse);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(null);
+        }
+    }
+
+    private Collection<GrantedAuthority> getAuthorities(UserEntity user) {
+        return user.getRoles().stream()
+                .map(role -> new SimpleGrantedAuthority(role.getName()))
+                .collect(Collectors.toList());
+    }
+
 
 }

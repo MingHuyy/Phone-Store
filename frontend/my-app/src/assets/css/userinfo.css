@@ -32,22 +32,62 @@
 
 .user-avatar {
     margin-right: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    cursor: pointer;
 }
 
 .avatar-circle {
-    width: 80px;
-    /* Tăng kích thước avatar */
-    height: 80px;
     background: linear-gradient(135deg, #4e54c8, #8f94fb);
+    width: 140px;
+    height: 140px;
+    color: white;
+    font-size: 48px;
+    font-weight: bold;
     border-radius: 50%;
     display: flex;
-    align-items: center;
     justify-content: center;
+    align-items: center;
+}
+
+.avatar-image {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.avatar-edit-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     color: white;
-    font-size: 32px;
-    /* Tăng kích thước font */
-    font-weight: bold;
-    box-shadow: 0 4px 10px rgba(78, 84, 200, 0.3);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.user-avatar:hover .avatar-edit-overlay {
+    opacity: 1;
+}
+
+.avatar-edit-overlay svg {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.avatar-edit-overlay span {
+    font-size: 0.8rem;
+    text-align: center;
 }
 
 .password-icon {
@@ -649,6 +689,17 @@
         width: 100%;
         justify-content: center;
     }
+
+    .avatar-circle {
+        width: 100px;    /* Giảm xuống nhưng vẫn lớn hơn kích thước cũ */
+        height: 100px;
+        font-size: 36px;
+    }
+    
+    .avatar-preview {
+        width: 100px;
+        height: 100px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -657,9 +708,14 @@
     }
 
     .avatar-circle {
-        width: 60px;
-        height: 60px;
-        font-size: 24px;
+        width: 80px;     /* Kích thước nhỏ nhất trên mobile */
+        height: 80px;
+        font-size: 32px;
+    }
+    
+    .avatar-preview {
+        width: 80px;
+        height: 80px;
     }
 
     .user-header h1 {

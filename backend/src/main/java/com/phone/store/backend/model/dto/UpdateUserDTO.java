@@ -17,4 +17,5 @@ public class UpdateUserDTO {
     private String email;
     @Pattern(regexp = "^\\d{10}$", message = "Phone number must be exactly 10 digits")
     private String phone;
+    private String img;
 }

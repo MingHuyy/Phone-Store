@@ -115,7 +115,7 @@ header.scrolled {
     display: flex;
     align-items: center;
     padding: 15px;
-    max-width: 1200px;
+    /* max-width: 1200px; */
     margin: 0 auto;
 }
 

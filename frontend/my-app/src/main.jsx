@@ -15,6 +15,8 @@ import ResetPassword from './components/auth/resetpassword.jsx';
 import Cart from './components/product/cart.jsx';
 import AboutUs from './pages/aboutpage.jsx';
 import ServiceCenters from './pages/servicecenters.jsx';
+import ProductList from './components/product/productlist.jsx';
+import ProductDetail from './components/product/productdetail.jsx';
 
 
 const router = createBrowserRouter([
@@ -62,6 +64,14 @@ const router = createBrowserRouter([
       {
         path: '/baohanh',
         element: <ServiceCenters />
+      },
+      {
+        path: '/products',
+        element: <ProductList />
+      },
+      {
+        path: '/product/:productId',
+        element: <ProductDetail />
       },
     ]
   }

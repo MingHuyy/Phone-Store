@@ -167,7 +167,7 @@ const Cart = () => {
                                         <div className="product-info">
                                             <img src={item.image || "/placeholder.svg"} alt={item.name} className="product-image" />
                                             <div className="product-details">
-                                                <h3 className="product-name">{item.name}</h3>
+                                                <h3 className="cart-product-name">{item.name}</h3>
                                                 <div className="product-meta">
                                                     <span>Màu: {item.color}</span>
                                                     <span>Bộ nhớ: {item.storage}</span>

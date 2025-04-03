@@ -47,7 +47,7 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .csrf(c -> c.disable())
                 .authorizeHttpRequests(
-                authorizeRequests -> authorizeRequests.requestMatchers("/", "/auth/login", "/register", "/products").permitAll()
+                authorizeRequests -> authorizeRequests.requestMatchers("/", "/auth/login", "/register", "/products", "/products/v1", "/auth/refresh", "/products/**").permitAll()
                         .anyRequest().authenticated())
                         .oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults()))
                 .formLogin(f -> f.disable())
@@ -73,5 +73,4 @@ public class SecurityConfig {
             }
         };
     }
-
 }

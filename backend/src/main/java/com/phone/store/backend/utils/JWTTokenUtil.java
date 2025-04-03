@@ -64,14 +64,4 @@ public class JWTTokenUtil {
         return jwtEncoder.encode(JwtEncoderParameters.from(jwsHeader, claims)).getTokenValue();
     }
 
-    public boolean validateToken(String token) {
-        try {
-            Jwt decodedJwt = jwtDecoder.decode(token);
-            Instant now = Instant.now();
-
-            return decodedJwt.getExpiresAt() != null && decodedJwt.getExpiresAt().isAfter(now);
-        } catch (JwtException e) {
-            return false;
-        }
-    }
 }

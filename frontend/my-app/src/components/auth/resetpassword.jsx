@@ -84,7 +84,6 @@ const ResetPassword = () => {
                     })
                 });
 
-                console.log("Đổi mật khẩu thành công:", response);
                 setSuccess(true);
 
                 setTimeout(() => {

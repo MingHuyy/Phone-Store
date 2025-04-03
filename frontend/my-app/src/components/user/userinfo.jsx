@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { FaHome } from "react-icons/fa";
-import { FaUser, FaEnvelope, FaPhone, FaUserTag, FaPen, FaKey, FaSave, FaTimes } from "react-icons/fa";
+import { FaUser, FaEnvelope, FaPhone, FaUserTag, FaPen, FaKey, FaSave, FaTimes, FaCamera } from "react-icons/fa";
 import "../../assets/css/userinfo.css";
 import { callApiWithAuth } from "../../utils/AuthService";
 
@@ -11,19 +11,26 @@ const UserInfo = () => {
         email: "",
         phone: "",
         role: "",
+        img: "",
     });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState({
-        userName: "",
+        username: "",
         email: "",
         phone: "",
+        img: "",
     });
     const [formErrors, setFormErrors] = useState({});
     const [saveLoading, setSaveLoading] = useState(false);
     const [saveSuccess, setSaveSuccess] = useState(false);
+    
+    // Ref for file input
+    const fileInputRef = useRef(null);
+    // State for image preview
+    const [imagePreview, setImagePreview] = useState(null);
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -34,6 +41,7 @@ const UserInfo = () => {
                     username: userData.username,
                     email: userData.email,
                     phone: userData.phone || "",
+                    img: userData.img || "",
                 });
                 setUser(userData);
             } catch (err) {
@@ -61,6 +69,34 @@ const UserInfo = () => {
         }
     };
 
+    // Handle avatar click to trigger file input
+    const handleAvatarClick = () => {
+        if (isEditing) {
+            fileInputRef.current.click();
+        }
+    };
+
+    // Handle file selection
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            // Create a preview URL
+            const previewUrl = URL.createObjectURL(file);
+            setImagePreview(previewUrl);
+            
+            // Handle file upload - convert to base64 for simplicity
+            // In a real app, you might want to upload to a server instead
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onloadend = () => {
+                setFormData({
+                    ...formData,
+                    img: reader.result
+                });
+            };
+        }
+    };
+
     const validateForm = () => {
         const errors = {};
 
@@ -84,28 +120,37 @@ const UserInfo = () => {
 
     const handleSave = async (e) => {
         e.preventDefault();
-
+    
         if (validateForm()) {
             setSaveLoading(true);
-
+    
             try {
-                console.log("Đang gửi dữ liệu cập nhật:", formData);
-
+                const formDataToSend = new FormData();
+                formDataToSend.append("username", formData.username);
+                formDataToSend.append("email", formData.email);
+                formDataToSend.append("phone", formData.phone || "");
+    
+                // Chỉ gửi ảnh nếu người dùng chọn
+                if (fileInputRef.current && fileInputRef.current.files && fileInputRef.current.files[0]) {
+                    formDataToSend.append("img", fileInputRef.current.files[0]);
+                }
+    
                 const updatedData = await callApiWithAuth("/auth/update", {
                     method: "PUT",
-                    body: JSON.stringify(formData),
+                    body: formDataToSend,
+                    // KHÔNG thiết lập Content-Type ở đây
                 });
-
-                console.log("Dữ liệu nhận về sau khi cập nhật:", updatedData);
+    
 
                 setUser({
                     ...user,
                     ...updatedData
                 });
-
+    
                 setSaveSuccess(true);
                 setIsEditing(false);
-
+                setImagePreview(null); // Clear preview sau khi lưu
+    
                 setTimeout(() => {
                     setSaveSuccess(false);
                 }, 3000);
@@ -117,18 +162,21 @@ const UserInfo = () => {
             }
         }
     };
-
+    
+    
 
     const handleCancel = () => {
         setIsEditing(false);
         if (user) {
             setFormData({
-                userName: user.username,
+                username: user.username,
                 email: user.email,
                 phone: user.phone || "",
+                img: user.img || "",
             });
         }
         setFormErrors({});
+        setImagePreview(null); // Clear preview on cancel
     };
 
     if (loading) {
@@ -160,9 +208,42 @@ const UserInfo = () => {
         <div className="user-container">
             <div className="user-card">
                 <div className="user-header">
-                    <div className="user-avatar">
-                        <div className="avatar-circle">{user.username.charAt(0).toUpperCase()}</div>
+                    <div 
+                        className="user-avatar"
+                        onClick={handleAvatarClick}
+                    >
+                        <input 
+                            type="file" 
+                            ref={fileInputRef} 
+                            style={{ display: 'none' }} 
+                            accept="image/*"
+                            onChange={handleFileChange}
+                        />
+                        
+                        {imagePreview ? (
+                            <img 
+                                src={imagePreview} 
+                                alt="Avatar Preview" 
+                                className="avatar-image" 
+                            />
+                        ) : user.img ? (
+                            <img 
+                                src={user.img} 
+                                alt="User Avatar" 
+                                className="avatar-image" 
+                            />
+                        ) : (
+                            <div className="avatar-circle">{user.username.charAt(0).toUpperCase()}</div>
+                        )}
+                        
+                        {isEditing && (
+                            <div className="avatar-edit-overlay">
+                                <FaCamera />
+                                <span>Đổi ảnh</span>
+                            </div>
+                        )}
                     </div>
+
                     <h1>Thông tin tài khoản</h1>
                     {!isEditing && (
                         <button className="edit-button" onClick={() => setIsEditing(true)} aria-label="Chỉnh sửa thông tin">
@@ -282,7 +363,7 @@ const UserInfo = () => {
                 </div>
             </div>
         </div>
-    )
+    );
 };
 
 export default UserInfo;

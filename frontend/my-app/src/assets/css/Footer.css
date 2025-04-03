@@ -20,6 +20,7 @@
     border-top: 1px solid #e9ecef;
     position: relative;
     overflow: hidden;
+    margin: 0 auto;
 }
 
 .plc:before {

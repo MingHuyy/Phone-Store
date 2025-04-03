@@ -4,10 +4,12 @@ import com.phone.store.backend.entity.TokenEntity;
 import com.phone.store.backend.respository.TokenRepository;
 import com.phone.store.backend.service.TokenService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.Optional;
 
 @Service
@@ -50,6 +52,18 @@ public class TokenServiceImpl implements TokenService {
             return jwtDecoder.decode(token).getSubject();
         } catch (JwtException e) {
             return null;
+        }
+    }
+
+    @Override
+    public boolean validateToken(String token) {
+        try {
+            Jwt decodedJwt = jwtDecoder.decode(token);
+            Instant now = Instant.now();
+
+            return decodedJwt.getExpiresAt() != null && decodedJwt.getExpiresAt().isAfter(now);
+        } catch (JwtException e) {
+            return false;
         }
     }
 }

@@ -7,17 +7,19 @@ import com.phone.store.backend.model.response.StatusResponse;
 import com.phone.store.backend.model.response.TokenResponse;
 import com.phone.store.backend.respository.UserRepository;
 import com.phone.store.backend.service.AuthService;
+import com.phone.store.backend.service.CloudinaryService;
 import com.phone.store.backend.service.TokenService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Map;
 
 @RestController
@@ -29,7 +31,7 @@ public class AuthController {
     @Autowired
     private AuthService authService;
     @Autowired
-    private UserRepository userRepository;
+    private CloudinaryService cloudinaryService;
 
     @PostMapping("/login")
     public ResponseEntity<TokenResponse> login(@Valid @RequestBody LoginDTO loginDTO) {
@@ -38,7 +40,10 @@ public class AuthController {
 
     @PostMapping("/refresh")
     public ResponseEntity<TokenResponse> refresh(@RequestBody TokenDTO tokenDTO) {
-        return null;
+        if (tokenDTO.getRefreshToken() == null) {
+            return ResponseEntity.badRequest().body(null);
+        }
+        return authService.refresh(tokenDTO.getRefreshToken());
     }
 
     @PostMapping("/reset-password")
@@ -73,15 +78,37 @@ public class AuthController {
         String accessToken = authorizationHeader.substring(7);
         return authService.logout(accessToken);
     }
-    @PutMapping("/update")
-    public ResponseEntity<?> update(HttpServletRequest request, @RequestBody UpdateUserDTO updateUserDTO){
+    @PutMapping(value = "/update", consumes = {"multipart/form-data"})
+    public ResponseEntity<?> update(HttpServletRequest request,
+                                    @RequestParam("username") String username,
+                                    @RequestParam("email") String email,
+                                    @RequestParam(value = "phone", required = false) String phone,
+                                    @RequestParam(value = "img", required = false) MultipartFile img) {
         String authorizationHeader = request.getHeader("Authorization");
 
         if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("message", "Không tìm thấy token hợp lệ."));
+                    .body(Map.of("error", true, "message", "Không tìm thấy token hợp lệ."));
         }
-        System.out.println(updateUserDTO.getUsername());
+
+        String phoneNumber = (phone == null || phone.isEmpty()) ? null : phone;
+
+        String imageUrl = null;
+        if (img != null && !img.isEmpty()) {
+            try {
+                imageUrl = cloudinaryService.uploadImage(img);
+            } catch (IOException e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body(Map.of("error", true, "message", "Lỗi khi xử lý ảnh."));
+            }
+        }
+
+        UpdateUserDTO updateUserDTO = UpdateUserDTO.builder()
+                .username(username)
+                .email(email)
+                .phone(phoneNumber)
+                .img(imageUrl)
+                .build();
         return authService.update(updateUserDTO);
-        }
+    }
 }

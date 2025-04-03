@@ -10,4 +10,6 @@ public interface TokenService {
     TokenEntity getByName(String name);
 
     public String getUsernameFromToken(String token);
+
+    public boolean validateToken(String token);
 }

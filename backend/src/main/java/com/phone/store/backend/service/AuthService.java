@@ -13,4 +13,5 @@ public interface AuthService {
     ResponseEntity<?> resetPassword(ResetPasswordDTO resetPasswordDTO, String userName);
     ResponseEntity<?> logout(String accessToken);
     ResponseEntity<?> update(UpdateUserDTO updateUserDTO);
+    public ResponseEntity<TokenResponse> refresh(String refreshToken);
 }
