@@ -55,6 +55,15 @@ public class TokenServiceImpl implements TokenService {
         }
     }
 
+    public Long getUserIdFromToken(String token) {
+        try {
+            Jwt jwt = jwtDecoder.decode(token);
+            return jwt.getClaim("userId");
+        } catch (JwtException e) {
+            throw new RuntimeException("Token không hợp lệ", e);
+        }
+    }
+
     @Override
     public boolean validateToken(String token) {
         try {

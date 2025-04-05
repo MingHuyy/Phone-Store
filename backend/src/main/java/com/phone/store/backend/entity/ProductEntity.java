@@ -44,6 +44,7 @@ public class ProductEntity {
     public ProductDetailResponse getProductDetailResponse() {
         ProductDetailResponse productDetailResponse = new ProductDetailResponse();
         if (productDetail != null) {
+            productDetailResponse.setId(productDetail.getId());
             productDetailResponse.setName(this.name);
             productDetailResponse.setDescription(this.description);
             productDetailResponse.setPrice(this.price);
@@ -58,7 +59,6 @@ public class ProductEntity {
             productDetailResponse.setRam(this.productDetail.getRam());
             productDetailResponse.setRom(this.productDetail.getRom());
             productDetailResponse.setScreen(this.productDetail.getScreen());
-
         }
         return productDetailResponse;
     }

@@ -906,4 +906,43 @@
     box-shadow: none;
   }
   
+  /* Thông báo khi thêm vào giỏ hàng */
+  .notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 20px;
+    border-radius: 8px;
+    font-weight: 500;
+    color: white;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    animation: slideIn 0.4s ease-out;
+    max-width: 380px;
+    font-size: 16px;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+  }
+  
+  .notification.success {
+    background: linear-gradient(135deg, #28a745, #20c997);
+  }
+  
+  .notification.error {
+    background: linear-gradient(135deg, #dc3545, #ff6b6b);
+  }
+  
+  @keyframes slideIn {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  
   

@@ -30,7 +30,4 @@ public class CartEntity {
 
     @Column(nullable = false)
     private int quantity;
-
-    @CreationTimestamp
-    private LocalDateTime createdAt;
 }

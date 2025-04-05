@@ -13,6 +13,7 @@ import {
 } from "react-icons/fa"
 import "../../assets/css/productlist.css"
 import { callApiWithAuth } from "../../utils/AuthService"
+import { addToCart } from "../../utils/CartService"
 
 
 const ProductList = () => {
@@ -23,6 +24,11 @@ const ProductList = () => {
   const [totalPages, setTotalPages] = useState(1)
   const [sortBy, setSortBy] = useState("newest")
   const [filterOpen, setFilterOpen] = useState(false)
+  
+
+  const [showNotification, setShowNotification] = useState(false)
+  const [notificationMessage, setNotificationMessage] = useState("")
+  const [notificationType, setNotificationType] = useState("success")
   
   // State chính để lưu trữ giá trị bộ lọc đang được áp dụng
   const [priceRange, setPriceRange] = useState([0, 50000000])
@@ -42,6 +48,52 @@ const ProductList = () => {
     { id: 4, name: "OPPO" },
     { id: 5, name: "Vivo" },
   ]
+
+  const handleAddToCart = async (product, quantity = 1) => {
+    if (!product.inStock) {
+      setShowNotification(true);
+      setNotificationMessage('Sản phẩm đã hết hàng!');
+      setNotificationType('error');
+      
+      setTimeout(() => {
+        setShowNotification(false);
+      }, 3000);
+      return;
+    }
+    
+    try {
+      const response = await addToCart(product.id, quantity);
+      
+      let message = '';
+      if (typeof response === 'object' && response.message) {
+        message = response.message;
+      } else if (typeof response === 'string') {
+        message = response;
+      } else {
+        message = `Đã thêm ${quantity} ${product.name} vào giỏ hàng!`;
+      }
+      
+      setShowNotification(true);
+      setNotificationMessage(message);
+      setNotificationType('success');
+      
+      // Ẩn thông báo sau 3 giây
+      setTimeout(() => {
+        setShowNotification(false);
+      }, 3000);
+    } catch (error) {
+      console.error('Lỗi khi thêm vào giỏ hàng:', error);
+      
+      setShowNotification(true);
+      setNotificationMessage(error.message || 'Không thể thêm sản phẩm vào giỏ hàng!');
+      setNotificationType('error');
+      
+      // Ẩn thông báo sau 3 giây
+      setTimeout(() => {
+        setShowNotification(false);
+      }, 3000);
+    }
+  };
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -388,12 +440,7 @@ const ProductList = () => {
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      if (!product.inStock) {
-                        alert("Sản phẩm đã hết hàng!");
-                        return;
-                      }
-                      // Xử lý thêm vào giỏ hàng ở đây
-                      alert("Thêm vào giỏ hàng thành công!");
+                      handleAddToCart(product, 1);
                     }}
                   >
                     <FaPlus />
@@ -438,6 +485,19 @@ const ProductList = () => {
           )}
         </div>
       </div>
+
+      {/* Thông báo */}
+      {showNotification && (
+        <div className={`notification ${notificationType}`}>
+          {notificationType === 'success' && (
+            <span className="notification-icon" style={{ marginRight: '10px' }}>✓</span>
+          )}
+          {notificationType === 'error' && (
+            <span className="notification-icon" style={{ marginRight: '10px' }}>✗</span>
+          )}
+          <span>{notificationMessage}</span>
+        </div>
+      )}
     </div>
   )
 }

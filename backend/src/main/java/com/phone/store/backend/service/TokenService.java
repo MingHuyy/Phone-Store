@@ -12,4 +12,6 @@ public interface TokenService {
     public String getUsernameFromToken(String token);
 
     public boolean validateToken(String token);
+
+    public Long getUserIdFromToken(String token);
 }

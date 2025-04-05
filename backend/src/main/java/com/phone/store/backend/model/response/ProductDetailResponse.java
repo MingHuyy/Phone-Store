@@ -8,6 +8,8 @@ import lombok.Setter;
 @Setter
 public class ProductDetailResponse {
 
+    private Long id;
+
     private String name;
 
     private String description;

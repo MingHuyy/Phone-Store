@@ -172,7 +172,65 @@
 .password-toggle:focus {
     outline: none;
 }
+.home-button {
+    display: flex;
+    align-items: center;
+    padding: 12px 25px;
+    /* Tăng padding */
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 1.05rem;
+    /* Tăng kích thước font */
+    text-decoration: none;
+    transition: all 0.3s;
+}
 
+.change-password-button svg,
+.home-button svg {
+    margin-right: 10px;
+    /* Tăng khoảng cách */
+    font-size: 1.1rem;
+    /* Tăng kích thước icon */
+}
+
+.change-password-button,
+.home-button {
+    margin-top: 30px;
+    display: flex;
+    align-items: center;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.3s;
+}
+
+.change-password-button svg,
+.home-button svg {
+    margin-right: 8px;
+}
+
+.change-password-button {
+    background-color: #f8f9fa;
+    color: #4e54c8;
+    border: 1px solid #4e54c8;
+}
+
+.change-password-button:hover {
+    background-color: #4e54c8;
+    color: white;
+}
+
+.home-button {
+    background-color: #f8f9fa;
+    color: #28a745;
+    border: 1px solid #28a745;
+}
+
+.home-button:hover {
+    background-color: #28a745;
+    color: white;
+}
 /* Form options */
 .form-options {
     display: flex;

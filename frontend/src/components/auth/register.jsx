@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
-import { FaUser, FaEnvelope, FaLock, FaEye, FaEyeSlash, FaPhone } from "react-icons/fa"
+import { FaUser, FaEnvelope, FaLock, FaEye, FaEyeSlash, FaPhone, FaHome } from "react-icons/fa"
 import "../../assets/css/auth.css";
 
 const Register = () => {
@@ -82,7 +82,6 @@ const Register = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault()
-        console.log(formData)
         if (validateForm()) {
             setLoading(true)
 
@@ -107,8 +106,6 @@ const Register = () => {
                     throw new Error(errorData.message || 'Đăng ký thất bại');
                 }
 
-                const data = await response.json();
-                console.log('Đăng ký thành công:', data);
                 alert('Đăng ký thành công! Vui lòng đăng nhập.');
                 navigate('/login');
 
@@ -261,6 +258,12 @@ const Register = () => {
                                 Đã có tài khoản? <Link to="/login">Đăng nhập</Link>
                             </p>
                         </div>
+
+                        <div className="home-button-container" style={{  display: "flex", justifyContent: "center" }}>
+              <Link to="/" className="home-button" style={{ display: "flex", alignItems: "center", gap: "8px"}}>
+                <FaHome /> Trang chủ
+              </Link>
+            </div>
                     </div>
                 </div>
             </div>

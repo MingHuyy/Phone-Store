@@ -5,6 +5,7 @@ import { useParams, useNavigate } from "react-router-dom"
 import { FaShoppingCart, FaHeart, FaShare, FaCheck, FaMinus, FaPlus, FaArrowLeft } from "react-icons/fa"
 import "../../assets/css/productdetail.css"
 import { callApiWithAuth } from "../../utils/AuthService"
+import { addToCart } from "../../utils/CartService"
 
 const ProductDetail = () => {
   const { productId } = useParams()
@@ -15,13 +16,15 @@ const ProductDetail = () => {
   const [quantity, setQuantity] = useState(1)
   const [activeTab, setActiveTab] = useState("description")
   const [isShaking, setIsShaking] = useState(false)
+  const [showNotification, setShowNotification] = useState(false)
+  const [notificationMessage, setNotificationMessage] = useState("")
+  const [notificationType, setNotificationType] = useState("success")
 
   useEffect(() => {
     const fetchProductDetails = async () => {
       try {
         setLoading(true)
         const data = await callApiWithAuth(`/products/${productId}`)
-        console.log(data)
         
         if (data && data.description) {
           const formattedDescription = data.description.replace(/([.!?])\s+/g, "$1\n");
@@ -51,20 +54,55 @@ const ProductDetail = () => {
     }
   }
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (product?.stock <= 0) {
-      alert("Sản phẩm đã hết hàng!")
-      return
+      setShowNotification(true);
+      setNotificationMessage('Sản phẩm đã hết hàng!');
+      setNotificationType('error');
+      
+      // Ẩn thông báo sau 3 giây
+      setTimeout(() => {
+        setShowNotification(false);
+      }, 3000);
+      return;
     }
     
-    setIsShaking(true)
+    setIsShaking(true);
+    setTimeout(() => setIsShaking(false), 500);
     
-    // Hiệu ứng rung khi nhấn nút
-    setTimeout(() => {
-      setIsShaking(false)
-      alert("Thêm vào giỏ hàng thành công!")
-    }, 600)
-  }
+    try {
+      const response = await addToCart(Number(productId), quantity);
+      
+      let message = '';
+      if (typeof response === 'object' && response.message) {
+        message = response.message;
+      } else if (typeof response === 'string') {
+        message = response;
+      } else {
+        message = `Đã thêm ${quantity} ${product.name} vào giỏ hàng!`;
+      }
+      
+      setShowNotification(true);
+      setNotificationMessage(message);
+      setNotificationType('success');
+      
+      // Ẩn thông báo sau 3 giây
+      setTimeout(() => {
+        setShowNotification(false);
+      }, 3000);
+    } catch (error) {
+      console.error('Lỗi khi thêm vào giỏ hàng:', error);
+      
+      setShowNotification(true);
+      setNotificationMessage(error.message || 'Không thể thêm sản phẩm vào giỏ hàng!');
+      setNotificationType('error');
+      
+      // Ẩn thông báo sau 3 giây
+      setTimeout(() => {
+        setShowNotification(false);
+      }, 3000);
+    }
+  };
 
   const formatPrice = (price) => {
     return price?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + "₫"
@@ -264,6 +302,18 @@ const ProductDetail = () => {
           )}
         </div>
       </div>
+
+      {showNotification && (
+        <div className={`notification ${notificationType}`}>
+          {notificationType === 'success' && (
+            <span className="notification-icon" style={{ marginRight: '10px' }}>✓</span>
+          )}
+          {notificationType === 'error' && (
+            <span className="notification-icon" style={{ marginRight: '10px' }}>✗</span>
+          )}
+          <span>{notificationMessage}</span>
+        </div>
+      )}
     </div>
   )
 }

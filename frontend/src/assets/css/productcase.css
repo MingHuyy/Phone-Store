@@ -356,3 +356,44 @@
   transform: none;
   box-shadow: none;
 }
+
+/* Notification Styles */
+.notification {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    min-width: 280px;
+    padding: 15px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    animation: slideIn 0.3s ease-out forwards;
+    font-size: 14px;
+    color: white;
+}
+
+.notification.success {
+    background: linear-gradient(135deg, #4caf50, #45a049);
+}
+
+.notification.error {
+    background: linear-gradient(135deg, #f44336, #e53935);
+}
+
+.notification-icon {
+    margin-right: 10px;
+    font-size: 20px;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}

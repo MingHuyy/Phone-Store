@@ -1,40 +1,33 @@
-// src/utils/api.js
 const API_BASE_URL = "http://localhost:1111";
 
 export const callApiWithAuth = async (url, options = {}) => {
     const accessToken = localStorage.getItem("accessToken");
-    
-    // Kiểm tra xem body có phải là FormData không
+
     const isFormData = options.body instanceof FormData;
-    
-    // Thiết lập headers
+
     options.headers = {
         ...options.headers,
         Authorization: accessToken ? `Bearer ${accessToken}` : "",
     };
-    
-    // Chỉ thêm Content-Type: application/json nếu KHÔNG phải FormData
+
     if (!isFormData) {
         options.headers["Content-Type"] = "application/json";
     }
-    // Nếu là FormData, KHÔNG thiết lập Content-Type để browser tự xử lý
 
     try {
         let response = await fetch(`${API_BASE_URL}${url}`, options);
 
-        // Xử lý token hết hạn
         if (response.status === 401) {
             try {
                 const newToken = await refreshToken();
                 if (!newToken) {
-                    // Nếu refresh token thất bại, đăng xuất
                     logout();
                     throw new Error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
                 }
 
                 options.headers.Authorization = `Bearer ${newToken}`;
                 response = await fetch(`${API_BASE_URL}${url}`, options);
-                
+
                 if (!response.ok) {
                     throw new Error(`Lỗi HTTP ${response.status}`);
                 }
@@ -91,7 +84,6 @@ export const logout = async () => {
     try {
         const accessToken = localStorage.getItem("accessToken");
         if (accessToken) {
-            // Gọi API đăng xuất
             try {
                 await fetch(`${API_BASE_URL}/auth/logout`, {
                     method: "POST",
@@ -109,7 +101,6 @@ export const logout = async () => {
         // Luôn xóa token khỏi localStorage
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
-        // Redirect về trang đăng nhập
         window.location.href = "/login";
     }
 };

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { FaUser, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
+import { FaUser, FaLock, FaEye, FaEyeSlash, FaHome } from "react-icons/fa";
 import "../../assets/css/auth.css";
 
 const Login = () => {
@@ -58,13 +58,15 @@ const Login = () => {
         });
 
         const data = await response.json();
+
         setLoading(false);
 
         if (response.ok) {
           localStorage.setItem("accessToken", data.accessToken);
           localStorage.setItem("refreshToken", data.refreshToken);
           localStorage.setItem("userId", data.userId);
-          localStorage.setItem("userRole", data.role)
+          localStorage.setItem("userRole", data.role);
+
           alert("Đăng nhập thành công!");
           navigate("/");
         } else {
@@ -150,10 +152,17 @@ const Login = () => {
             <div className="auth-footer">
               <p>Chưa có tài khoản? <Link to="/register">Đăng ký ngay</Link></p>
             </div>
+
+            <div className="home-button-container" style={{ display: "flex", justifyContent: "center" }}>
+              <Link to="/" className="home-button" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <FaHome /> Trang chủ
+              </Link>
+            </div>
+
           </div>
         </div>
-      </div >
-    </div >
+      </div>
+    </div>
   );
 };
 

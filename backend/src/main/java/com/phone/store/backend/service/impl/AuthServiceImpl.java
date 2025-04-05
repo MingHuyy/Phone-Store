@@ -160,7 +160,6 @@ public class AuthServiceImpl implements AuthService {
 
     public ResponseEntity<TokenResponse> refresh(String refreshToken) {
         try {
-            // Kiểm tra refreshToken có hợp lệ không
             if (!tokenService.validateToken(refreshToken)) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                         .body(null);

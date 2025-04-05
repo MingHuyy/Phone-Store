@@ -1,5 +1,8 @@
 package com.phone.store.backend.utils;
 
+import com.phone.store.backend.entity.UserEntity;
+import com.phone.store.backend.respository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -21,6 +24,9 @@ public class JWTTokenUtil {
     @Value("${phonestore.jwt.token-validity-in-day}")
     private long jwtExpirationDay;
 
+    @Autowired
+    private UserRepository userRepository;
+
     private final JwtEncoder jwtEncoder;
     private final JwtDecoder jwtDecoder;
 
@@ -39,11 +45,15 @@ public class JWTTokenUtil {
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
 
+        UserEntity user = userRepository.findByUsername(authentication.getName());
+        Long userId = user.getId();
+
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuedAt(now)
                 .expiresAt(validity)
                 .subject(authentication.getName())
                 .claim("roles", roles)
+                .claim("userId", userId)
                 .build();
 
         JwsHeader jwsHeader = JwsHeader.with(JWT_ALGORITHM).build();
