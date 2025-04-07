@@ -17,6 +17,7 @@ import AboutUs from './pages/aboutpage.jsx';
 import ServiceCenters from './pages/servicecenters.jsx';
 import ProductList from './components/product/productlist.jsx';
 import ProductDetail from './components/product/productdetail.jsx';
+import PasswordResetSuccess from './components/PasswordResetSuccess.jsx';
 
 
 const router = createBrowserRouter([
@@ -73,6 +74,10 @@ const router = createBrowserRouter([
         path: '/product/:productId',
         element: <ProductDetail />
       },
+      {
+        path: '/password-reset-success',
+        element: <PasswordResetSuccess />
+      }
     ]
   }
 ]);

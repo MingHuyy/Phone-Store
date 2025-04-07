@@ -111,4 +111,10 @@ public class AuthController {
                 .build();
         return authService.update(updateUserDTO);
     }
+
+    @PostMapping("/reset-password/v1")
+    public ResponseEntity<StatusResponse> resetPassword(@RequestParam String refreshToken) {
+        return new ResponseEntity<>(authService.setPassword(refreshToken).getStatusCode());
+    }
+
 }

@@ -27,18 +27,33 @@ const ForgotPassword = () => {
         return true
     }
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault()
 
         if (validateEmail()) {
             setLoading(true)
 
-            // Giả lập API call
-            setTimeout(() => {
-                console.log("Gửi yêu cầu đặt lại mật khẩu cho:", email)
+            try {
+                const response = await fetch("http://localhost:1111/forgotpassword", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ email })
+                });
+
+                if (response.ok) {
+                    setSuccess(true)
+                } else {
+                    const errorData = await response.json();
+                    setError(errorData.message || "Đã xảy ra lỗi khi gửi yêu cầu đặt lại mật khẩu");
+                }
+            } catch (error) {
+                console.error("Lỗi:", error);
+                setError("Không thể kết nối đến máy chủ. Vui lòng thử lại sau.");
+            } finally {
                 setLoading(false)
-                setSuccess(true)
-            }, 1500)
+            }
         }
     }
 
@@ -89,9 +104,6 @@ const ForgotPassword = () => {
                                 <div className="form-group">
                                     <label htmlFor="email">Email</label>
                                     <div className="input-group">
-                                        <span className="input-icon">
-                                            <FaEnvelope />
-                                        </span>
                                         <input
                                             type="email"
                                             id="email"

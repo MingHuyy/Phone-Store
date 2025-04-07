@@ -17,4 +17,5 @@ public interface TokenRepository extends JpaRepository<TokenEntity, Long> {
     @Modifying
     @Query("DELETE FROM TokenEntity t WHERE t.userName = :userName")
     void deleteByUserName(@Param("userName") String userName);
+    TokenEntity findByRefreshToken(String refreshToken);
 }

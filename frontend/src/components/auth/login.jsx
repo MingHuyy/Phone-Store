@@ -73,6 +73,7 @@ const Login = () => {
           setErrors({ server: data.message || "Đăng nhập thất bại!" });
         }
       } catch (error) {
+        console.error("Lỗi:", error);
         setLoading(false);
         setErrors({ server: "Lỗi kết nối đến server!" });
       }

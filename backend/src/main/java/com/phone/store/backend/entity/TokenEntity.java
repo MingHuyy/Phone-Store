@@ -24,4 +24,7 @@ public class TokenEntity {
 
     @Column(nullable = false, unique = true)
     private String refreshToken;
+
+    @Column(nullable = false)
+    private boolean revoked = false;
 }

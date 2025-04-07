@@ -32,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -52,6 +53,8 @@ public class AuthServiceImpl implements AuthService {
     private TokenRepository tokenRepository;
     @Autowired
     private UserConverter userConverter;
+
+    private String defaultPassword = "123456";
 
     @Override
     public ResponseEntity<TokenResponse> login(LoginDTO loginDTO) {
@@ -102,7 +105,6 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public ResponseEntity<?> logout(String accessToken) {
         String userName = tokenService.getUsernameFromToken(accessToken);
-        System.out.println("Username từ token: " + userName);
         tokenRepository.deleteByUserName(userName);
         return ResponseEntity.ok(Map.of(
                 "message", "Logout thành công!"
@@ -196,6 +198,25 @@ public class AuthServiceImpl implements AuthService {
                     .body(null);
         }
     }
+
+    @Override
+    public ResponseEntity<?> setPassword(String refreshToken) {
+        TokenEntity token = tokenRepository.findByRefreshToken(refreshToken);
+        if (token == null || token.isRevoked()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", "Token không hợp lệ hoặc đã bị thu hồi"));
+        }
+        String userName = tokenService.getUsernameFromToken(refreshToken);
+        UserEntity user = userRepository.findByUsername(userName);
+
+        user.setPassword(passwordEncoder.encode(defaultPassword));
+        userRepository.save(user);
+         token.setRevoked(true);
+         tokenRepository.save(token);
+
+        return ResponseEntity.ok(Map.of("message", "Mật khẩu đã được thay đổi thành công"));
+    }
+
 
     private Collection<GrantedAuthority> getAuthorities(UserEntity user) {
         return user.getRoles().stream()
