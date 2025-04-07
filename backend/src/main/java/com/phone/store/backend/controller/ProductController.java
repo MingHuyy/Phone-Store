@@ -28,6 +28,11 @@ public class ProductController {
         return productRepository.findV1();
     }
 
+    @GetMapping("/oderbyprice")
+    public List<ProductResponse> oderByPrice() {
+        return productRepository.findAllOrderByPriceAsc();
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<ProductDetailResponse> productById(@PathVariable long id) {
         Optional<ProductEntity> productOptional = productRepository.findById(id);
@@ -44,7 +49,7 @@ public class ProductController {
     @GetMapping("/v1")
     public ResponseEntity<Page<ProductResponse>> getProducts(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "12") int size,
+            @RequestParam(defaultValue = "9") int size,
             @RequestParam(required = false) String sort,
             @RequestParam(required = false) Long minPrice,
             @RequestParam(required = false) Long maxPrice,
@@ -60,5 +65,13 @@ public class ProductController {
     public ResponseEntity<List<String>> getCategories() {
         List<String> categories = productRepository.findDistinctCategories();
         return ResponseEntity.ok(categories);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<ProductResponse>> searchProducts(@RequestParam(defaultValue = "0") int page,
+                                                                @RequestParam(defaultValue = "9") int size,
+                                                                @RequestParam("keyword") String keyword){
+        System.out.println(keyword);
+        return productService.searchProduct(keyword, page, size);
     }
 }

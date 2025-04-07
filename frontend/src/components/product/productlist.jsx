@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useLocation, useNavigate } from "react-router-dom"
 import {
     FaShoppingCart,
     FaHeart,
@@ -17,6 +18,8 @@ import { addToCart } from "../../utils/CartService"
 
 
 const ProductList = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -48,6 +51,17 @@ const ProductList = () => {
     { id: 4, name: "OPPO" },
     { id: 5, name: "Vivo" },
   ]
+
+  // Đọc tham số tìm kiếm từ URL khi component mount
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const searchFromUrl = params.get("search");
+    
+    if (searchFromUrl) {
+      setSearchQuery(searchFromUrl);
+      setTempSearchQuery(searchFromUrl);
+    }
+  }, [location.search]);
 
   const handleAddToCart = async (product, quantity = 1) => {
     if (!product.inStock) {
@@ -100,6 +114,7 @@ const ProductList = () => {
       try {
         setLoading(true)
 
+        // Khởi tạo tham số truy vấn
         const queryParams = new URLSearchParams({
           page: currentPage - 1,
           size: 9,
@@ -112,16 +127,23 @@ const ProductList = () => {
         if (priceRange[1] < 50000000) {
           queryParams.append("maxPrice", priceRange[1])
         }
+        
+        let apiUrl = "/products/v1";
+        
+        // Nếu có từ khóa tìm kiếm, sử dụng API search
         if (searchQuery) {
-          queryParams.append("search", searchQuery)
-        }
-        if (selectedCategories.length > 0) {
-          selectedCategories.forEach((categoryName) => {
-            queryParams.append("categories", categoryName)
-          })
+          apiUrl = "/products/search";
+          queryParams.set("keyword", searchQuery);
+        } else {
+          // Nếu không có từ khóa, sử dụng API thông thường với các tham số khác
+          if (selectedCategories.length > 0) {
+            selectedCategories.forEach((categoryName) => {
+              queryParams.append("categories", categoryName)
+            })
+          }
         }
 
-        const data = await callApiWithAuth(`/products/v1?${queryParams.toString()}`)
+        const data = await callApiWithAuth(`${apiUrl}?${queryParams.toString()}`);
         
         const formattedProducts = data.content.map(product => {
           return {
@@ -180,21 +202,59 @@ const ProductList = () => {
     })
   }
 
-  // Xử lý tìm kiếm (chỉ cập nhật giá trị tạm thời)
+  // Cập nhật hàm xử lý tìm kiếm để thiết lập URL
   const handleSearch = (e) => {
-    e.preventDefault()
-    setTempSearchQuery(searchQuery)
-  }
+    e.preventDefault();
+    
+    // Lưu từ khóa tìm kiếm vào biến tạm
+    const keyword = tempSearchQuery;
+    
+    if (!keyword.trim()) return;
+    
+    // Thiết lập từ khóa tìm kiếm
+    setSearchQuery(keyword);
+    setCurrentPage(1);
+    
+    // Cập nhật URL để phản ánh tìm kiếm
+    const params = new URLSearchParams(location.search);
+    params.set("search", keyword);
+    
+    // Điều hướng đến trang với tham số tìm kiếm
+    navigate(`${location.pathname}?${params.toString()}`);
+    
+    // Đặt lại thanh tìm kiếm về rỗng
+    setTempSearchQuery("");
+  };
 
   // Xử lý áp dụng bộ lọc
   const handleApplyFilters = () => {
-    setPriceRange(tempPriceRange)
-    setSelectedCategories(tempSelectedCategories)
-    setSearchQuery(tempSearchQuery)
-    setCurrentPage(1) // Reset về trang đầu tiên
-  }
+    const wasSearching = searchQuery !== ""; // Kiểm tra xem có đang tìm kiếm không
+    
+    setPriceRange(tempPriceRange);
+    setSelectedCategories(tempSelectedCategories);
+    
+    // Xóa tham số tìm kiếm khi áp dụng bộ lọc
+    setSearchQuery("");
+    setTempSearchQuery("");
+    
+    setCurrentPage(1); // Reset về trang đầu tiên
+    
+    // Cập nhật URL không còn tham số search
+    const params = new URLSearchParams();
+    navigate(`${location.pathname}?${params.toString()}`);
+    
+    // Hiển thị thông báo nếu đã hủy kết quả tìm kiếm
+    if (wasSearching) {
+      setShowNotification(true);
+      setNotificationMessage("Đã hủy kết quả tìm kiếm và áp dụng bộ lọc mới");
+      setNotificationType("info");
+      
+      setTimeout(() => {
+        setShowNotification(false);
+      }, 3000);
+    }
+  };
 
-  // Khởi tạo giá trị tạm thời khi component được tải
   useEffect(() => {
     setTempPriceRange(priceRange)
     setTempSelectedCategories(selectedCategories)
@@ -258,9 +318,20 @@ const ProductList = () => {
   return (
     <div className="product-list-container">
       <div className="product-list-header">
-        <h1>Tất cả sản phẩm</h1>
+        <h1>
+          {searchQuery 
+            ? `Kết quả tìm kiếm cho "${searchQuery}"` 
+            : selectedCategories.length > 0 || priceRange[0] > 0 || priceRange[1] < 50000000
+              ? "Sản phẩm đã lọc"
+              : "Tất cả sản phẩm"
+          }
+        </h1>
         <div className="breadcrumb">
           <a href="/">Trang chủ</a> / <span>Sản phẩm</span>
+          {searchQuery && <span> / Tìm kiếm</span>}
+          {(selectedCategories.length > 0 || priceRange[0] > 0 || priceRange[1] < 50000000) && !searchQuery && 
+            <span> / Đã lọc</span>
+          }
         </div>
       </div>
 

@@ -6,12 +6,12 @@ const Home = () => {
         <div>
             <Banner />
             <ProductCase
-                title="Điện thoại mới nhất"
+                title="Điện thoại mới nhất!"
                 apiUrl="http://localhost:1111/products"
             />
             <ProductCase
-                title="Laptop mới"
-                apiUrl="http://localhost:1111/products"
+                title="Giá rẻ cho mọi nhà!"
+                apiUrl="http://localhost:1111/products/oderbyprice"
             />
         </div>
     )

@@ -15,4 +15,7 @@ public interface ProductService {
                                                       Long maxPrice,
                                                       String search,
                                                       List<String> categories);
+
+
+    ResponseEntity<Page<ProductResponse>> searchProduct(String keyword, int page, int size);
 }

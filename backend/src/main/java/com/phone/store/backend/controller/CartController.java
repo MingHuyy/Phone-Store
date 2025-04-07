@@ -34,7 +34,7 @@ public class CartController {
     private String extractAccessToken(HttpServletRequest request) {
         String token = request.getHeader("Authorization");
         if (token != null && token.startsWith("Bearer ")) {
-            return token.substring(7); // Bỏ "Bearer "
+            return token.substring(7);
         }
         return null;
     }
@@ -56,7 +56,6 @@ public class CartController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(new StatusResponse("Không tìm thấy token hợp lệ.", 401));
         }
-        System.out.println("fhjakfhakks" + cartDTO.getProductId() + " " + cartDTO.getQuantity());
         long userId = tokenService.getUserIdFromToken(accessToken);
         return cartService.addToCart(cartDTO, userId);
     }

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Link } from "react-router-dom";
 import logo from "../assets/img/logo.jpg";
 import '../assets/css/header.css';
@@ -10,18 +10,22 @@ import { callApiWithAuth } from "../utils/AuthService";
 
 const Header = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [showMenu, setShowMenu] = useState(false);
     const [cartItemCount, setCartItemCount] = useState(0);
+    const [searchKeyword, setSearchKeyword] = useState("");
+    const [isSearching, setIsSearching] = useState(false);
     const menuRef = useRef(null);
     const menuButtonRef = useRef(null);
+    const headerRef = useRef(null);
+    const searchFormRef = useRef(null);
 
     useEffect(() => {
         const token = localStorage.getItem("accessToken");
         setIsLoggedIn(!!token);
     }, []);
 
-    // Lấy số lượng sản phẩm trong giỏ hàng
     useEffect(() => {
         if (isLoggedIn) {
             fetchCartItemCount();
@@ -40,7 +44,6 @@ const Header = () => {
         }
     };
 
-    // Đăng ký hàm cập nhật số lượng giỏ hàng
     useEffect(() => {
         window.updateCartCount = (addedItems = 1) => {
             setCartItemCount(prev => prev + addedItems);
@@ -52,22 +55,23 @@ const Header = () => {
     }, []);
 
     useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (showMenu && 
-                menuRef.current && 
-                !menuRef.current.contains(event.target) && 
-                menuButtonRef.current && 
-                !menuButtonRef.current.contains(event.target)) {
-                setShowMenu(false);
+        const handleClickOutside = (e) => {
+            if (searchFormRef.current && !searchFormRef.current.contains(e.target)) {
+                setSearchKeyword("");
             }
         };
-
-        document.addEventListener("mousedown", handleClickOutside);
+        
+        const headerElement = headerRef.current;
+        if (headerElement) {
+            headerElement.addEventListener('click', handleClickOutside);
+        }
         
         return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
+            if (headerElement) {
+                headerElement.removeEventListener('click', handleClickOutside);
+            }
         };
-    }, [showMenu]);
+    }, []);
 
     const logOut = async () => {
         if (!window.confirm("Xác nhận đăng xuất?")) return;
@@ -87,8 +91,46 @@ const Header = () => {
         }
     };
 
+    const handleSearch = (e) => {
+        e.preventDefault();
+        
+        if (!searchKeyword.trim()) return;
+        
+        try {
+            setIsSearching(true);
+            const keyword = searchKeyword;
+            setSearchKeyword("");
+            window.location.href = `/products?search=${encodeURIComponent(keyword)}`;
+        } catch (error) {
+            console.error("Lỗi khi tìm kiếm:", error);
+            setIsSearching(false);
+        }
+    };
+    
+    const handleQuickSearch = (keyword) => {
+        try {
+            setIsSearching(true);
+            
+            setSearchKeyword("");
+            
+            window.location.href = `/products?search=${encodeURIComponent(keyword)}`;
+        } catch (error) {
+            console.error("Lỗi khi tìm kiếm nhanh:", error);
+            setIsSearching(false);
+        }
+    };
+
+    useEffect(() => {
+        const queryParams = new URLSearchParams(location.search);
+        const searchFromUrl = queryParams.get('search');
+        
+        if (searchFromUrl) {
+            setSearchKeyword(searchFromUrl);
+        }
+    }, [location.search]);
+
     return (
-        <header>
+        <header ref={headerRef}>
             <div className="top-nav group">
                 <section>
                     <ul className="top-nav-quicklink flexContain">
@@ -109,16 +151,52 @@ const Header = () => {
 
                 <div className="content">
                     <div className="search-header">
-                        <form className="input-search" method="get" action="/">
+                        <form className="input-search" onSubmit={handleSearch} ref={searchFormRef}>
                             <div className="autocomplete">
-                                <input id="search-box" name="search" autoComplete="off" type="text" placeholder="Nhập từ khóa tìm kiếm..." />
-                                <button type="submit">
-                                    <FaSearch /> Tìm kiếm
+                                <input 
+                                    id="search-box" 
+                                    name="search" 
+                                    autoComplete="off" 
+                                    type="text" 
+                                    placeholder="Nhập từ khóa tìm kiếm..."
+                                    value={searchKeyword}
+                                    onChange={(e) => setSearchKeyword(e.target.value)}
+                                    disabled={isSearching}
+                                    onClick={(e) => e.stopPropagation()}
+                                />
+                                <button 
+                                    type="submit" 
+                                    disabled={isSearching} 
+                                    onClick={(e) => e.stopPropagation()}
+                                >
+                                    {isSearching ? (
+                                        <span>Đang tìm...</span>
+                                    ) : (
+                                        <>
+                                            <FaSearch /> Tìm kiếm
+                                        </>
+                                    )}
                                 </button>
                             </div>
                         </form>
                         <div className="tags">
-                            <strong>Từ khóa: </strong><span>iPhone</span> • <span>Samsung</span> • <span>Xiaomi</span> • <span>OPPO</span>
+                            <strong>Từ khóa: </strong>
+                            <span onClick={(e) => {
+                                e.stopPropagation();
+                                if (!isSearching) handleQuickSearch("iPhone");
+                            }} style={{cursor: isSearching ? "default" : "pointer"}}>iPhone</span> • 
+                            <span onClick={(e) => {
+                                e.stopPropagation();
+                                if (!isSearching) handleQuickSearch("Samsung");
+                            }} style={{cursor: isSearching ? "default" : "pointer"}}>Samsung</span> • 
+                            <span onClick={(e) => {
+                                e.stopPropagation();
+                                if (!isSearching) handleQuickSearch("Xiaomi");
+                            }} style={{cursor: isSearching ? "default" : "pointer"}}>Xiaomi</span> • 
+                            <span onClick={(e) => {
+                                e.stopPropagation();
+                                if (!isSearching) handleQuickSearch("OPPO");
+                            }} style={{cursor: isSearching ? "default" : "pointer"}}>OPPO</span>
                         </div>
                     </div>
 

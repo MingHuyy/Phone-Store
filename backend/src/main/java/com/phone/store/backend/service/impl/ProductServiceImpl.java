@@ -92,4 +92,11 @@ public class ProductServiceImpl implements ProductService {
 
         return ResponseEntity.ok(response);
     }
+
+    @Override
+    public ResponseEntity<Page<ProductResponse>> searchProduct(String keyword, int page, int size) {
+        PageRequest pageable = PageRequest.of(page, size);
+        Page<ProductResponse> productResponses = productRepository.findByKeyword(keyword, pageable);
+        return ResponseEntity.ok(productResponses);
+    }
 }
