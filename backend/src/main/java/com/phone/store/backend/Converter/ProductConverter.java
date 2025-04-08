@@ -14,13 +14,13 @@ public class ProductConverter {
     private ModelMapper modelMapper;
 
     public ProductResponse converterToResponse(ProductEntity productEntity) {
-        ProductResponse productResponse = new ProductResponse();
-        productResponse.setId(productEntity.getId());
-        productResponse.setName(productEntity.getName());
-        productResponse.setDescription(productEntity.getDescription());
-        productResponse.setPrice(productEntity.getPrice());
-        productResponse.setCategory(productEntity.getCategory());
-        productResponse.setImage(productEntity.getImage());
+        ProductResponse productResponse = modelMapper.map(productEntity, ProductResponse.class);
+//        productResponse.setId(productEntity.getId());
+//        productResponse.setName(productEntity.getName());
+//        productResponse.setDescription(productEntity.getDescription());
+//        productResponse.setPrice(productEntity.getPrice());
+//        productResponse.setCategory(productEntity.getCategory());
+//        productResponse.setImage(productEntity.getImage());
         return productResponse;
     }
 

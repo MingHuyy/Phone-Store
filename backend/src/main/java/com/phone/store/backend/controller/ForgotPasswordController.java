@@ -12,6 +12,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.UnsupportedEncodingException;
@@ -44,6 +45,9 @@ public class ForgotPasswordController {
     public void forgotPassword(@RequestBody Map<String, String> requestBody) throws MessagingException, UnsupportedEncodingException {
         String email = requestBody.get("email");
         UserEntity user = userRepository.findByEmail(email);
+        if (user == null) {
+            throw new UsernameNotFoundException("Email bạn nhập chưa được dùng để đăng ký, vui lòng kiểm tra lại!");
+        }
         Authentication authentication =
                 new UsernamePasswordAuthenticationToken(user.getUsername(), null, getAuthorities(user));
         String refreshToken = jwtTokenUtil.createRefreshToken(authentication);

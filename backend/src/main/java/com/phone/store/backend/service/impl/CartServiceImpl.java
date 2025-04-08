@@ -44,6 +44,7 @@ public class CartServiceImpl implements CartService {
         for (CartEntity cart : cartItems) {
             CartResponse cartResponse = new CartResponse();
             cartResponse.setId(cart.getId());
+            cartResponse.setProductId(cart.getProduct().getId());
             cartResponse.setProductName(cart.getProduct().getName());
             cartResponse.setQuantity(cart.getQuantity());
             cartResponse.setImage(cart.getProduct().getImage());

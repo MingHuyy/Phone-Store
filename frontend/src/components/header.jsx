@@ -48,28 +48,9 @@ const Header = () => {
         window.updateCartCount = (addedItems = 1) => {
             setCartItemCount(prev => prev + addedItems);
         };
-        
+
         return () => {
             delete window.updateCartCount;
-        };
-    }, []);
-
-    useEffect(() => {
-        const handleClickOutside = (e) => {
-            if (searchFormRef.current && !searchFormRef.current.contains(e.target)) {
-                setSearchKeyword("");
-            }
-        };
-        
-        const headerElement = headerRef.current;
-        if (headerElement) {
-            headerElement.addEventListener('click', handleClickOutside);
-        }
-        
-        return () => {
-            if (headerElement) {
-                headerElement.removeEventListener('click', handleClickOutside);
-            }
         };
     }, []);
 
@@ -93,27 +74,53 @@ const Header = () => {
 
     const handleSearch = (e) => {
         e.preventDefault();
-        
+
         if (!searchKeyword.trim()) return;
-        
+
         try {
             setIsSearching(true);
             const keyword = searchKeyword;
             setSearchKeyword("");
-            window.location.href = `/products?search=${encodeURIComponent(keyword)}`;
+            
+            // Kiểm tra xem đang ở trang nào
+            const currentPath = location.pathname;
+            
+            // Nếu đang ở trang chủ hoặc trang khác không phải products, chuyển đến trang products
+            if (currentPath !== "/products") {
+                navigate(`/products?search=${encodeURIComponent(keyword)}`);
+            } else {
+                // Nếu đã ở trang products, chỉ cập nhật URL
+                const params = new URLSearchParams(location.search);
+                params.set("search", keyword);
+                navigate(`${currentPath}?${params.toString()}`);
+            }
+            
+            setIsSearching(false);
         } catch (error) {
             console.error("Lỗi khi tìm kiếm:", error);
             setIsSearching(false);
         }
     };
-    
+
     const handleQuickSearch = (keyword) => {
         try {
             setIsSearching(true);
-            
             setSearchKeyword("");
             
-            window.location.href = `/products?search=${encodeURIComponent(keyword)}`;
+            // Kiểm tra xem đang ở trang nào
+            const currentPath = location.pathname;
+            
+            // Nếu đang ở trang chủ hoặc trang khác không phải products, chuyển đến trang products
+            if (currentPath !== "/products") {
+                navigate(`/products?search=${encodeURIComponent(keyword)}`);
+            } else {
+                // Nếu đã ở trang products, chỉ cập nhật URL
+                const params = new URLSearchParams(location.search);
+                params.set("search", keyword);
+                navigate(`${currentPath}?${params.toString()}`);
+            }
+            
+            setIsSearching(false);
         } catch (error) {
             console.error("Lỗi khi tìm kiếm nhanh:", error);
             setIsSearching(false);
@@ -123,7 +130,7 @@ const Header = () => {
     useEffect(() => {
         const queryParams = new URLSearchParams(location.search);
         const searchFromUrl = queryParams.get('search');
-        
+
         if (searchFromUrl) {
             setSearchKeyword(searchFromUrl);
         }
@@ -153,20 +160,20 @@ const Header = () => {
                     <div className="search-header">
                         <form className="input-search" onSubmit={handleSearch} ref={searchFormRef}>
                             <div className="autocomplete">
-                                <input 
-                                    id="search-box" 
-                                    name="search" 
-                                    autoComplete="off" 
-                                    type="text" 
+                                <input
+                                    id="search-box"
+                                    name="search"
+                                    autoComplete="off"
+                                    type="text"
                                     placeholder="Nhập từ khóa tìm kiếm..."
                                     value={searchKeyword}
                                     onChange={(e) => setSearchKeyword(e.target.value)}
                                     disabled={isSearching}
                                     onClick={(e) => e.stopPropagation()}
                                 />
-                                <button 
-                                    type="submit" 
-                                    disabled={isSearching} 
+                                <button
+                                    type="submit"
+                                    disabled={isSearching}
                                     onClick={(e) => e.stopPropagation()}
                                 >
                                     {isSearching ? (
@@ -184,27 +191,27 @@ const Header = () => {
                             <span onClick={(e) => {
                                 e.stopPropagation();
                                 if (!isSearching) handleQuickSearch("iPhone");
-                            }} style={{cursor: isSearching ? "default" : "pointer"}}>iPhone</span> • 
+                            }} style={{ cursor: isSearching ? "default" : "pointer" }}>iPhone</span> •
                             <span onClick={(e) => {
                                 e.stopPropagation();
                                 if (!isSearching) handleQuickSearch("Samsung");
-                            }} style={{cursor: isSearching ? "default" : "pointer"}}>Samsung</span> • 
+                            }} style={{ cursor: isSearching ? "default" : "pointer" }}>Samsung</span> •
                             <span onClick={(e) => {
                                 e.stopPropagation();
                                 if (!isSearching) handleQuickSearch("Xiaomi");
-                            }} style={{cursor: isSearching ? "default" : "pointer"}}>Xiaomi</span> • 
+                            }} style={{ cursor: isSearching ? "default" : "pointer" }}>Xiaomi</span> •
                             <span onClick={(e) => {
                                 e.stopPropagation();
                                 if (!isSearching) handleQuickSearch("OPPO");
-                            }} style={{cursor: isSearching ? "default" : "pointer"}}>OPPO</span>
+                            }} style={{ cursor: isSearching ? "default" : "pointer" }}>OPPO</span>
                         </div>
                     </div>
 
                     <div className="tools-member">
                         <div className="member">
-                            <a 
+                            <a
                                 ref={menuButtonRef}
-                                onClick={() => setShowMenu(!showMenu)} 
+                                onClick={() => setShowMenu(!showMenu)}
                                 style={{ cursor: "pointer" }}
                             >
                                 <FaUser /> Tài khoản
@@ -215,6 +222,7 @@ const Header = () => {
                                         <>
                                             <Link to="/users/info" onClick={() => setShowMenu(false)}>Trang người dùng</Link>
                                             <a onClick={logOut} style={{ cursor: "pointer" }}>Đăng xuất</a>
+                                            <Link to="/orderdetail" onClick={() => setShowMenu(false)}>Đơn hàng đã mua</Link>
                                         </>
                                     ) : (
                                         <>

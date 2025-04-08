@@ -64,9 +64,6 @@ const ForgotPassword = () => {
                     <div className="auth-left-content">
                         <h2>Đặt lại mật khẩu</h2>
                         <p>Nhập email của bạn và chúng tôi sẽ gửi hướng dẫn để đặt lại mật khẩu.</p>
-                        <div className="auth-image">
-                            <img src="/placeholder.svg?height=300&width=300" alt="Forgot Password" />
-                        </div>
                     </div>
                 </div>
 

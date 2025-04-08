@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
-import java.security.Timestamp;
+import java.util.Date;
 
 @Entity
 @Table(name = "orders")
@@ -27,23 +27,20 @@ public class OrderEntity {
     @Column(nullable = false)
     private Long totalPrice;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private OrderStatus status = OrderStatus.PENDING;
+    @Column
+    private String phoneNumber;
+
+    @Column(nullable = true)
+    private String address;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private PaymentStatus paymentStatus = PaymentStatus.PENDING;
+    private PaymentStatus paymentStatus;
 
     @CreationTimestamp
-    private Timestamp createdAt;
-
-    public enum OrderStatus {
-        PENDING, SHIPPED, DELIVERED, CANCELLED
-    }
+    private Date createdAt;
 
     public enum PaymentStatus {
-        PENDING, COMPLETED, FAILED
+        COD, COMPLETED
     }
 }
-

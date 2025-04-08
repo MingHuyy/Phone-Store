@@ -4,7 +4,7 @@
     --primary-gradient: linear-gradient(135deg, #4e54c8, #8f94fb);
     --secondary-color: #ff3b30;
     --text-color: #333;
-    font-family: Arial, sans-serif;     
+    font-family: Arial, sans-serif;
 }
 
 .product-showcase {
@@ -133,7 +133,7 @@
     font-family: Arial, sans-serif;
     font-weight: bold;
 }
-  
+
 .product-price {
     margin-top: auto;
     text-align: center;
@@ -183,7 +183,8 @@
     transition: all 0.3s ease;
     color: white;
     box-shadow: 0 2px 6px rgba(78, 84, 200, 0.4);
-    z-index: 2; /* Đảm bảo nút nằm trên link */
+    z-index: 2;
+    /* Đảm bảo nút nằm trên link */
     font-size: 14px;
 }
 
@@ -314,7 +315,7 @@
     }
 
     .product-name {
-        font-size: 13px;
+        font-size: 15px;
     }
 
     .current-price {
@@ -323,38 +324,38 @@
 }
 
 .out-of-stock-overlay {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background-color: rgba(255, 59, 48, 0.1);
-  color: #ff3b30;
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
-  z-index: 2;
-  pointer-events: none;
-  box-shadow: 0 2px 8px rgba(255, 59, 48, 0.1);
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  display: inline-flex;
-  align-items: center;
-  border: none;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: rgba(255, 59, 48, 0.1);
+    color: #ff3b30;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    z-index: 2;
+    pointer-events: none;
+    box-shadow: 0 2px 8px rgba(255, 59, 48, 0.1);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    border: none;
 }
 
 .out-of-stock-overlay::before {
-  display: none;
+    display: none;
 }
 
 .add-to-cart.disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  background: linear-gradient(135deg, #9e9e9e, #757575);
+    opacity: 0.6;
+    cursor: not-allowed;
+    background: linear-gradient(135deg, #9e9e9e, #757575);
 }
 
 .add-to-cart.disabled:hover {
-  transform: none;
-  box-shadow: none;
+    transform: none;
+    box-shadow: none;
 }
 
 /* Notification Styles */
@@ -392,6 +393,7 @@
         transform: translateX(100%);
         opacity: 0;
     }
+
     to {
         transform: translateX(0);
         opacity: 1;

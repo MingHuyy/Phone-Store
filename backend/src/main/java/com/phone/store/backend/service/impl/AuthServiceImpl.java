@@ -7,8 +7,6 @@ import com.phone.store.backend.entity.UserEntity;
 import com.phone.store.backend.model.dto.LoginDTO;
 import com.phone.store.backend.model.dto.ResetPasswordDTO;
 import com.phone.store.backend.model.dto.UpdateUserDTO;
-import com.phone.store.backend.model.dto.UserDTO;
-import com.phone.store.backend.model.response.StatusResponse;
 import com.phone.store.backend.model.response.TokenResponse;
 import com.phone.store.backend.model.response.UserResponse;
 import com.phone.store.backend.respository.TokenRepository;
@@ -16,7 +14,6 @@ import com.phone.store.backend.respository.UserRepository;
 import com.phone.store.backend.service.AuthService;
 import com.phone.store.backend.service.TokenService;
 import com.phone.store.backend.utils.JWTTokenUtil;
-import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -28,11 +25,9 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 

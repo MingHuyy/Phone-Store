@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { FaTrash, FaMinus, FaPlus, FaShoppingCart, FaArrowLeft, FaCreditCard } from "react-icons/fa";
+import { FaTrash, FaMinus, FaPlus, FaShoppingCart, FaArrowLeft, FaCreditCard, FaMoneyBillWave, FaCcVisa, FaUserAlt, FaPhone, FaMapMarkerAlt, FaCheck } from "react-icons/fa";
 import { getCart, updateCartQuantity, removeFromCart, removeMultipleFromCart } from "../../utils/CartService";
 import "../../assets/css/cart.css";
 
@@ -11,6 +11,15 @@ const Cart = () => {
     const [error, setError] = useState(null);
     const [selectedItems, setSelectedItems] = useState({});
     const [isProcessing, setIsProcessing] = useState(false);
+    // State cho form thanh toán
+    const [showCheckout, setShowCheckout] = useState(false);
+    const [checkoutInfo, setCheckoutInfo] = useState({
+        fullName: "",
+        phone: "",
+        address: "",
+        paymentMethod: "cod", // mặc định là COD
+    });
+    const [formErrors, setFormErrors] = useState({});
 
     // Lấy dữ liệu giỏ hàng
     const fetchCartData = async () => {
@@ -165,6 +174,127 @@ const Cart = () => {
     // Đếm số lượng sản phẩm đã chọn
     const countSelectedItems = () => {
         return Object.values(selectedItems).filter(Boolean).length;
+    };
+
+    // Xử lý hiển thị form thanh toán
+    const handleShowCheckout = () => {
+        if (countSelectedItems() === 0) {
+            alert("Vui lòng chọn ít nhất một sản phẩm để thanh toán");
+            return;
+        }
+        setShowCheckout(true);
+    };
+
+    // Xử lý đóng form thanh toán
+    const handleCloseCheckout = () => {
+        setShowCheckout(false);
+    };
+
+    // Xử lý thay đổi thông tin form thanh toán
+    const handleCheckoutInfoChange = (e) => {
+        const { name, value } = e.target;
+        setCheckoutInfo({
+            ...checkoutInfo,
+            [name]: value
+        });
+
+        // Xóa lỗi khi người dùng nhập
+        if (formErrors[name]) {
+            setFormErrors({
+                ...formErrors,
+                [name]: ""
+            });
+        }
+    };
+
+    // Xử lý xác nhận thanh toán
+    const handleSubmitOrder = async (e) => {
+        e.preventDefault();
+        
+        // Kiểm tra dữ liệu
+        const errors = {};
+        if (!checkoutInfo.fullName.trim()) {
+            errors.fullName = "Vui lòng nhập họ tên người nhận";
+        }
+        
+        if (!checkoutInfo.phone.trim()) {
+            errors.phone = "Vui lòng nhập số điện thoại";
+        } else if (!/^[0-9]{10}$/.test(checkoutInfo.phone)) {
+            errors.phone = "Số điện thoại phải có 10 chữ số";
+        }
+        
+        if (!checkoutInfo.address.trim()) {
+            errors.address = "Vui lòng nhập địa chỉ nhận hàng";
+        }
+        
+        if (Object.keys(errors).length > 0) {
+            setFormErrors(errors);
+            return;
+        }
+        
+        // Lấy danh sách sản phẩm đã chọn
+        const selectedProducts = cartItems.filter(item => selectedItems[item.id]);
+        
+        try {
+            setIsProcessing(true);
+            
+            const orderData = {
+                fullName: checkoutInfo.fullName,
+                phone: checkoutInfo.phone,
+                address: checkoutInfo.address,
+                paymentMethod: checkoutInfo.paymentMethod,
+                totalAmount: calculateTotal(),
+                orderItems: selectedProducts.map(item => ({
+                    productId: item.productId,
+                    quantity: item.quantity,
+                    price: parseInt(item.price)
+                }))
+            };
+            
+            // Gọi API tạo đơn hàng
+            const response = await fetch('http://localhost:1111/api/orders', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+                },
+                body: JSON.stringify(orderData)
+            });
+            
+            const data = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(data.message || 'Đặt hàng thất bại');
+            }
+            
+            // Xóa các sản phẩm đã đặt khỏi giỏ hàng
+            const itemsToRemove = selectedProducts.map(item => item.id);
+            await removeMultipleFromCart(itemsToRemove);
+            
+            // Cập nhật state
+            setCartItems(prevItems => prevItems.filter(item => !selectedItems[item.id]));
+            
+            // Reset selected items
+            const newSelectedItems = {};
+            cartItems.forEach(item => {
+                if (!selectedItems[item.id]) {
+                    newSelectedItems[item.id] = true;
+                }
+            });
+            setSelectedItems(newSelectedItems);
+            
+            // Thông báo thành công
+            alert("Đặt hàng thành công! Cảm ơn bạn đã mua sắm.");
+            
+            // Đóng form thanh toán
+            setShowCheckout(false);
+            
+        } catch (error) {
+            console.error("Lỗi khi đặt hàng:", error);
+            alert(error.message || "Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại.");
+        } finally {
+            setIsProcessing(false);
+        }
     };
 
     if (loading) {
@@ -350,6 +480,7 @@ const Cart = () => {
                         className="checkout-btn"
                         disabled={countSelectedItems() === 0}
                         style={{ opacity: countSelectedItems() === 0 ? 0.7 : 1 }}
+                        onClick={handleShowCheckout}
                     >
                         <FaCreditCard /> Thanh toán ({countSelectedItems()} sản phẩm)
                     </button>
@@ -359,6 +490,152 @@ const Cart = () => {
                     </Link>
                 </div>
             </div>
+
+            {/* Form Thanh toán */}
+            {showCheckout && (
+                <div className="checkout-overlay">
+                    <div className="checkout-modal">
+                        <div className="checkout-header">
+                            <h2>Thông tin thanh toán</h2>
+                            <button className="close-btn" onClick={handleCloseCheckout}>&times;</button>
+                        </div>
+                        
+                        <div className="checkout-body">
+                            <div className="checkout-summary">
+                                <h3>Tóm tắt đơn hàng</h3>
+                                <div className="checkout-products">
+                                    {cartItems.filter(item => selectedItems[item.id]).map(item => (
+                                        <div className="checkout-product-item" key={item.id}>
+                                            <div className="checkout-product-info">
+                                                <img src={item.image || "/placeholder.svg"} alt={item.productName} />
+                                                <div>
+                                                    <p className="checkout-product-name">{item.productName}</p>
+                                                    <p className="checkout-product-quantity">Số lượng: {item.quantity}</p>
+                                                </div>
+                                            </div>
+                                            <div className="checkout-product-price">
+                                                {formatCurrency(parseInt(item.price) * item.quantity)}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                                
+                                <div className="checkout-total">
+                                    <div className="summary-row">
+                                        <span>Tạm tính:</span>
+                                        <span>{formatCurrency(calculateTotal())}</span>
+                                    </div>
+                                    <div className="summary-row">
+                                        <span>Phí vận chuyển:</span>
+                                        <span>Miễn phí</span>
+                                    </div>
+                                    <div className="summary-row total">
+                                        <span>Tổng cộng:</span>
+                                        <span>{formatCurrency(calculateTotal())}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <form onSubmit={handleSubmitOrder} className="checkout-form">
+                                <h3>Thông tin nhận hàng</h3>
+                                
+                                <div className="form-group">
+                                    <label>
+                                        <FaUserAlt /> Họ tên người nhận:
+                                    </label>
+                                    <input
+                                        type="text"
+                                        name="fullName"
+                                        value={checkoutInfo.fullName}
+                                        onChange={handleCheckoutInfoChange}
+                                        placeholder="Nhập họ tên người nhận"
+                                        className={formErrors.fullName ? "error" : ""}
+                                    />
+                                    {formErrors.fullName && <p className="error-message">{formErrors.fullName}</p>}
+                                </div>
+                                
+                                <div className="form-group">
+                                    <label>
+                                        <FaPhone /> Số điện thoại:
+                                    </label>
+                                    <input
+                                        type="tel"
+                                        name="phone"
+                                        value={checkoutInfo.phone}
+                                        onChange={handleCheckoutInfoChange}
+                                        placeholder="Nhập số điện thoại"
+                                        className={formErrors.phone ? "error" : ""}
+                                    />
+                                    {formErrors.phone && <p className="error-message">{formErrors.phone}</p>}
+                                </div>
+                                
+                                <div className="form-group">
+                                    <label>
+                                        <FaMapMarkerAlt /> Địa chỉ nhận hàng:
+                                    </label>
+                                    <textarea
+                                        name="address"
+                                        value={checkoutInfo.address}
+                                        onChange={handleCheckoutInfoChange}
+                                        placeholder="Nhập địa chỉ nhận hàng"
+                                        className={formErrors.address ? "error" : ""}
+                                    ></textarea>
+                                    {formErrors.address && <p className="error-message">{formErrors.address}</p>}
+                                </div>
+                                
+                                <div className="form-group payment-methods">
+                                    <label>Phương thức thanh toán:</label>
+                                    
+                                    <div className="payment-option">
+                                        <input
+                                            type="radio"
+                                            id="cod"
+                                            name="paymentMethod"
+                                            value="cod"
+                                            checked={checkoutInfo.paymentMethod === "cod"}
+                                            onChange={handleCheckoutInfoChange}
+                                        />
+                                        <label htmlFor="cod">
+                                            <FaMoneyBillWave className="payment-icon" />
+                                            <div>
+                                                <p className="payment-title">Thanh toán khi nhận hàng (COD)</p>
+                                                <p className="payment-desc">Thanh toán bằng tiền mặt khi nhận hàng</p>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    
+                                    <div className="payment-option">
+                                        <input
+                                            type="radio"
+                                            id="online"
+                                            name="paymentMethod"
+                                            value="online"
+                                            checked={checkoutInfo.paymentMethod === "online"}
+                                            onChange={handleCheckoutInfoChange}
+                                        />
+                                        <label htmlFor="online">
+                                            <FaCcVisa className="payment-icon" />
+                                            <div>
+                                                <p className="payment-title">Thanh toán trực tuyến</p>
+                                                <p className="payment-desc">Thanh toán bằng thẻ tín dụng/ghi nợ hoặc ví điện tử</p>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div className="checkout-actions">
+                                    <button type="button" className="cancel-btn" onClick={handleCloseCheckout}>
+                                        Hủy
+                                    </button>
+                                    <button type="submit" className="confirm-btn">
+                                        <FaCheck /> Xác nhận đặt hàng
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
