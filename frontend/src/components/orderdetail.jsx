@@ -8,7 +8,7 @@ import {
     FaCalendarAlt,
     FaCreditCard,
     FaMoneyBillWave,
-    FaClock,
+    FaTruck,
     FaUser,
     FaMapMarkerAlt,
     FaPhone,
@@ -115,8 +115,8 @@ const OrderDetail = () => {
                     <div className="order-detail-header">
                         <h1>Chi tiết đơn hàng #{index + 1}</h1>
                         <div className="order-status">
-                            <FaClock className="status-icon processing" />
-                            <span>Đang xử lý</span>
+                            <FaTruck className="status-icon processing" />
+                            <span>Đang vận chuyển</span>
                         </div>
                     </div>
 

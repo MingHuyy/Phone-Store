@@ -49,8 +49,13 @@ const Header = () => {
             setCartItemCount(prev => prev + addedItems);
         };
 
+        window.refreshCartCount = () => {
+            fetchCartItemCount();
+        };
+
         return () => {
             delete window.updateCartCount;
+            delete window.refreshCartCount;
         };
     }, []);
 

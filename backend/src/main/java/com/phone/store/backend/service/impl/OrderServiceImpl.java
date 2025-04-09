@@ -97,7 +97,9 @@ public class OrderServiceImpl implements OrderService {
 
         orderItemRepository.saveAll(orderItems);
 
-        return ResponseEntity.ok(new StatusResponse("Đặt hàng thành công", 200));
+        // Trả về thông tin bao gồm ID đơn hàng mới tạo
+        StatusResponse response = new StatusResponse("Đặt hàng thành công", 200);
+        return ResponseEntity.ok(response);
     }
 
     @Override
@@ -130,7 +132,51 @@ public class OrderServiceImpl implements OrderService {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
         }
 
-        OrderResponse response =orderConverter.convertToOrderResponse(order);
+        OrderResponse response = orderConverter.convertToOrderResponse(order);
         return ResponseEntity.ok(response);
     }
+
+    public OrderEntity createOrderv1(OrderDTO orderDTO, Long userId) {
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+
+        OrderEntity order = new OrderEntity();
+        order.setUser(user);
+        order.setTotalPrice(orderDTO.getTotalAmount());
+        order.setAddress(orderDTO.getAddress());
+        order.setPhoneNumber(orderDTO.getPhone());
+
+        OrderEntity.PaymentStatus paymentStatus = "online".equals(orderDTO.getPaymentMethod())
+                ? OrderEntity.PaymentStatus.COMPLETED
+                : OrderEntity.PaymentStatus.COD;
+        order.setPaymentStatus(paymentStatus);
+
+        OrderEntity savedOrder = orderRepository.save(order);
+
+        // Tạo danh sách sản phẩm trong đơn hàng
+        List<OrderItemEntity> orderItems = new ArrayList<>();
+        for (OrderItemDTO itemDTO : orderDTO.getOrderItems()) {
+            ProductEntity product = productRepository.findById(itemDTO.getProductId())
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm"));
+
+            if (product.getStock() < itemDTO.getQuantity()) {
+                throw new RuntimeException("Sản phẩm " + product.getName() + " không đủ hàng");
+            }
+
+            product.setStock(product.getStock() - itemDTO.getQuantity());
+            productRepository.save(product);
+
+            OrderItemEntity orderItem = new OrderItemEntity();
+            orderItem.setOrderEntity(savedOrder);
+            orderItem.setProduct(product);
+            orderItem.setQuantity(itemDTO.getQuantity());
+            orderItem.setPrice(product.getPrice());
+
+            orderItems.add(orderItem);
+        }
+
+        orderItemRepository.saveAll(orderItems);
+        return savedOrder; // Trả về luôn OrderEntity
+    }
+
 }

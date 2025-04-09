@@ -27,7 +27,6 @@ const Cart = () => {
         try {
             const data = await getCart();
             setCartItems(data);
-            // Thiết lập mặc định tất cả đều được chọn
             const initialSelected = {};
             data.forEach(item => {
                 initialSelected[item.id] = true;
@@ -66,12 +65,12 @@ const Cart = () => {
     const increaseQuantity = async (itemId) => {
         const item = cartItems.find((item) => item.id === itemId);
         if (!item) return;
-        
+
         const newQuantity = item.quantity + 1;
-        
+
         try {
             await updateCartQuantity(itemId, newQuantity);
-            
+
             // Cập nhật state
             setCartItems(prevItems =>
                 prevItems.map(item =>
@@ -87,12 +86,12 @@ const Cart = () => {
     const decreaseQuantity = async (itemId) => {
         const item = cartItems.find((item) => item.id === itemId);
         if (!item || item.quantity <= 1) return;
-        
+
         const newQuantity = item.quantity - 1;
-        
+
         try {
             await updateCartQuantity(itemId, newQuantity);
-            
+
             // Cập nhật state
             setCartItems(prevItems =>
                 prevItems.map(item =>
@@ -108,7 +107,7 @@ const Cart = () => {
     const removeItem = async (itemId) => {
         try {
             await removeFromCart(itemId);
-            
+
             // Cập nhật state
             setCartItems(prevItems => prevItems.filter(item => item.id !== itemId));
         } catch (error) {
@@ -122,25 +121,25 @@ const Cart = () => {
         const itemsToRemove = Object.entries(selectedItems)
             .filter(([_, isSelected]) => isSelected) // eslint-disable-line no-unused-vars
             .map(([id]) => Number(id));
-        
+
         if (itemsToRemove.length === 0) {
             alert("Vui lòng chọn sản phẩm để xóa");
             return;
         }
-        
+
         // Xác nhận xóa
         if (!window.confirm(`Bạn có chắc muốn xóa ${itemsToRemove.length} sản phẩm đã chọn?`)) {
             return;
         }
-        
+
         setIsProcessing(true);
-        
+
         try {
             await removeMultipleFromCart(itemsToRemove);
-            
+
             // Cập nhật state
             setCartItems(prevItems => prevItems.filter(item => !itemsToRemove.includes(item.id)));
-            
+
             // Cập nhật selected state
             const newSelectedItems = { ...selectedItems };
             itemsToRemove.forEach(id => {
@@ -207,6 +206,37 @@ const Cart = () => {
         }
     };
 
+    // Xử lý thanh toán online
+    const handleOnlinePayment = async (orderData) => {
+        try {
+            // Gọi API để tạo URL thanh toán VNPay
+            const paymentResponse = await fetch('http://localhost:1111/api/payment/create-payment', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+                },
+                body: JSON.stringify(orderData)
+            });
+            
+            console.log("Payment API response status:", paymentResponse.status);
+            const paymentData = await paymentResponse.json();
+            console.log("Payment API response data:", paymentData);
+            
+            if (paymentResponse.ok && paymentData.paymentUrl) {
+                // Chuyển hướng đến trang thanh toán VNPay
+                window.location.href = paymentData.paymentUrl;
+                return true;
+            } else {
+                throw new Error(paymentData.message || "Không thể tạo liên kết thanh toán");
+            }
+        } catch (err) {
+            console.error("Lỗi khi tạo URL thanh toán:", err);
+            alert("Đặt hàng thành công nhưng không thể chuyển đến trang thanh toán. Vui lòng kiểm tra đơn hàng của bạn.");
+            return false;
+        }
+    };
+
     // Xử lý xác nhận thanh toán
     const handleSubmitOrder = async (e) => {
         e.preventDefault();
@@ -249,44 +279,43 @@ const Cart = () => {
                     quantity: item.quantity,
                     price: parseInt(item.price)
                 }))
-            };
-            
-            // Gọi API tạo đơn hàng
-            const response = await fetch('http://localhost:1111/api/orders', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-                },
-                body: JSON.stringify(orderData)
-            });
-            
-            const data = await response.json();
-            
-            if (!response.ok) {
-                throw new Error(data.message || 'Đặt hàng thất bại');
-            }
-            
-            // Xóa các sản phẩm đã đặt khỏi giỏ hàng
-            const itemsToRemove = selectedProducts.map(item => item.id);
-            await removeMultipleFromCart(itemsToRemove);
-            
-            // Cập nhật state
-            setCartItems(prevItems => prevItems.filter(item => !selectedItems[item.id]));
-            
-            // Reset selected items
-            const newSelectedItems = {};
-            cartItems.forEach(item => {
-                if (!selectedItems[item.id]) {
-                    newSelectedItems[item.id] = true;
+            }; 
+            console.log("OrderData:", orderData);
+            if (checkoutInfo.paymentMethod === "online") {
+                const paymentSuccess = await handleOnlinePayment(orderData);
+                if (paymentSuccess) return;
+            } else {
+                const response = await fetch('http://localhost:1111/api/orders', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+                    },
+                    body: JSON.stringify(orderData)
+                });
+                
+                const data = await response.json();
+
+                console.log("OrderData response:", data);
+                if (!response.ok) {
+                    throw new Error(data.message || 'Đặt hàng thất bại');
                 }
-            });
-            setSelectedItems(newSelectedItems);
-            
-            // Thông báo thành công
-            alert("Đặt hàng thành công! Cảm ơn bạn đã mua sắm.");
-            
-            // Đóng form thanh toán
+                
+                const itemsToRemove = selectedProducts.map(item => item.id);
+                await removeMultipleFromCart(itemsToRemove);
+                
+                // Cập nhật state
+                setCartItems(prevItems => prevItems.filter(item => !selectedItems[item.id]));
+                
+                const newSelectedItems = {};
+                cartItems.forEach(item => {
+                    if (!selectedItems[item.id]) {
+                        newSelectedItems[item.id] = true;
+                    }
+                });
+                setSelectedItems(newSelectedItems);
+                alert("Đặt hàng thành công! Cảm ơn bạn đã mua sắm.");
+            }
             setShowCheckout(false);
             
         } catch (error) {
@@ -353,22 +382,22 @@ const Cart = () => {
                     <div className="cart-table">
                         <div className="cart-actions-header" style={{ padding: '10px 15px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #eee' }}>
                             <div className="select-all-container" style={{ display: 'flex', alignItems: 'center' }}>
-                                <input 
-                                    type="checkbox" 
+                                <input
+                                    type="checkbox"
                                     style={{ width: '18px', height: '18px', accentColor: '#4e54c8', cursor: 'pointer', marginRight: '10px' }}
                                     checked={Object.values(selectedItems).every(Boolean) && cartItems.length > 0}
                                     onChange={(e) => handleSelectAll(e.target.checked)}
                                 />
                                 <span>Chọn tất cả ({cartItems.length} sản phẩm)</span>
                             </div>
-                            
-                            <button 
+
+                            <button
                                 className="delete-selected-btn"
                                 onClick={removeSelectedItems}
                                 disabled={countSelectedItems() === 0 || isProcessing}
-                                style={{ 
-                                    background: 'none', 
-                                    border: 'none', 
+                                style={{
+                                    background: 'none',
+                                    border: 'none',
                                     color: countSelectedItems() === 0 ? '#999' : '#ff3b30',
                                     cursor: countSelectedItems() === 0 ? 'not-allowed' : 'pointer',
                                     display: 'flex',
@@ -385,8 +414,8 @@ const Cart = () => {
                             {cartItems.map((item) => (
                                 <div className="cart-item" key={item.id}>
                                     <div className="cart-checkbox">
-                                        <input 
-                                            type="checkbox" 
+                                        <input
+                                            type="checkbox"
                                             checked={selectedItems[item.id] || false}
                                             onChange={() => handleSelectItem(item.id)}
                                         />
@@ -394,10 +423,10 @@ const Cart = () => {
 
                                     <div className="cart-column product">
                                         <div className="cart-product-info">
-                                            <img 
-                                                src={item.image || "/placeholder.svg"} 
-                                                alt={item.productName} 
-                                                className="cart-product-image" 
+                                            <img
+                                                src={item.image || "/placeholder.svg"}
+                                                alt={item.productName}
+                                                className="cart-product-image"
                                             />
                                             <div className="product-details">
                                                 <h3 className="cart-product-name">{item.productName}</h3>
@@ -476,7 +505,7 @@ const Cart = () => {
                         <span>{formatCurrency(calculateTotal())}</span>
                     </div>
 
-                    <button 
+                    <button
                         className="checkout-btn"
                         disabled={countSelectedItems() === 0}
                         style={{ opacity: countSelectedItems() === 0 ? 0.7 : 1 }}
@@ -499,7 +528,7 @@ const Cart = () => {
                             <h2>Thông tin thanh toán</h2>
                             <button className="close-btn" onClick={handleCloseCheckout}>&times;</button>
                         </div>
-                        
+
                         <div className="checkout-body">
                             <div className="checkout-summary">
                                 <h3>Tóm tắt đơn hàng</h3>
@@ -519,7 +548,7 @@ const Cart = () => {
                                         </div>
                                     ))}
                                 </div>
-                                
+
                                 <div className="checkout-total">
                                     <div className="summary-row">
                                         <span>Tạm tính:</span>
@@ -535,10 +564,10 @@ const Cart = () => {
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <form onSubmit={handleSubmitOrder} className="checkout-form">
                                 <h3>Thông tin nhận hàng</h3>
-                                
+
                                 <div className="form-group">
                                     <label>
                                         <FaUserAlt /> Họ tên người nhận:
@@ -553,7 +582,7 @@ const Cart = () => {
                                     />
                                     {formErrors.fullName && <p className="error-message">{formErrors.fullName}</p>}
                                 </div>
-                                
+
                                 <div className="form-group">
                                     <label>
                                         <FaPhone /> Số điện thoại:
@@ -568,7 +597,7 @@ const Cart = () => {
                                     />
                                     {formErrors.phone && <p className="error-message">{formErrors.phone}</p>}
                                 </div>
-                                
+
                                 <div className="form-group">
                                     <label>
                                         <FaMapMarkerAlt /> Địa chỉ nhận hàng:
@@ -582,10 +611,10 @@ const Cart = () => {
                                     ></textarea>
                                     {formErrors.address && <p className="error-message">{formErrors.address}</p>}
                                 </div>
-                                
+
                                 <div className="form-group payment-methods">
                                     <label>Phương thức thanh toán:</label>
-                                    
+
                                     <div className="payment-option">
                                         <input
                                             type="radio"
@@ -603,7 +632,7 @@ const Cart = () => {
                                             </div>
                                         </label>
                                     </div>
-                                    
+
                                     <div className="payment-option">
                                         <input
                                             type="radio"
@@ -622,7 +651,7 @@ const Cart = () => {
                                         </label>
                                     </div>
                                 </div>
-                                
+
                                 <div className="checkout-actions">
                                     <button type="button" className="cancel-btn" onClick={handleCloseCheckout}>
                                         Hủy

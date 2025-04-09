@@ -34,6 +34,22 @@ export const addToCart = async (productId, quantity = 1) => {
     const token = localStorage.getItem("accessToken");
     
     try {
+        // Kiểm tra xem sản phẩm đã có trong giỏ hàng chưa
+        let isNewItem = true;
+        
+        // Chỉ thực hiện kiểm tra khi có token (đã đăng nhập)
+        if (token) {
+            try {
+                const cartItems = await getCart();
+                // Kiểm tra xem sản phẩm đã tồn tại trong giỏ hàng chưa
+                isNewItem = !cartItems.some(item => item.productId === productId);
+            } catch (error) {
+                console.error('Lỗi khi kiểm tra giỏ hàng:', error);
+                // Nếu không kiểm tra được, giả định là sản phẩm mới
+                isNewItem = true;
+            }
+        }
+        
         const response = await fetch(`${API_BASE_URL}/api/carts`, {
             method: 'POST',
             headers: {
@@ -58,9 +74,12 @@ export const addToCart = async (productId, quantity = 1) => {
             throw new Error(result.message || `Lỗi HTTP ${response.status}`);
         }
         
-        // Cập nhật số lượng trên header (nếu cần)
-        if (window.updateCartCount) {
-            window.updateCartCount(quantity);
+        // Cập nhật số lượng trên header chỉ khi là sản phẩm mới
+        if (window.updateCartCount && isNewItem) {
+            window.updateCartCount(1); // Chỉ tăng 1 cho mỗi loại sản phẩm mới
+        } else if (window.refreshCartCount) {
+            // Nếu sản phẩm đã tồn tại, gọi hàm refresh để cập nhật chính xác
+            window.refreshCartCount();
         }
         
         return result;

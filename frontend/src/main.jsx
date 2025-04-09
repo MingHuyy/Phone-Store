@@ -19,6 +19,7 @@ import ProductList from './components/product/productlist.jsx';
 import ProductDetail from './components/product/productdetail.jsx';
 import PasswordResetSuccess from './components/PasswordResetSuccess.jsx';
 import OrderDetail from './components/orderdetail.jsx';
+import PaymentResult from './pages/PaymentResult.jsx';
 
 
 const router = createBrowserRouter([
@@ -82,6 +83,10 @@ const router = createBrowserRouter([
       {
         path: '/orderdetail',
         element: <OrderDetail />
+      },
+      {
+        path: '/payment/vnpay-return',
+        element: <PaymentResult />
       }
     ]
   }

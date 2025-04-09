@@ -71,11 +71,6 @@ const Register = () => {
             newErrors.confirmPassword = "Mật khẩu xác nhận không khớp"
         }
 
-        // Kiểm tra đồng ý điều khoản
-        if (!formData.agreeTerms) {
-            newErrors.agreeTerms = "Bạn phải đồng ý với điều khoản dịch vụ"
-        }
-
         setErrors(newErrors)
         return Object.keys(newErrors).length === 0
     }
@@ -259,11 +254,11 @@ const Register = () => {
                             </p>
                         </div>
 
-                        <div className="home-button-container" style={{  display: "flex", justifyContent: "center" }}>
-              <Link to="/" className="home-button" style={{ display: "flex", alignItems: "center", gap: "8px"}}>
-                <FaHome /> Trang chủ
-              </Link>
-            </div>
+                        <div className="home-button-container" style={{ display: "flex", justifyContent: "center" }}>
+                            <Link to="/" className="home-button" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                                <FaHome /> Trang chủ
+                            </Link>
+                        </div>
                     </div>
                 </div>
             </div>
