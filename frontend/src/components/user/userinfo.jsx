@@ -26,7 +26,7 @@ const UserInfo = () => {
     const [formErrors, setFormErrors] = useState({});
     const [saveLoading, setSaveLoading] = useState(false);
     const [saveSuccess, setSaveSuccess] = useState(false);
-    
+
     // Ref for file input
     const fileInputRef = useRef(null);
     // State for image preview
@@ -35,7 +35,7 @@ const UserInfo = () => {
     useEffect(() => {
         const fetchUserData = async () => {
             try {
-                const userData = await callApiWithAuth("/users/info");
+                const userData = await callApiWithAuth("/auth/info");
 
                 setFormData({
                     username: userData.username,
@@ -83,7 +83,7 @@ const UserInfo = () => {
             // Create a preview URL
             const previewUrl = URL.createObjectURL(file);
             setImagePreview(previewUrl);
-            
+
             // Handle file upload - convert to base64 for simplicity
             // In a real app, you might want to upload to a server instead
             const reader = new FileReader();
@@ -120,37 +120,37 @@ const UserInfo = () => {
 
     const handleSave = async (e) => {
         e.preventDefault();
-    
+
         if (validateForm()) {
             setSaveLoading(true);
-    
+
             try {
                 const formDataToSend = new FormData();
                 formDataToSend.append("username", formData.username);
                 formDataToSend.append("email", formData.email);
                 formDataToSend.append("phone", formData.phone || "");
-    
+
                 // Chỉ gửi ảnh nếu người dùng chọn
                 if (fileInputRef.current && fileInputRef.current.files && fileInputRef.current.files[0]) {
                     formDataToSend.append("img", fileInputRef.current.files[0]);
                 }
-    
+
                 const updatedData = await callApiWithAuth("/auth/update", {
                     method: "PUT",
                     body: formDataToSend,
                     // KHÔNG thiết lập Content-Type ở đây
                 });
-    
+
 
                 setUser({
                     ...user,
                     ...updatedData
                 });
-    
+
                 setSaveSuccess(true);
                 setIsEditing(false);
                 setImagePreview(null); // Clear preview sau khi lưu
-    
+
                 setTimeout(() => {
                     setSaveSuccess(false);
                 }, 3000);
@@ -162,8 +162,8 @@ const UserInfo = () => {
             }
         }
     };
-    
-    
+
+
 
     const handleCancel = () => {
         setIsEditing(false);
@@ -208,34 +208,34 @@ const UserInfo = () => {
         <div className="user-container">
             <div className="user-card">
                 <div className="user-header">
-                    <div 
+                    <div
                         className="user-avatar"
                         onClick={handleAvatarClick}
                     >
-                        <input 
-                            type="file" 
-                            ref={fileInputRef} 
-                            style={{ display: 'none' }} 
+                        <input
+                            type="file"
+                            ref={fileInputRef}
+                            style={{ display: 'none' }}
                             accept="image/*"
                             onChange={handleFileChange}
                         />
-                        
+
                         {imagePreview ? (
-                            <img 
-                                src={imagePreview} 
-                                alt="Avatar Preview" 
-                                className="avatar-image" 
+                            <img
+                                src={imagePreview}
+                                alt="Avatar Preview"
+                                className="avatar-image"
                             />
                         ) : user.img ? (
-                            <img 
-                                src={user.img} 
-                                alt="User Avatar" 
-                                className="avatar-image" 
+                            <img
+                                src={user.img}
+                                alt="User Avatar"
+                                className="avatar-image"
                             />
                         ) : (
                             <div className="avatar-circle">{user.username.charAt(0).toUpperCase()}</div>
                         )}
-                        
+
                         {isEditing && (
                             <div className="avatar-edit-overlay">
                                 <FaCamera />

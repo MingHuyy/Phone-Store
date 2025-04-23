@@ -6,10 +6,12 @@ import com.phone.store.backend.model.response.StatusResponse;
 import com.phone.store.backend.respository.CartRepository;
 import com.phone.store.backend.service.CartService;
 import com.phone.store.backend.service.TokenService;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -31,43 +33,18 @@ public class CartController {
     @Autowired
     private CartRepository cartRepository;
 
-    private String extractAccessToken(HttpServletRequest request) {
-        String token = request.getHeader("Authorization");
-        if (token != null && token.startsWith("Bearer ")) {
-            return token.substring(7);
-        }
-        return null;
-    }
-
     @GetMapping
-    public ResponseEntity<?> getCart(HttpServletRequest request) {
-        String accessToken = extractAccessToken(request);
-        if (accessToken == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new StatusResponse("Không tìm thấy token hợp lệ.", 401));
-        }
-        return cartService.getCart(accessToken);
+    public ResponseEntity<?> getCart() {
+        return cartService.getCart();
     }
 
     @PostMapping
-    public ResponseEntity<?> addToCart(HttpServletRequest request, @RequestBody CartDTO cartDTO) {
-        String accessToken = extractAccessToken(request);
-        if (accessToken == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new StatusResponse("Không tìm thấy token hợp lệ.", 401));
-        }
-        long userId = tokenService.getUserIdFromToken(accessToken);
-        return cartService.addToCart(cartDTO, userId);
+    public ResponseEntity<?> addToCart(@RequestBody CartDTO cartDTO) {
+        return cartService.addToCart(cartDTO);
     }
 
     @DeleteMapping("/{cartId}")
-    public ResponseEntity<?> removeFromCart(HttpServletRequest request, @PathVariable Long cartId) {
-        String accessToken = extractAccessToken(request);
-        if (accessToken == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new StatusResponse("Không tìm thấy token hợp lệ.", 401));
-        }
-
+    public ResponseEntity<?> removeFromCart(@PathVariable Long cartId) {
         Optional<CartEntity> cartOptional = cartRepository.findById(cartId);
         if (cartOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -78,15 +55,8 @@ public class CartController {
     }
 
     @DeleteMapping("/items")
-    public ResponseEntity<?> removeMultipleItems(HttpServletRequest request, @RequestBody List<Long> cartIds) {
-        String accessToken = extractAccessToken(request);
-        if (accessToken == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new StatusResponse("Không tìm thấy token hợp lệ.", 401));
-        }
-
-        long userId = tokenService.getUserIdFromToken(accessToken);
-
+    public ResponseEntity<?> removeMultipleItems(Authentication authentication, @RequestBody List<Long> cartIds) {
+        Long userId = getUserIdFromAuthentication(authentication);
         if (cartIds == null || cartIds.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new StatusResponse("Danh sách rỗng", 400));
@@ -114,13 +84,12 @@ public class CartController {
     }
 
     @PutMapping("/{cartId}")
-    public ResponseEntity<?> updateCartQuantity(HttpServletRequest request, @RequestBody CartDTO cartDTO) {
-        String accessToken = extractAccessToken(request);
-        if (accessToken == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new StatusResponse("Không tìm thấy token hợp lệ.", 401));
-        }
-        long userId = tokenService.getUserIdFromToken(accessToken);
-        return cartService.updateCartQuantity(cartDTO, userId);
+    public ResponseEntity<?> updateCartQuantity(@RequestBody CartDTO cartDTO) {
+        return cartService.updateCartQuantity(cartDTO);
+    }
+
+    private Long getUserIdFromAuthentication(Authentication authentication) {
+        Jwt jwt = (Jwt) authentication.getPrincipal();
+        return jwt.getClaim("userId");
     }
 }

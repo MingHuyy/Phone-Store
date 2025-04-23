@@ -1,10 +1,10 @@
 package com.phone.store.backend.controller;
 
-
 import com.phone.store.backend.entity.UserEntity;
 import com.phone.store.backend.model.dto.*;
 import com.phone.store.backend.model.response.StatusResponse;
 import com.phone.store.backend.model.response.TokenResponse;
+import com.phone.store.backend.model.response.UserResponse;
 import com.phone.store.backend.respository.UserRepository;
 import com.phone.store.backend.service.AuthService;
 import com.phone.store.backend.service.CloudinaryService;
@@ -46,51 +46,27 @@ public class AuthController {
         return authService.refresh(tokenDTO.getRefreshToken());
     }
 
+    @GetMapping("/info")
+    public ResponseEntity<?> getUserInfo() {
+        return authService.getUserInfo();
+    }
+
     @PostMapping("/reset-password")
-    public ResponseEntity<?> resetPassword(HttpServletRequest request,
-                                           @RequestBody ResetPasswordDTO resetPasswordDTO) {
-        String authorizationHeader = request.getHeader("Authorization");
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new StatusResponse("Không tìm thấy token hợp lệ.", 401));
-        }
-
-        String accessToken = authorizationHeader.substring(7);
-
-        try {
-            String userName = tokenService.getUsernameFromToken(accessToken);
-            return authService.resetPassword(resetPasswordDTO, userName);
-
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new StatusResponse("Token không hợp lệ hoặc đã hết hạn.", 401));
-        }
+    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordDTO resetPasswordDTO) {
+        return authService.resetPassword(resetPasswordDTO);
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(HttpServletRequest request) {
-        String authorizationHeader = request.getHeader("Authorization");
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new StatusResponse("Không tìm thấy token hợp lệ.", 401));
-        }
-
-        String accessToken = authorizationHeader.substring(7);
-        return authService.logout(accessToken);
+    public ResponseEntity<?> logout(Authentication authentication) {
+        String username = authentication.getName();
+        return authService.logout(username);
     }
-    @PutMapping(value = "/update", consumes = {"multipart/form-data"})
-    public ResponseEntity<?> update(HttpServletRequest request,
-                                    @RequestParam("username") String username,
+
+    @PutMapping(value = "/update", consumes = { "multipart/form-data" })
+    public ResponseEntity<?> update(@RequestParam("username") String username,
                                     @RequestParam("email") String email,
                                     @RequestParam(value = "phone", required = false) String phone,
                                     @RequestParam(value = "img", required = false) MultipartFile img) {
-        String authorizationHeader = request.getHeader("Authorization");
-
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("error", true, "message", "Không tìm thấy token hợp lệ."));
-        }
-
         String phoneNumber = (phone == null || phone.isEmpty()) ? null : phone;
 
         String imageUrl = null;

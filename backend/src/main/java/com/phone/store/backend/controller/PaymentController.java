@@ -57,19 +57,19 @@ public class PaymentController {
                         .body(new StatusResponse("Không tìm thấy token hợp lệ.", 401));
             }
 
-            Long userId = tokenService.getUserIdFromToken(accessToken);
-            OrderEntity orderEntity = orderService.createOrderv1(orderDTO, userId);
+            ResponseEntity<?> res = orderService.createOrderv1(orderDTO);
+            if (!res.getStatusCode().is2xxSuccessful()) {
+                return res;
+            }
+            OrderEntity orderEntity = (OrderEntity) res.getBody();
             System.out.println(orderDTO.getTotalAmount());
-            // Lấy IP của người dùng
             String ipAddress = request.getRemoteAddr();
-            // Tạo URL thanh toán
             String paymentUrl = paymentService.createPaymentUrl(
                     orderEntity.getId(),
                     orderDTO.getTotalAmount(),
                     "Thanh toan don hang #" + orderEntity.getId(),
                     ipAddress);
 
-            // Tạo response giống với mẫu
             Map<String, String> response = new HashMap<>();
             response.put("status", "OK");
             response.put("message", "Tạo URL thanh toán thành công");

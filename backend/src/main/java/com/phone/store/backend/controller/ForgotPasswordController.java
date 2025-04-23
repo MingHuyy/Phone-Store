@@ -41,15 +41,17 @@ public class ForgotPasswordController {
 
     @Autowired
     private MailService mailService;
+
     @PostMapping
-    public void forgotPassword(@RequestBody Map<String, String> requestBody) throws MessagingException, UnsupportedEncodingException {
+    public void forgotPassword(@RequestBody Map<String, String> requestBody)
+            throws MessagingException, UnsupportedEncodingException {
         String email = requestBody.get("email");
         UserEntity user = userRepository.findByEmail(email);
         if (user == null) {
             throw new UsernameNotFoundException("Email bạn nhập chưa được dùng để đăng ký, vui lòng kiểm tra lại!");
         }
-        Authentication authentication =
-                new UsernamePasswordAuthenticationToken(user.getUsername(), null, getAuthorities(user));
+        Authentication authentication = new UsernamePasswordAuthenticationToken(user.getUsername(), null,
+                getAuthorities(user));
         String refreshToken = jwtTokenUtil.createRefreshToken(authentication);
         String accessToken = jwtTokenUtil.createAccessToken(authentication);
         TokenEntity tokenEntity = new TokenEntity();

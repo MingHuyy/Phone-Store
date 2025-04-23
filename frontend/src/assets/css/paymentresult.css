@@ -42,6 +42,7 @@
         opacity: 0;
         transform: translateY(-20px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -59,6 +60,7 @@
     from {
         transform: scale(0.5);
     }
+
     to {
         transform: scale(1);
     }
@@ -160,6 +162,7 @@ h1.error {
     0% {
         transform: rotate(0deg);
     }
+
     100% {
         transform: rotate(360deg);
     }
@@ -170,17 +173,17 @@ h1.error {
     .payment-result-card {
         padding: 30px 20px;
     }
-    
+
     .result-icon {
         font-size: 60px;
     }
-    
+
     .action-buttons {
         flex-direction: column;
     }
-    
+
     .btn {
         width: 100%;
         justify-content: center;
     }
-} 
+}
