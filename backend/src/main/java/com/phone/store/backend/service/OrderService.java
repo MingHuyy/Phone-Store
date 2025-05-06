@@ -51,7 +51,7 @@ public class OrderService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new StatusResponse("Không tìm thấy token hợp lệ.", 401));
+                    .body(new StatusResponse("Không tìm thấy thông tin xác thực", 401));
         }
 
         String name = authentication.getName();
@@ -73,6 +73,7 @@ public class OrderService {
         UserEntity user = (UserEntity) response.getBody();
         OrderEntity order = new OrderEntity();
         order.setUser(user);
+        order.setFullName(orderDTO.getFullName());
         order.setTotalPrice(orderDTO.getTotalAmount());
         order.setAddress(orderDTO.getAddress());
         order.setPhoneNumber(orderDTO.getPhone());
@@ -105,7 +106,9 @@ public class OrderService {
             orderItem.setOrderEntity(savedOrder);
             orderItem.setProduct(product);
             orderItem.setQuantity(itemDTO.getQuantity());
-            orderItem.setPrice(product.getPrice());
+            orderItem.setPrice(itemDTO.getPrice());
+            orderItem.setProductImage(itemDTO.getProductImage());
+            orderItem.setColor(itemDTO.getColorName());
 
             orderItems.add(orderItem);
         }
@@ -155,6 +158,7 @@ public class OrderService {
         order.setTotalPrice(orderDTO.getTotalAmount());
         order.setAddress(orderDTO.getAddress());
         order.setPhoneNumber(orderDTO.getPhone());
+        order.setFullName(orderDTO.getFullName());
         order.setPaymentStatus("online".equals(orderDTO.getPaymentMethod())
                 ? OrderEntity.PaymentStatus.COMPLETED
                 : OrderEntity.PaymentStatus.COD);
@@ -179,11 +183,13 @@ public class OrderService {
             orderItem.setOrderEntity(savedOrder);
             orderItem.setProduct(product);
             orderItem.setQuantity(itemDTO.getQuantity());
-            orderItem.setPrice(product.getPrice());
+            orderItem.setPrice(itemDTO.getPrice());
+            orderItem.setProductImage(itemDTO.getProductImage());
+            orderItem.setColor(itemDTO.getColorName());
 
             orderItems.add(orderItem);
         }
         orderItemRepository.saveAll(orderItems);
-        return ResponseEntity.ok(orderItems);
+        return ResponseEntity.ok(savedOrder);
     }
 }

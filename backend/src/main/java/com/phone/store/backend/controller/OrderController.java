@@ -21,7 +21,7 @@ public class OrderController {
 
     @PostMapping
     public ResponseEntity<?> createOrder(@RequestBody OrderDTO orderDTO) {
-
+        System.out.println(orderDTO);
         return orderService.createOrder(orderDTO);
     }
 

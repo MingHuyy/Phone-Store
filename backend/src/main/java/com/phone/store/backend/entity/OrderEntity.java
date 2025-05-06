@@ -25,6 +25,9 @@ public class OrderEntity {
     private UserEntity user;
 
     @Column(nullable = false)
+    private String fullName;
+
+    @Column(nullable = false)
     private Long totalPrice;
 
     @Column

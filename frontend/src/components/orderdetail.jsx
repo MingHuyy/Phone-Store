@@ -202,7 +202,14 @@ const OrderDetail = () => {
                                                                     alt={item.productName}
                                                                 />
                                                             </div>
-                                                            <div className="orderdetail-product-name">{item.productName}</div>
+                                                            <div className="orderdetail-product-details">
+                                                                <div className="orderdetail-product-name">{item.productName}</div>
+                                                                {item.color && (
+                                                                    <div className="orderdetail-product-color">
+                                                                        <span className="color-label">Màu sắc:</span> {item.color}
+                                                                    </div>
+                                                                )}
+                                                            </div>
                                                         </div>
                                                     </div>
                                                     <div className="col price-col">{formatPrice(item.price)}</div>

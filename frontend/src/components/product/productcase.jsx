@@ -1,48 +1,12 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { FaPlus } from "react-icons/fa"
-import { IoCheckmarkCircle, IoAlertCircle } from "react-icons/io5"
-import { addToCart } from "../../utils/CartService"
 import "../../assets/css/productcase.css"
 
 const ProductCase = ({ title, apiUrl }) => {
     const [products, setProducts] = useState([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
-    const [showNotification, setShowNotification] = useState(false)
-    const [notificationMessage, setNotificationMessage] = useState("")
-    const [notificationType, setNotificationType] = useState("success")
-    
-    const handleAddToCart = async (product) => {
-        try {
-            if (!product.inStock) {
-                setNotificationMessage("Sản phẩm đã hết hàng!")
-                setNotificationType("error")
-                setShowNotification(true)
-                setTimeout(() => setShowNotification(false), 3000)
-                return
-            }
-            
-            await addToCart(product.id, 1)
-            
-            // Hiển thị thông báo thành công
-            setNotificationMessage("Đã thêm sản phẩm vào giỏ hàng!")
-            setNotificationType("success")
-            setShowNotification(true)
-            
-            // Ẩn thông báo sau 3 giây
-            setTimeout(() => setShowNotification(false), 3000)
-            
-        } catch (error) {
-            // Hiển thị thông báo lỗi
-            setNotificationMessage(error.message || "Không thể thêm vào giỏ hàng!")
-            setNotificationType("error")
-            setShowNotification(true)
-            setTimeout(() => setShowNotification(false), 3000)
-            console.error("Lỗi khi thêm vào giỏ hàng:", error)
-        }
-    }
     
     useEffect(() => {
         const fetchProducts = async () => {
@@ -96,17 +60,6 @@ const ProductCase = ({ title, apiUrl }) => {
 
     return (
         <div className="product-showcase">
-            {showNotification && (
-                <div className={`notification ${notificationType}`}>
-                    {notificationType === "success" ? (
-                        <IoCheckmarkCircle className="notification-icon" />
-                    ) : (
-                        <IoAlertCircle className="notification-icon" />
-                    )}
-                    <span>{notificationMessage}</span>
-                </div>
-            )}
-            
             <div className="showcase-title">* {title} *</div>
             <div className="product-grid">
                 {products.slice(0, 5).map((product, index) => (
@@ -136,18 +89,6 @@ const ProductCase = ({ title, apiUrl }) => {
                                 </div>
                             </div>
                         </a>
-                        {/* Nút thêm vào giỏ hàng */}
-                        <button 
-                            className={`add-to-cart ${!product.inStock ? 'disabled' : ''}`}
-                            disabled={!product.inStock}
-                            onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                handleAddToCart(product);
-                            }}
-                        >
-                            <FaPlus />
-                        </button>
                     </div>
                 ))}
             </div>

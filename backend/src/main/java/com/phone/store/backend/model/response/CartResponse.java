@@ -1,10 +1,14 @@
 package com.phone.store.backend.model.response;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class CartResponse {
 
     private Long id;
@@ -15,4 +19,5 @@ public class CartResponse {
     private String price;
     private String ram;
     private String rom;
+    private String colorName;
 }

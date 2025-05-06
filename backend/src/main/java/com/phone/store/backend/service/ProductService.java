@@ -1,11 +1,15 @@
 package com.phone.store.backend.service;
 
 import com.phone.store.backend.entity.ProductEntity;
+import com.phone.store.backend.entity.ProductVariantEntity;
 import com.phone.store.backend.model.response.ProductResponse;
 import com.phone.store.backend.respository.ProductRepository;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
@@ -13,24 +17,24 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductService {
 
-
     @Autowired
     private ProductRepository productRepository;
 
-
-    
     public ResponseEntity<Page<ProductResponse>> getProducts(int page,
-                                                             int size,
-                                                             String sort,
-                                                             Long minPrice,
-                                                             Long maxPrice,
-                                                             String search,
-                                                             List<String> categories) {
+            int size,
+            String sort,
+            Long minPrice,
+            Long maxPrice,
+            String search,
+            List<String> categories) {
         PageRequest pageable = PageRequest.of(page, size);
 
         if (sort != null) {
@@ -74,25 +78,27 @@ public class ProductService {
             return cb.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
         };
 
-
         Page<ProductEntity> productPage = productRepository.findAll(spec, pageable);
 
-        Page<ProductResponse> response = productPage.map(product ->
-                ProductResponse.builder()
+        Page<ProductResponse> response = productPage.map(product -> {
+                product.getVariants().sort(Comparator.comparing(ProductVariantEntity::getPrice));
+
+                ProductVariantEntity cheapestVariant = product.getVariants().get(0);
+
+                return ProductResponse.builder()
                         .id(product.getId())
                         .name(product.getName())
                         .description(product.getDescription())
-                        .price(product.getPrice())
+                        .price(cheapestVariant.getPrice())
                         .stock(product.getStock())
                         .image(product.getImage())
                         .category(product.getCategory())
-                        .build()
-        );
+                        .build();
+        });
 
         return ResponseEntity.ok(response);
     }
 
-    
     public ResponseEntity<Page<ProductResponse>> searchProduct(String keyword, int page, int size) {
         PageRequest pageable = PageRequest.of(page, size);
         Page<ProductResponse> productResponses = productRepository.findByKeyword(keyword, pageable);

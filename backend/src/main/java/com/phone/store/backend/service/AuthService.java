@@ -112,7 +112,8 @@ public class AuthService {
 
         user.setPhone(updateUserDTO.getPhone());
         user.setEmail(updateUserDTO.getEmail());
-        if(updateUserDTO.getImg() != null) user.setImg(updateUserDTO.getImg());
+        if (updateUserDTO.getImg() != null)
+            user.setImg(updateUserDTO.getImg());
 
         try {
             userRepository.save(user);
@@ -172,7 +173,7 @@ public class AuthService {
         }
     }
 
-    public ResponseEntity<?> getUserInfo(){
+    public ResponseEntity<?> getUserInfo() {
         ResponseEntity<?> response = getUser();
         if (!response.getStatusCode().is2xxSuccessful()) {
             return response;
@@ -208,7 +209,7 @@ public class AuthService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new StatusResponse("Không tìm thấy token hợp lệ.", 401));
+                    .body(new StatusResponse("Không tìm thấy thông tin xác thực", 401));
         }
 
         String name = authentication.getName();

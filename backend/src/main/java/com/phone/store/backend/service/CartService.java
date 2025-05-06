@@ -1,14 +1,11 @@
 package com.phone.store.backend.service;
 
-import com.phone.store.backend.entity.CartEntity;
-import com.phone.store.backend.entity.ProductEntity;
-import com.phone.store.backend.entity.UserEntity;
+import com.phone.store.backend.entity.*;
 import com.phone.store.backend.model.dto.CartDTO;
 import com.phone.store.backend.model.response.CartResponse;
 import com.phone.store.backend.model.response.StatusResponse;
-import com.phone.store.backend.respository.CartRepository;
-import com.phone.store.backend.respository.ProductRepository;
-import com.phone.store.backend.respository.UserRepository;
+import com.phone.store.backend.respository.*;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,11 +29,17 @@ public class CartService {
     @Autowired
     private ProductRepository productRepository;
 
+    @Autowired
+    private ProductVariantRepository productVariantRepository;
+
+    @Autowired
+    private ProductColorRepository productColorRepository;
+
     public ResponseEntity<?> getUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new StatusResponse("Không tìm thấy token hợp lệ.", 401));
+                    .body(new StatusResponse("Không tìm thấy thông tin xác thực", 401));
         }
 
         String name = authentication.getName();
@@ -59,15 +62,23 @@ public class CartService {
         List<CartResponse> cartResponses = new ArrayList<>();
 
         for (CartEntity cart : cartItems) {
+
+            ProductVariantEntity variant = productVariantRepository.findById(cart.getVariantId())
+                    .orElseThrow(() -> new EntityNotFoundException("Variant not found"));
+
+            ProductColorEntity color = productColorRepository.findById(cart.getColorId())
+                    .orElseThrow(() -> new EntityNotFoundException("Color not found"));
+
             CartResponse cartResponse = new CartResponse();
             cartResponse.setId(cart.getId());
             cartResponse.setProductId(cart.getProduct().getId());
             cartResponse.setProductName(cart.getProduct().getName());
             cartResponse.setQuantity(cart.getQuantity());
-            cartResponse.setImage(cart.getProduct().getImage());
-            cartResponse.setPrice(String.valueOf(cart.getProduct().getPrice()));
-            cartResponse.setRam(cart.getProduct().getProductDetail().getRam());
-            cartResponse.setRom(cart.getProduct().getProductDetail().getRom());
+            cartResponse.setImage(color.getImage());
+            cartResponse.setPrice(String.valueOf(variant.getPrice()));
+            cartResponse.setRam(variant.getRam());
+            cartResponse.setRom(variant.getRom());
+            cartResponse.setColorName(color.getColorName());
 
             cartResponses.add(cartResponse);
         }
@@ -91,6 +102,25 @@ public class CartService {
                     .body(new StatusResponse("Số lượng phải lớn hơn 0", 400));
         }
 
+        if (productOptional.get().getVariants() != null && !productOptional.get().getVariants().isEmpty()) {
+            if (request.getVariantId() == null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(new StatusResponse("Thiếu thông tin biến thể", 400));
+            }
+
+            if (request.getPrice() == null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(new StatusResponse("Thiếu thông tin giá sản phẩm", 400));
+            }
+        }
+
+        if (productOptional.get().getColors() != null && !productOptional.get().getColors().isEmpty()) {
+            if(request.getColorId() == null){
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(new StatusResponse("Thiếu thông tin màu sắc", 400));
+            }
+        }
+
         ProductEntity product = productOptional.get();
         if (request.getQuantity() > product.getStock()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -99,8 +129,19 @@ public class CartService {
 
         List<CartEntity> existingCartItems = cartRepository.findCartByUserId(user.getId());
         for (CartEntity cartItem : existingCartItems) {
-            if (cartItem.getProduct().getId().equals(request.getProductId())) {
+            boolean sameProduct = cartItem.getProduct().getId().equals(request.getProductId());
+            boolean sameVariant = (cartItem.getVariantId() == null && request.getVariantId() == null) ||
+                    (cartItem.getVariantId() != null &&
+                            request.getVariantId() != null &&
+                            cartItem.getVariantId().equals(request.getVariantId()));
+            boolean sameColor = (cartItem.getColorId() == null && request.getColorId() == null) ||
+                    (cartItem.getColorId() != null &&
+                            request.getColorId() != null &&
+                            cartItem.getColorId().equals(request.getColorId()));
+
+            if (sameProduct && sameVariant && sameColor) {
                 int newQuantity = cartItem.getQuantity() + request.getQuantity();
+
                 if (newQuantity > product.getStock()) {
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                             .body(new StatusResponse("Tổng số lượng vượt quá hàng tồn kho", 400));
@@ -116,6 +157,9 @@ public class CartService {
         newCartItem.setUser(user);
         newCartItem.setProduct(productOptional.get());
         newCartItem.setQuantity(request.getQuantity());
+        newCartItem.setColorId(request.getColorId());
+        newCartItem.setVariantId(request.getVariantId());
+        newCartItem.setPrice(request.getPrice());
 
         cartRepository.save(newCartItem);
 

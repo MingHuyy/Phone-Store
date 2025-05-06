@@ -30,4 +30,13 @@ public class CartEntity {
 
     @Column(nullable = false)
     private int quantity;
+
+    @Column(name = "color_id")
+    private Long colorId;
+
+    @Column(name = "variant_id")
+    private Long variantId;
+
+    @Column(name = "price")
+    private Long price;
 }

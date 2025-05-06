@@ -28,27 +28,25 @@ export const getCart = async () => {
  * Thêm sản phẩm vào giỏ hàng
  * @param {Number} productId ID của sản phẩm
  * @param {Number} quantity Số lượng sản phẩm
+ * @param {Object} options Các tùy chọn bổ sung (màu sắc, cấu hình)
  * @returns {Promise<Object>} Kết quả thêm vào giỏ hàng
  */
-export const addToCart = async (productId, quantity = 1) => {
+export const addToCart = async (productId, quantity = 1, options = null) => {
     const token = localStorage.getItem("accessToken");
     
     try {
-        // Kiểm tra xem sản phẩm đã có trong giỏ hàng chưa
-        let isNewItem = true;
+        // Tạo dữ liệu gửi lên server
+        const cartData = {
+            productId,
+            quantity,
+            ...(options && { 
+                colorId: options.colorId,
+                variantId: options.variantId,
+                price: options.price
+            })
+        };
         
-        // Chỉ thực hiện kiểm tra khi có token (đã đăng nhập)
-        if (token) {
-            try {
-                const cartItems = await getCart();
-                // Kiểm tra xem sản phẩm đã tồn tại trong giỏ hàng chưa
-                isNewItem = !cartItems.some(item => item.productId === productId);
-            } catch (error) {
-                console.error('Lỗi khi kiểm tra giỏ hàng:', error);
-                // Nếu không kiểm tra được, giả định là sản phẩm mới
-                isNewItem = true;
-            }
-        }
+        console.log("Sending to server:", cartData);
         
         const response = await fetch(`${API_BASE_URL}/api/carts`, {
             method: 'POST',
@@ -56,7 +54,7 @@ export const addToCart = async (productId, quantity = 1) => {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify({ productId, quantity })
+            body: JSON.stringify(cartData)
         });
         
         // Xử lý response
@@ -74,11 +72,9 @@ export const addToCart = async (productId, quantity = 1) => {
             throw new Error(result.message || `Lỗi HTTP ${response.status}`);
         }
         
-        // Cập nhật số lượng trên header chỉ khi là sản phẩm mới
-        if (window.updateCartCount && isNewItem) {
-            window.updateCartCount(1); // Chỉ tăng 1 cho mỗi loại sản phẩm mới
-        } else if (window.refreshCartCount) {
-            // Nếu sản phẩm đã tồn tại, gọi hàm refresh để cập nhật chính xác
+        // Cập nhật UI hiển thị giỏ hàng nếu cần
+        if (window.refreshCartCount) {
+            // Luôn gọi refresh để cập nhật chính xác số lượng
             window.refreshCartCount();
         }
         

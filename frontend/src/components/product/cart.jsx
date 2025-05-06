@@ -26,6 +26,7 @@ const Cart = () => {
         setLoading(true);
         try {
             const data = await getCart();
+            console.log(data)
             setCartItems(data);
             const initialSelected = {};
             data.forEach(item => {
@@ -154,10 +155,16 @@ const Cart = () => {
         }
     };
 
-    // Tính tổng tiền của các sản phẩm đã chọn
     const calculateTotal = () => {
         return cartItems.reduce(
-            (total, item) => selectedItems[item.id] ? total + parseInt(item.price) * item.quantity : total,
+            (total, item) => {
+                if (selectedItems[item.id]) {
+                    const itemPrice = parseInt(item.price);
+                    const itemTotal = itemPrice * item.quantity;
+                    return total + itemTotal;
+                }
+                return total;
+            },
             0
         );
     };
@@ -218,7 +225,7 @@ const Cart = () => {
                 },
                 body: JSON.stringify(orderData)
             });
-            
+            console.log("cmmmm", orderData)
             console.log("Payment API response status:", paymentResponse.status);
             const paymentData = await paymentResponse.json();
             console.log("Payment API response data:", paymentData);
@@ -277,7 +284,11 @@ const Cart = () => {
                 orderItems: selectedProducts.map(item => ({
                     productId: item.productId,
                     quantity: item.quantity,
-                    price: parseInt(item.price)
+                    price: parseInt(item.price),
+                    productName: item.productName,
+                    productImage: item.image,
+                    colorName: item.colorName,
+
                 }))
             }; 
             console.log("OrderData:", orderData);
@@ -324,6 +335,111 @@ const Cart = () => {
         } finally {
             setIsProcessing(false);
         }
+    };
+
+    // Hiển thị thông tin sản phẩm với cấu hình và màu sắc
+    const renderCartItem = (item) => {
+        return (
+            <div className="cart-item" key={item.id}>
+                <div className="cart-item-checkbox">
+                    <input
+                        type="checkbox"
+                        checked={selectedItems[item.id] || false}
+                        onChange={() => handleSelectItem(item.id)}
+                    />
+                </div>
+                <div className="cart-item-image">
+                    <img
+                        src={item.image || "/placeholder.svg"}
+                        alt={item.productName}
+                        onError={(e) => {
+                            e.target.src = "/placeholder.svg";
+                        }}
+                    />
+                </div>
+                <div className="cart-item-info">
+                    <h3 className="cart-item-name" style={{ fontWeight: 700 }}>
+                        <Link to={`/product/${item.productId}`}>{item.productName}</Link>
+                    </h3>
+                    <div className="cart-item-details">
+                        <span className="cart-item-variant">
+                            Cấu hình: {item.ram}/{item.rom}
+                        </span>
+                        <span className="cart-item-color">
+                            Màu sắc: {item.colorName}
+                        </span>
+                    </div>
+                </div>
+                <div className="cart-item-price-quantity">
+                    <div className="price-label">
+                        <span>Đơn giá:</span>
+                        <span className="cart-item-price-value" style={{ color: '#333' }}>{formatCurrency(item.price)}</span>
+                    </div>
+                    <div className="subtotal-label">
+                        <span>Tổng tiền:</span>
+                        <span className="cart-item-subtotal-value" style={{ color: '#ff3b30' }}>{formatCurrency(parseInt(item.price) * item.quantity)}</span>
+                    </div>
+                    <div className="cart-item-quantity">
+                        <button
+                            className="quantity-btn"
+                            onClick={() => decreaseQuantity(item.id)}
+                            disabled={item.quantity <= 1}
+                            style={{ width: '24px', height: '24px', fontSize: '12px' }}
+                        >
+                            <FaMinus />
+                        </button>
+                        <span className="quantity-value" style={{ width: '32px', height: '24px', lineHeight: '24px' }}>{item.quantity}</span>
+                        <button
+                            className="quantity-btn"
+                            onClick={() => increaseQuantity(item.id)}
+                            style={{ width: '24px', height: '24px', fontSize: '12px' }}
+                        >
+                            <FaPlus />
+                        </button>
+                    </div>
+                </div>
+                <div className="cart-item-actions" style={{ display: 'flex', alignItems: 'center', height: '100%', paddingTop: '35px', justifyContent: 'flex-end', paddingRight: '15px' }}>
+                    <button className="cart-remove-btn" onClick={() => removeItem(item.id)}>
+                        <FaTrash />
+                    </button>
+                </div>
+            </div>
+        );
+    };
+    
+    // Hiển thị danh sách sản phẩm trong form thanh toán
+    const renderCheckoutItems = () => {
+        const selectedCartItems = cartItems.filter(item => selectedItems[item.id]);
+        return (
+            <div className="checkout-items">
+                <h3>Sản phẩm thanh toán</h3>
+                <div className="checkout-item-list">
+                    {selectedCartItems.map(item => (
+                        <div className="checkout-item" key={item.id}>
+                            <div className="checkout-item-image">
+                                <img src={item.image || "/placeholder.svg"} alt={item.productName} />
+                            </div>
+                            <div className="checkout-item-details">
+                                <div className="checkout-item-name" style={{ fontWeight: 700 }}>{item.productName}</div>
+                                <div className="checkout-item-specs">
+                                    {item.colorName} - {item.ram}/{item.rom} - SL: {item.quantity}
+                                </div>
+                                <div className="checkout-item-price" style={{ color: '#333' }}>
+                                    <span>Giá: </span>{formatCurrency(parseInt(item.price))}
+                                </div>
+                                <div className="checkout-item-price" style={{ color: '#ff3b30' }}>
+                                    <span>Tổng: </span>{formatCurrency(parseInt(item.price) * item.quantity)}
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+                <div className="checkout-total">
+                    <span>Tổng thanh toán:</span>
+                    <span className="checkout-total-amount" style={{ color: '#ff3b30' }}>{formatCurrency(calculateTotal())}</span>
+                </div>
+            </div>
+        );
     };
 
     if (loading) {
@@ -411,78 +527,7 @@ const Cart = () => {
                         </div>
 
                         <div className="cart-table-body">
-                            {cartItems.map((item) => (
-                                <div className="cart-item" key={item.id}>
-                                    <div className="cart-checkbox">
-                                        <input
-                                            type="checkbox"
-                                            checked={selectedItems[item.id] || false}
-                                            onChange={() => handleSelectItem(item.id)}
-                                        />
-                                    </div>
-
-                                    <div className="cart-column product">
-                                        <div className="cart-product-info">
-                                            <img
-                                                src={item.image || "/placeholder.svg"}
-                                                alt={item.productName}
-                                                className="cart-product-image"
-                                            />
-                                            <div className="product-details">
-                                                <h3 className="cart-product-name">{item.productName}</h3>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="cart-actions-container">
-                                        <div className="cart-quantity-price-group">
-                                            <div className="cart-quantity-area">
-                                                <div className="quantity-control">
-                                                    <button
-                                                        className="quantity-btn"
-                                                        onClick={() => decreaseQuantity(item.id)}
-                                                        disabled={item.quantity <= 1}
-                                                        aria-label="Giảm số lượng"
-                                                    >
-                                                        <FaMinus />
-                                                    </button>
-                                                    <input
-                                                        type="text"
-                                                        value={item.quantity}
-                                                        readOnly
-                                                        className="quantity-input"
-                                                        aria-label="Số lượng"
-                                                    />
-                                                    <button
-                                                        className="quantity-btn"
-                                                        onClick={() => increaseQuantity(item.id)}
-                                                        aria-label="Tăng số lượng"
-                                                    >
-                                                        <FaPlus />
-                                                    </button>
-                                                </div>
-                                            </div>
-
-                                            <div className="cart-price-area">
-                                                <div className="cart-current-price">
-                                                    {formatCurrency(parseInt(item.price))}
-                                                </div>
-                                                <div className="original-price">
-                                                    {formatCurrency(parseInt(item.price) * 1.2)}
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <button
-                                            className="remove-btn"
-                                            onClick={() => removeItem(item.id)}
-                                            aria-label="Xóa sản phẩm"
-                                        >
-                                            <FaTrash />
-                                        </button>
-                                    </div>
-                                </div>
-                            ))}
+                            {cartItems.map((item) => renderCartItem(item))}
                         </div>
                     </div>
                 </div>
@@ -532,37 +577,7 @@ const Cart = () => {
                         <div className="checkout-body">
                             <div className="checkout-summary">
                                 <h3>Tóm tắt đơn hàng</h3>
-                                <div className="checkout-products">
-                                    {cartItems.filter(item => selectedItems[item.id]).map(item => (
-                                        <div className="checkout-product-item" key={item.id}>
-                                            <div className="checkout-product-info">
-                                                <img src={item.image || "/placeholder.svg"} alt={item.productName} />
-                                                <div>
-                                                    <p className="checkout-product-name">{item.productName}</p>
-                                                    <p className="checkout-product-quantity">Số lượng: {item.quantity}</p>
-                                                </div>
-                                            </div>
-                                            <div className="checkout-product-price">
-                                                {formatCurrency(parseInt(item.price) * item.quantity)}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-
-                                <div className="checkout-total">
-                                    <div className="summary-row">
-                                        <span>Tạm tính:</span>
-                                        <span>{formatCurrency(calculateTotal())}</span>
-                                    </div>
-                                    <div className="summary-row">
-                                        <span>Phí vận chuyển:</span>
-                                        <span>Miễn phí</span>
-                                    </div>
-                                    <div className="summary-row total">
-                                        <span>Tổng cộng:</span>
-                                        <span>{formatCurrency(calculateTotal())}</span>
-                                    </div>
-                                </div>
+                                {renderCheckoutItems()}
                             </div>
 
                             <form onSubmit={handleSubmitOrder} className="checkout-form">

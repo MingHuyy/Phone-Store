@@ -13,13 +13,14 @@ public class OrderItemConverter {
     private ModelMapper modelMapper;
 
     public OrderItemResponse convertToOrderItemResponse(OrderItemEntity orderItem) {
-        OrderItemResponse response = modelMapper.map(orderItem, OrderItemResponse.class);
+        OrderItemResponse response = new OrderItemResponse();
         response.setId(orderItem.getId());
         response.setProductId(orderItem.getProduct().getId());
         response.setProductName(orderItem.getProduct().getName());
-        response.setProductImage(orderItem.getProduct().getImage());
+        response.setProductImage(orderItem.getProductImage());
         response.setQuantity(orderItem.getQuantity());
         response.setPrice(orderItem.getPrice());
+        response.setColor(orderItem.getColor());
         return response;
     }
 }

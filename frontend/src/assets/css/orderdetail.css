@@ -270,8 +270,22 @@
     object-fit: contain;
 }
 
+.orderdetail-product-details {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
 .orderdetail-product-name {
-    flex: 1;
+    font-weight: 500;
+}
+
+.orderdetail-product-color {
+    font-size: 13px;
+    color: #666;
+}
+
+.color-label {
     font-weight: 500;
 }
 
@@ -495,6 +509,15 @@
 
     .action-button {
         width: 100%;
+    }
+
+    .orderdetail-product-details {
+        margin-top: 10px;
+    }
+    
+    .orderdetail-product-info {
+        flex-direction: column;
+        align-items: flex-start;
     }
 }
 

@@ -27,8 +27,8 @@ public class OrderConverter {
     public OrderResponse convertToOrderResponse(OrderEntity order) {
         OrderResponse response = modelMapper.map(order, OrderResponse.class);
         response.setId(order.getId());
-        response.setFullName(order.getUser().getUsername());
-        response.setPhone(order.getUser().getPhone());
+        response.setFullName(order.getFullName());
+        response.setPhone(order.getPhoneNumber());
         response.setAddress(order.getAddress());
         response.setTotalPrice(order.getTotalPrice());
         response.setPaymentStatus(order.getPaymentStatus().toString());

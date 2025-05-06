@@ -7,34 +7,27 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
+@Table(name = "product_variant")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "order_items")
-public class OrderItemEntity {
+public class ProductVariantEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "order_id", nullable = false)
-    private OrderEntity orderEntity;
+    @Column(nullable = false)
+    private String ram;
+
+    @Column(nullable = false)
+    private String rom;
+
+    @Column(nullable = false)
+    private Long price;
 
     @ManyToOne
     @JoinColumn(name = "product_id", nullable = false)
     private ProductEntity product;
 
-    private String productImage;
-
-    @Column(nullable = false)
-    private int quantity;
-
-    @Column(nullable = false)
-    private Long price;
-
-    @Column(nullable = false)
-    private String color;
-
 }
-

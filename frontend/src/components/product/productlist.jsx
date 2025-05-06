@@ -14,7 +14,6 @@ import {
 } from "react-icons/fa"
 import "../../assets/css/productlist.css"
 import { callApiWithAuth } from "../../utils/AuthService"
-import { addToCart } from "../../utils/CartService"
 
 
 const ProductList = () => {
@@ -28,7 +27,7 @@ const ProductList = () => {
   const [sortBy, setSortBy] = useState("newest")
   const [filterOpen, setFilterOpen] = useState(false)
   
-
+  // State cho thông báo
   const [showNotification, setShowNotification] = useState(false)
   const [notificationMessage, setNotificationMessage] = useState("")
   const [notificationType, setNotificationType] = useState("success")
@@ -62,52 +61,6 @@ const ProductList = () => {
       setTempSearchQuery(searchFromUrl);
     }
   }, [location.search]);
-
-  const handleAddToCart = async (product, quantity = 1) => {
-    if (!product.inStock) {
-      setShowNotification(true);
-      setNotificationMessage('Sản phẩm đã hết hàng!');
-      setNotificationType('error');
-      
-      setTimeout(() => {
-        setShowNotification(false);
-      }, 3000);
-      return;
-    }
-    
-    try {
-      const response = await addToCart(product.id, quantity);
-      
-      let message = '';
-      if (typeof response === 'object' && response.message) {
-        message = response.message;
-      } else if (typeof response === 'string') {
-        message = response;
-      } else {
-        message = `Đã thêm ${quantity} ${product.name} vào giỏ hàng!`;
-      }
-      
-      setShowNotification(true);
-      setNotificationMessage(message);
-      setNotificationType('success');
-      
-      // Ẩn thông báo sau 3 giây
-      setTimeout(() => {
-        setShowNotification(false);
-      }, 3000);
-    } catch (error) {
-      console.error('Lỗi khi thêm vào giỏ hàng:', error);
-      
-      setShowNotification(true);
-      setNotificationMessage(error.message || 'Không thể thêm sản phẩm vào giỏ hàng!');
-      setNotificationType('error');
-      
-      // Ẩn thông báo sau 3 giây
-      setTimeout(() => {
-        setShowNotification(false);
-      }, 3000);
-    }
-  };
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -504,18 +457,6 @@ const ProductList = () => {
                       </div>
                     </div>
                   </a>
-                  
-                  <button 
-                    className={`add-to-cart ${!product.inStock ? 'disabled' : ''}`}
-                    disabled={!product.inStock}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      handleAddToCart(product, 1);
-                    }}
-                  >
-                    <FaPlus />
-                  </button>
                 </div>
               ))}
             </div>
@@ -565,6 +506,9 @@ const ProductList = () => {
           )}
           {notificationType === 'error' && (
             <span className="notification-icon" style={{ marginRight: '10px' }}>✗</span>
+          )}
+          {notificationType === 'info' && (
+            <span className="notification-icon" style={{ marginRight: '10px' }}>i</span>
           )}
           <span>{notificationMessage}</span>
         </div>

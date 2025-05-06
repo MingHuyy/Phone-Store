@@ -34,9 +34,6 @@ public class PaymentController {
     private VNPayConfig vnPayConfig;
 
     @Autowired
-    private TokenService tokenService;
-
-    @Autowired
     private OrderService orderService;
 
     private String extractAccessToken(HttpServletRequest request) {
@@ -62,7 +59,6 @@ public class PaymentController {
                 return res;
             }
             OrderEntity orderEntity = (OrderEntity) res.getBody();
-            System.out.println(orderDTO.getTotalAmount());
             String ipAddress = request.getRemoteAddr();
             String paymentUrl = paymentService.createPaymentUrl(
                     orderEntity.getId(),
