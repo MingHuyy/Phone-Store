@@ -1,4 +1,4 @@
-package com.phone.store.backend.model.dto;
+package com.phone.store.backend.model.request;
 
 import lombok.*;
 
@@ -8,7 +8,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 
-public class CartDTO {
+public class CartRequest {
     private Long productId;
     private int quantity;
     private Long colorId;
@@ -17,7 +17,7 @@ public class CartDTO {
 
     @Override
     public String toString() {
-        return "CartDTO{" +
+        return "CartRequest{" +
                 "productId=" + productId +
                 ", quantity=" + quantity +
                 ", colorId=" + colorId +

@@ -1,4 +1,4 @@
-package com.phone.store.backend.model.dto;
+package com.phone.store.backend.model.request;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
@@ -8,7 +8,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ResetPasswordDTO {
+public class ResetPasswordRequest {
 
     @NotBlank(message = "Old password must not be blank")
     private String oldPassword;

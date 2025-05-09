@@ -1,6 +1,6 @@
 package com.phone.store.backend.controller;
 
-import com.phone.store.backend.model.dto.OrderDTO;
+import com.phone.store.backend.model.request.OrderRequest;
 import com.phone.store.backend.model.response.OrderResponse;
 import com.phone.store.backend.model.response.StatusResponse;
 import com.phone.store.backend.service.OrderService;
@@ -11,7 +11,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
-
 @RestController
 @RequestMapping("/api/orders")
 public class OrderController {
@@ -20,9 +19,9 @@ public class OrderController {
     private OrderService orderService;
 
     @PostMapping
-    public ResponseEntity<?> createOrder(@RequestBody OrderDTO orderDTO) {
-        System.out.println(orderDTO);
-        return orderService.createOrder(orderDTO);
+    public ResponseEntity<?> createOrder(@RequestBody OrderRequest orderRequest) {
+        System.out.println(orderRequest);
+        return orderService.createOrder(orderRequest);
     }
 
     @GetMapping

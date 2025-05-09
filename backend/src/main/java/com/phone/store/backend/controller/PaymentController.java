@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.phone.store.backend.model.dto.OrderDTO;
+import com.phone.store.backend.model.request.OrderRequest;
 
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -45,7 +45,7 @@ public class PaymentController {
     }
 
     @PostMapping("/create-payment")
-    public ResponseEntity<?> createPayment(@RequestBody OrderDTO orderDTO,
+    public ResponseEntity<?> createPayment(@RequestBody OrderRequest orderRequest,
             HttpServletRequest request) {
         try {
             String accessToken = extractAccessToken(request);
@@ -54,7 +54,7 @@ public class PaymentController {
                         .body(new StatusResponse("Không tìm thấy token hợp lệ.", 401));
             }
 
-            ResponseEntity<?> res = orderService.createOrderv1(orderDTO);
+            ResponseEntity<?> res = orderService.createOrderv1(orderRequest);
             if (!res.getStatusCode().is2xxSuccessful()) {
                 return res;
             }
@@ -62,7 +62,7 @@ public class PaymentController {
             String ipAddress = request.getRemoteAddr();
             String paymentUrl = paymentService.createPaymentUrl(
                     orderEntity.getId(),
-                    orderDTO.getTotalAmount(),
+                    orderRequest.getTotalAmount(),
                     "Thanh toan don hang #" + orderEntity.getId(),
                     ipAddress);
 

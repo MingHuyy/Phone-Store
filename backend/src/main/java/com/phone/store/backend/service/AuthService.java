@@ -1,12 +1,12 @@
 package com.phone.store.backend.service;
 
-import com.phone.store.backend.Converter.UserConverter;
+import com.phone.store.backend.converter.UserConverter;
 import com.phone.store.backend.entity.RoleEntity;
 import com.phone.store.backend.entity.TokenEntity;
 import com.phone.store.backend.entity.UserEntity;
-import com.phone.store.backend.model.dto.LoginDTO;
-import com.phone.store.backend.model.dto.ResetPasswordDTO;
-import com.phone.store.backend.model.dto.UpdateUserDTO;
+import com.phone.store.backend.model.request.LoginRequest;
+import com.phone.store.backend.model.request.ResetPasswordRequest;
+import com.phone.store.backend.model.request.UpdateUserRequest;
 import com.phone.store.backend.model.response.StatusResponse;
 import com.phone.store.backend.model.response.TokenResponse;
 import com.phone.store.backend.model.response.UserResponse;
@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
@@ -51,12 +52,12 @@ public class AuthService {
 
     private String defaultPassword = "123456";
 
-    public ResponseEntity<TokenResponse> login(LoginDTO loginDTO) {
+    public ResponseEntity<TokenResponse> login(LoginRequest loginRequest) {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                loginDTO.getUsername(), loginDTO.getPassword());
+                loginRequest.getUsername(), loginRequest.getPassword());
         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
 
-        UserEntity user = userRepository.findByUsername(loginDTO.getUsername());
+        UserEntity user = userRepository.findByUsername(loginRequest.getUsername());
 
         Set<RoleEntity> roleEntities = user.getRoles();
         String roles = roleEntities.stream()
@@ -78,7 +79,8 @@ public class AuthService {
         return ResponseEntity.ok(jwtToken);
     }
 
-    public ResponseEntity<?> resetPassword(ResetPasswordDTO resetPasswordDTO) {
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    public ResponseEntity<?> resetPassword(ResetPasswordRequest resetPasswordRequest) {
         ResponseEntity<?> response = getUser();
         if (!response.getStatusCode().is2xxSuccessful()) {
             return response;
@@ -88,11 +90,11 @@ public class AuthService {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(Map.of("message", "Không tìm thấy người dùng."));
         }
-        if (!passwordEncoder.matches(resetPasswordDTO.getOldPassword(), user.getPassword())) {
+        if (!passwordEncoder.matches(resetPasswordRequest.getOldPassword(), user.getPassword())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(Map.of("message", "Mật khẩu cũ không đúng"));
         }
-        user.setPassword(passwordEncoder.encode(resetPasswordDTO.getNewPassword()));
+        user.setPassword(passwordEncoder.encode(resetPasswordRequest.getNewPassword()));
         userRepository.save(user);
         return ResponseEntity.ok(Map.of("message", "Đổi mật khẩu thành công"));
     }
@@ -103,17 +105,18 @@ public class AuthService {
                 "message", "Logout thành công!"));
     }
 
-    public ResponseEntity<?> update(UpdateUserDTO updateUserDTO) {
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    public ResponseEntity<?> update(UpdateUserRequest updateUserRequest) {
         ResponseEntity<?> response = getUser();
         if (!response.getStatusCode().is2xxSuccessful()) {
             return response;
         }
         UserEntity user = (UserEntity) response.getBody();
 
-        user.setPhone(updateUserDTO.getPhone());
-        user.setEmail(updateUserDTO.getEmail());
-        if (updateUserDTO.getImg() != null)
-            user.setImg(updateUserDTO.getImg());
+        user.setPhone(updateUserRequest.getPhone());
+        user.setEmail(updateUserRequest.getEmail());
+        if (updateUserRequest.getImg() != null)
+            user.setImg(updateUserRequest.getImg());
 
         try {
             userRepository.save(user);
@@ -173,6 +176,7 @@ public class AuthService {
         }
     }
 
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<?> getUserInfo() {
         ResponseEntity<?> response = getUser();
         if (!response.getStatusCode().is2xxSuccessful()) {

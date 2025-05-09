@@ -1,4 +1,4 @@
-package com.phone.store.backend.model.dto;
+package com.phone.store.backend.model.request;
 
 import lombok.*;
 
@@ -8,7 +8,6 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 
-public class TokenDTO {
+public class TokenRequest {
     private String refreshToken;
 }
-

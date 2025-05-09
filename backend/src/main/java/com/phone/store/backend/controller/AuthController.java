@@ -1,7 +1,7 @@
 package com.phone.store.backend.controller;
 
 import com.phone.store.backend.entity.UserEntity;
-import com.phone.store.backend.model.dto.*;
+import com.phone.store.backend.model.request.*;
 import com.phone.store.backend.model.response.StatusResponse;
 import com.phone.store.backend.model.response.TokenResponse;
 import com.phone.store.backend.model.response.UserResponse;
@@ -34,16 +34,16 @@ public class AuthController {
     private CloudinaryService cloudinaryService;
 
     @PostMapping("/login")
-    public ResponseEntity<TokenResponse> login(@Valid @RequestBody LoginDTO loginDTO) {
-        return authService.login(loginDTO);
+    public ResponseEntity<TokenResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
+        return authService.login(loginRequest);
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<TokenResponse> refresh(@RequestBody TokenDTO tokenDTO) {
-        if (tokenDTO.getRefreshToken() == null) {
+    public ResponseEntity<TokenResponse> refresh(@RequestBody TokenRequest tokenRequest) {
+        if (tokenRequest.getRefreshToken() == null) {
             return ResponseEntity.badRequest().body(null);
         }
-        return authService.refresh(tokenDTO.getRefreshToken());
+        return authService.refresh(tokenRequest.getRefreshToken());
     }
 
     @GetMapping("/info")
@@ -52,8 +52,8 @@ public class AuthController {
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordDTO resetPasswordDTO) {
-        return authService.resetPassword(resetPasswordDTO);
+    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest resetPasswordRequest) {
+        return authService.resetPassword(resetPasswordRequest);
     }
 
     @PostMapping("/logout")
@@ -64,9 +64,9 @@ public class AuthController {
 
     @PutMapping(value = "/update", consumes = { "multipart/form-data" })
     public ResponseEntity<?> update(@RequestParam("username") String username,
-                                    @RequestParam("email") String email,
-                                    @RequestParam(value = "phone", required = false) String phone,
-                                    @RequestParam(value = "img", required = false) MultipartFile img) {
+            @RequestParam("email") String email,
+            @RequestParam(value = "phone", required = false) String phone,
+            @RequestParam(value = "img", required = false) MultipartFile img) {
         String phoneNumber = (phone == null || phone.isEmpty()) ? null : phone;
 
         String imageUrl = null;
@@ -79,13 +79,13 @@ public class AuthController {
             }
         }
 
-        UpdateUserDTO updateUserDTO = UpdateUserDTO.builder()
+        UpdateUserRequest updateUserRequest = UpdateUserRequest.builder()
                 .username(username)
                 .email(email)
                 .phone(phoneNumber)
                 .img(imageUrl)
                 .build();
-        return authService.update(updateUserDTO);
+        return authService.update(updateUserRequest);
     }
 
     @PostMapping("/reset-password/v1")

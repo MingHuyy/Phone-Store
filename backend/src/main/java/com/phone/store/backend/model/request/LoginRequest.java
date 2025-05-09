@@ -1,4 +1,4 @@
-package com.phone.store.backend.model.dto;
+package com.phone.store.backend.model.request;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
@@ -9,7 +9,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 
-public class LoginDTO {
+public class LoginRequest {
 
     @NotBlank(message = "username must be not blank")
     private String username;

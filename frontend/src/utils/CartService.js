@@ -31,7 +31,7 @@ export const getCart = async () => {
  * @param {Object} options Các tùy chọn bổ sung (màu sắc, cấu hình)
  * @returns {Promise<Object>} Kết quả thêm vào giỏ hàng
  */
-export const addToCart = async (productId, quantity = 1, options = null) => {
+export const adRequestCart = async (productId, quantity = 1, options = null) => {
     const token = localStorage.getItem("accessToken");
     
     try {
@@ -194,7 +194,7 @@ export const getLocalCart = () => {
  * @param {Number} quantity Số lượng
  * @returns {Array} Giỏ hàng đã cập nhật
  */
-export const addToLocalCart = (productId, quantity = 1, productData = null) => {
+export const adRequestLocalCart = (productId, quantity = 1, productData = null) => {
     let cart = getLocalCart();
     
     // Tìm sản phẩm trong giỏ hàng

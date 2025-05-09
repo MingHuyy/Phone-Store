@@ -1,4 +1,4 @@
-package com.phone.store.backend.model.dto;
+package com.phone.store.backend.model.request;
 
 import com.phone.store.backend.entity.OrderEntity;
 import lombok.*;
@@ -10,11 +10,11 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class OrderDTO {
+public class OrderRequest {
     private String fullName;
     private String phone;
     private String address;
     private String paymentMethod;
-    private List<OrderItemDTO> orderItems;
+    private List<OrderItemRequest> orderItems;
     private Long totalAmount;
 }

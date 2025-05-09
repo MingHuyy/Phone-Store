@@ -1,4 +1,4 @@
-package com.phone.store.backend.Converter;
+package com.phone.store.backend.converter;
 
 import com.phone.store.backend.entity.OrderItemEntity;
 import com.phone.store.backend.model.response.OrderItemResponse;

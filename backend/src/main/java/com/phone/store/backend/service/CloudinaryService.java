@@ -27,15 +27,16 @@ public class CloudinaryService {
         String publicValue = generatePublicValue(file.getOriginalFilename());
         String extension = getFileName(file.getOriginalFilename())[1];
         File fileUpload = convert(file);
-        cloudinary.uploader().upload(fileUpload, ObjectUtils.asMap("public_id",publicValue));
+        cloudinary.uploader().upload(fileUpload, ObjectUtils.asMap("public_id", publicValue));
         cleanDisk(fileUpload);
-        return cloudinary.url().generate(StringUtils.join(publicValue,".",extension));
+        return cloudinary.url().generate(StringUtils.join(publicValue, ".", extension));
     }
 
     private File convert(MultipartFile file) throws IOException {
         assert file.getOriginalFilename() != null;
-        File convertFile = new File(StringUtils.join(generatePublicValue(file.getOriginalFilename()),getFileName(file.getOriginalFilename())[1]));
-        try(InputStream is = file.getInputStream()) {
+        File convertFile = new File(StringUtils.join(generatePublicValue(file.getOriginalFilename()),
+                getFileName(file.getOriginalFilename())[1]));
+        try (InputStream is = file.getInputStream()) {
             Files.copy(is, convertFile.toPath());
         }
         return convertFile;
@@ -43,18 +44,19 @@ public class CloudinaryService {
 
     private String generatePublicValue(String originName) {
         String fileName = getFileName(originName)[0];
-        return StringUtils.join(UUID.randomUUID().toString(),"_",fileName);
+        return StringUtils.join(UUID.randomUUID().toString(), "_", fileName);
     }
+
     private void cleanDisk(File file) {
         try {
             Path filePath = file.toPath();
             Files.delete(filePath);
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error(e.getMessage());
         }
     }
+
     private String[] getFileName(String originName) {
         return originName.split("\\.");
     }
 }
-

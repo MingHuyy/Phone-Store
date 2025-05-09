@@ -1,7 +1,7 @@
 package com.phone.store.backend.controller;
 
 import com.phone.store.backend.entity.CartEntity;
-import com.phone.store.backend.model.dto.CartDTO;
+import com.phone.store.backend.model.request.CartRequest;
 import com.phone.store.backend.model.response.StatusResponse;
 import com.phone.store.backend.respository.CartRepository;
 import com.phone.store.backend.service.CartService;
@@ -27,9 +27,6 @@ public class CartController {
     private CartService cartService;
 
     @Autowired
-    private TokenService tokenService;
-
-    @Autowired
     private CartRepository cartRepository;
 
     @GetMapping
@@ -38,8 +35,8 @@ public class CartController {
     }
 
     @PostMapping
-    public ResponseEntity<?> addToCart(@RequestBody CartDTO cartDTO) {
-        return cartService.addToCart(cartDTO);
+    public ResponseEntity<?> adRequestCart(@RequestBody CartRequest cartRequest) {
+        return cartService.adRequestCart(cartRequest);
     }
 
     @DeleteMapping("/{cartId}")
@@ -83,8 +80,8 @@ public class CartController {
     }
 
     @PutMapping("/{cartId}")
-    public ResponseEntity<?> updateCartQuantity(@RequestBody CartDTO cartDTO) {
-        return cartService.updateCartQuantity(cartDTO);
+    public ResponseEntity<?> updateCartQuantity(@RequestBody CartRequest cartRequest) {
+        return cartService.updateCartQuantity(cartRequest);
     }
 
     private Long getUserIdFromAuthentication(Authentication authentication) {

@@ -1,13 +1,12 @@
 package com.phone.store.backend.service;
 
-import com.phone.store.backend.Converter.OrderConverter;
+import com.phone.store.backend.converter.OrderConverter;
 import com.phone.store.backend.entity.OrderEntity;
 import com.phone.store.backend.entity.OrderItemEntity;
 import com.phone.store.backend.entity.ProductEntity;
 import com.phone.store.backend.entity.UserEntity;
-import com.phone.store.backend.model.dto.OrderDTO;
-import com.phone.store.backend.model.dto.OrderItemDTO;
-import com.phone.store.backend.model.response.OrderItemResponse;
+import com.phone.store.backend.model.request.OrderRequest;
+import com.phone.store.backend.model.request.OrderItemRequest;
 import com.phone.store.backend.model.response.OrderResponse;
 import com.phone.store.backend.model.response.StatusResponse;
 import com.phone.store.backend.respository.OrderItemRepository;
@@ -17,19 +16,18 @@ import com.phone.store.backend.respository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
+@PreAuthorize("hasAnyRole('USER', 'ADMIN')")
 public class OrderService {
 
     @Autowired
@@ -65,7 +63,7 @@ public class OrderService {
     }
 
     @Transactional
-    public ResponseEntity<?> createOrder(OrderDTO orderDTO) {
+    public ResponseEntity<?> createOrder(OrderRequest orderRequest) {
         ResponseEntity<?> response = getUser();
         if (!response.getStatusCode().is2xxSuccessful()) {
             return response;
@@ -73,13 +71,13 @@ public class OrderService {
         UserEntity user = (UserEntity) response.getBody();
         OrderEntity order = new OrderEntity();
         order.setUser(user);
-        order.setFullName(orderDTO.getFullName());
-        order.setTotalPrice(orderDTO.getTotalAmount());
-        order.setAddress(orderDTO.getAddress());
-        order.setPhoneNumber(orderDTO.getPhone());
+        order.setFullName(orderRequest.getFullName());
+        order.setTotalPrice(orderRequest.getTotalAmount());
+        order.setAddress(orderRequest.getAddress());
+        order.setPhoneNumber(orderRequest.getPhone());
 
         OrderEntity.PaymentStatus paymentStatus = OrderEntity.PaymentStatus.COD;
-        if ("online".equals(orderDTO.getPaymentMethod())) {
+        if ("online".equals(orderRequest.getPaymentMethod())) {
             paymentStatus = OrderEntity.PaymentStatus.COMPLETED;
         }
         order.setPaymentStatus(paymentStatus);
@@ -87,28 +85,28 @@ public class OrderService {
         OrderEntity savedOrder = orderRepository.save(order);
 
         List<OrderItemEntity> orderItems = new ArrayList<>();
-        for (OrderItemDTO itemDTO : orderDTO.getOrderItems()) {
-            Optional<ProductEntity> productOptional = productRepository.findById(itemDTO.getProductId());
+        for (OrderItemRequest itemRequest : orderRequest.getOrderItems()) {
+            Optional<ProductEntity> productOptional = productRepository.findById(itemRequest.getProductId());
             if (productOptional.isEmpty()) {
                 continue;
             }
 
             ProductEntity product = productOptional.get();
-            if (product.getStock() < itemDTO.getQuantity()) {
+            if (product.getStock() < itemRequest.getQuantity()) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body(new StatusResponse("Sản phẩm " + product.getName() + " không đủ hàng", 400));
             }
 
-            product.setStock(product.getStock() - itemDTO.getQuantity());
+            product.setStock(product.getStock() - itemRequest.getQuantity());
             productRepository.save(product);
 
             OrderItemEntity orderItem = new OrderItemEntity();
             orderItem.setOrderEntity(savedOrder);
             orderItem.setProduct(product);
-            orderItem.setQuantity(itemDTO.getQuantity());
-            orderItem.setPrice(itemDTO.getPrice());
-            orderItem.setProductImage(itemDTO.getProductImage());
-            orderItem.setColor(itemDTO.getColorName());
+            orderItem.setQuantity(itemRequest.getQuantity());
+            orderItem.setPrice(itemRequest.getPrice());
+            orderItem.setProductImage(itemRequest.getProductImage());
+            orderItem.setColor(itemRequest.getColorName());
 
             orderItems.add(orderItem);
         }
@@ -146,7 +144,7 @@ public class OrderService {
         return ResponseEntity.ok(orderResponse);
     }
 
-    public ResponseEntity<?> createOrderv1(OrderDTO orderDTO) {
+    public ResponseEntity<?> createOrderv1(OrderRequest orderRequest) {
         ResponseEntity<?> response = getUser();
         if (!response.getStatusCode().is2xxSuccessful()) {
             return response;
@@ -155,11 +153,11 @@ public class OrderService {
 
         OrderEntity order = new OrderEntity();
         order.setUser(user);
-        order.setTotalPrice(orderDTO.getTotalAmount());
-        order.setAddress(orderDTO.getAddress());
-        order.setPhoneNumber(orderDTO.getPhone());
-        order.setFullName(orderDTO.getFullName());
-        order.setPaymentStatus("online".equals(orderDTO.getPaymentMethod())
+        order.setTotalPrice(orderRequest.getTotalAmount());
+        order.setAddress(orderRequest.getAddress());
+        order.setPhoneNumber(orderRequest.getPhone());
+        order.setFullName(orderRequest.getFullName());
+        order.setPaymentStatus("online".equals(orderRequest.getPaymentMethod())
                 ? OrderEntity.PaymentStatus.COMPLETED
                 : OrderEntity.PaymentStatus.COD);
 
@@ -167,25 +165,26 @@ public class OrderService {
 
         List<OrderItemEntity> orderItems = new ArrayList<>();
 
-        for (OrderItemDTO itemDTO : orderDTO.getOrderItems()) {
-            ProductEntity product = productRepository.findById(itemDTO.getProductId())
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm ID: " + itemDTO.getProductId()));
+        for (OrderItemRequest itemRequest : orderRequest.getOrderItems()) {
+            ProductEntity product = productRepository.findById(itemRequest.getProductId())
+                    .orElseThrow(
+                            () -> new RuntimeException("Không tìm thấy sản phẩm ID: " + itemRequest.getProductId()));
 
-            if (product.getStock() < itemDTO.getQuantity()) {
+            if (product.getStock() < itemRequest.getQuantity()) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body(new StatusResponse("Sản phẩm " + product.getName() + " không đủ hàng", 400));
             }
 
-            product.setStock(product.getStock() - itemDTO.getQuantity());
+            product.setStock(product.getStock() - itemRequest.getQuantity());
             productRepository.save(product);
 
             OrderItemEntity orderItem = new OrderItemEntity();
             orderItem.setOrderEntity(savedOrder);
             orderItem.setProduct(product);
-            orderItem.setQuantity(itemDTO.getQuantity());
-            orderItem.setPrice(itemDTO.getPrice());
-            orderItem.setProductImage(itemDTO.getProductImage());
-            orderItem.setColor(itemDTO.getColorName());
+            orderItem.setQuantity(itemRequest.getQuantity());
+            orderItem.setPrice(itemRequest.getPrice());
+            orderItem.setProductImage(itemRequest.getProductImage());
+            orderItem.setColor(itemRequest.getColorName());
 
             orderItems.add(orderItem);
         }

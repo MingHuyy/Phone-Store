@@ -16,6 +16,7 @@ const Header = () => {
     const [cartItemCount, setCartItemCount] = useState(0);
     const [searchKeyword, setSearchKeyword] = useState("");
     const [isSearching, setIsSearching] = useState(false);
+    const [userProfile, setUserProfile] = useState(null);
     const menuRef = useRef(null);
     const menuButtonRef = useRef(null);
     const headerRef = useRef(null);
@@ -24,6 +25,9 @@ const Header = () => {
     useEffect(() => {
         const token = localStorage.getItem("accessToken");
         setIsLoggedIn(!!token);
+        if (token) {
+            fetchUserProfile();
+        }
     }, []);
 
     useEffect(() => {
@@ -31,6 +35,17 @@ const Header = () => {
             fetchCartItemCount();
         }
     }, [isLoggedIn]);
+
+    const fetchUserProfile = async () => {
+        try {
+            const response = await callApiWithAuth('/auth/info');
+            if (response) {
+                setUserProfile(response);
+            }
+        } catch (error) {
+            console.error("Không thể lấy thông tin người dùng:", error);
+        }
+    };
 
     const fetchCartItemCount = async () => {
         try {
@@ -69,7 +84,7 @@ const Header = () => {
             setShowMenu(false);
             setCartItemCount(0);
             alert("Đăng xuất thành công");
-            navigate("/");
+            navigate("/login");
             window.location.reload();
         } catch (error) {
             alert("Đăng xuất không thành công");
@@ -226,8 +241,13 @@ const Header = () => {
                                     {isLoggedIn ? (
                                         <>
                                             <Link to="/users/info" onClick={() => setShowMenu(false)}>Trang người dùng</Link>
-                                            <a onClick={logOut} style={{ cursor: "pointer" }}>Đăng xuất</a>
                                             <Link to="/orderdetail" onClick={() => setShowMenu(false)}>Đơn hàng đã mua</Link>
+                                            {userProfile && userProfile.roles && userProfile.roles.includes('ADMIN') && (
+                                                <Link to="/admin" onClick={() => setShowMenu(false)}>
+                                                    Trang quản trị
+                                                </Link>
+                                            )}
+                                            <a onClick={logOut} style={{ cursor: "pointer" }}>Đăng xuất</a>
                                         </>
                                     ) : (
                                         <>

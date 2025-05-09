@@ -18,4 +18,5 @@ public class UserResponse {
     private String roles;
     private String phone;
     private String img;
+    private boolean enabled;
 }

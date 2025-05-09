@@ -3,7 +3,7 @@ package com.phone.store.backend.controller;
 import com.phone.store.backend.entity.RoleEntity;
 import com.phone.store.backend.entity.UserEntity;
 import com.phone.store.backend.exception.ResourceNotFoundException;
-import com.phone.store.backend.model.dto.UserDTO;
+import com.phone.store.backend.model.request.UserRequest;
 import com.phone.store.backend.model.response.UserResponse;
 import com.phone.store.backend.respository.RoleRepository;
 import com.phone.store.backend.service.UserService;
@@ -29,14 +29,14 @@ public class RegisterController {
     private PasswordEncoder passwordEncoder;
 
     @PostMapping
-    public UserResponse register(@Valid @RequestBody UserDTO userDTO) {
-        String hashPassword = passwordEncoder.encode(userDTO.getPassword());
-        System.out.println(userDTO.getPassword());
+    public UserResponse register(@Valid @RequestBody UserRequest userRequest) {
+        String hashPassword = passwordEncoder.encode(userRequest.getPassword());
+        System.out.println(userRequest.getPassword());
         UserEntity userEntity = new UserEntity();
-        userEntity.setUsername(userDTO.getUserName());
-        userEntity.setEmail(userDTO.getEmail());
+        userEntity.setUsername(userRequest.getUserName());
+        userEntity.setEmail(userRequest.getEmail());
         userEntity.setPassword(hashPassword);
-        userEntity.setPhone(userDTO.getPhone());
+        userEntity.setPhone(userRequest.getPhone());
 
         Set<RoleEntity> roles = new HashSet<>();
         RoleEntity roleEntity = roleRepository.findById(roleUser)

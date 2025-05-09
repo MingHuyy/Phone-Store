@@ -1,4 +1,4 @@
-package com.phone.store.backend.model.dto;
+package com.phone.store.backend.model.request;
 
 import lombok.*;
 
@@ -7,11 +7,11 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class OrderItemDTO {
+public class OrderItemRequest {
     private Long productId;
     private Integer quantity;
     private Long price;
     private String productName;
     private String productImage;
     private String colorName;
-    }
+}

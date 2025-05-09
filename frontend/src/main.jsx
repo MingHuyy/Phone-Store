@@ -20,6 +20,8 @@ import ProductDetail from './components/product/productdetail.jsx';
 import PasswordResetSuccess from './components/PasswordResetSuccess.jsx';
 import OrderDetail from './components/orderdetail.jsx';
 import PaymentResult from './pages/PaymentResult.jsx';
+import AdminDashboard from './components/admin/AdminDashboard.jsx';
+import AdminRouteGuard from './components/admin/AdminRouteGuard.jsx';
 
 
 const router = createBrowserRouter([
@@ -87,6 +89,10 @@ const router = createBrowserRouter([
       {
         path: '/payment/vnpay-return',
         element: <PaymentResult />
+      },
+      {
+        path: '/admin',
+        element: <AdminRouteGuard><AdminDashboard /></AdminRouteGuard>
       }
     ]
   }

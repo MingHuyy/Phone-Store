@@ -5,7 +5,7 @@ import { useParams, useNavigate } from "react-router-dom"
 import { FaShoppingCart, FaHeart, FaShare, FaCheck, FaMinus, FaPlus, FaArrowLeft } from "react-icons/fa"
 import "../../assets/css/productdetail.css"
 import { callApiWithAuth } from "../../utils/AuthService"
-import { addToCart } from "../../utils/CartService"
+import { adRequestCart } from "../../utils/CartService"
 
 const ProductDetail = () => {
   const { productId } = useParams()
@@ -255,7 +255,7 @@ const ProductDetail = () => {
     }
   }
 
-  const handleAddToCart = async () => {
+  const handleAdRequestCart = async () => {
     if (product?.stock <= 0) {
       setShowNotification(true);
       setNotificationMessage('Sản phẩm đã hết hàng!');
@@ -325,7 +325,7 @@ const ProductDetail = () => {
       
       console.log("Sending options:", options);
       
-      const response = await addToCart(itemId, quantity, options);
+      const response = await adRequestCart(itemId, quantity, options);
       
       let message = '';
       if (typeof response === 'object' && response.message) {
@@ -600,7 +600,7 @@ const ProductDetail = () => {
             <div className="action-button">
               <button 
                 className={`add-to-cart-btn ${isShaking ? 'shaking' : ''} ${product?.stock <= 0 ? 'disabled' : ''}`} 
-                onClick={handleAddToCart}
+                onClick={handleAdRequestCart}
                 style={product?.stock <= 0 ? {cursor: 'not-allowed'} : {}}
               >
                 <FaShoppingCart /> <span>Thêm vào giỏ hàng</span>

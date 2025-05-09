@@ -1,4 +1,4 @@
-package com.phone.store.backend.Converter;
+package com.phone.store.backend.converter;
 
 import com.phone.store.backend.entity.RoleEntity;
 import com.phone.store.backend.entity.UserEntity;

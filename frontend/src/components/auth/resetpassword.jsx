@@ -132,7 +132,6 @@ const ResetPassword = () => {
                             <div className="form-group">
                                 <label htmlFor="currentPassword">Mật khẩu hiện tại</label>
                                 <div className="password-input-group">
-                                    <FaLock className="field-icon" />
                                     <input
                                         type={showCurrentPassword ? "text" : "password"}
                                         id="currentPassword"
@@ -155,7 +154,6 @@ const ResetPassword = () => {
                             <div className="form-group">
                                 <label htmlFor="newPassword">Mật khẩu mới</label>
                                 <div className="password-input-group">
-                                    <FaLock className="field-icon" />
                                     <input
                                         type={showNewPassword ? "text" : "password"}
                                         id="newPassword"
@@ -178,7 +176,6 @@ const ResetPassword = () => {
                             <div className="form-group">
                                 <label htmlFor="confirmPassword">Xác nhận mật khẩu mới</label>
                                 <div className="password-input-group">
-                                    <FaLock className="field-icon" />
                                     <input
                                         type={showConfirmPassword ? "text" : "password"}
                                         id="confirmPassword"

@@ -1,7 +1,7 @@
 package com.phone.store.backend.service;
 
 import com.phone.store.backend.entity.*;
-import com.phone.store.backend.model.dto.CartDTO;
+import com.phone.store.backend.model.request.CartRequest;
 import com.phone.store.backend.model.response.CartResponse;
 import com.phone.store.backend.model.response.StatusResponse;
 import com.phone.store.backend.respository.*;
@@ -9,6 +9,7 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@PreAuthorize("hasAnyRole('USER', 'ADMIN')")
 public class CartService {
 
     @Autowired
@@ -52,6 +54,7 @@ public class CartService {
         return ResponseEntity.ok(user);
     }
 
+
     public ResponseEntity<?> getCart() {
         ResponseEntity<?> response = getUser();
         if (!response.getStatusCode().is2xxSuccessful()) {
@@ -85,7 +88,7 @@ public class CartService {
         return ResponseEntity.ok(cartResponses);
     }
 
-    public ResponseEntity<?> addToCart(CartDTO request) {
+    public ResponseEntity<?> adRequestCart(CartRequest request) {
         ResponseEntity<?> response = getUser();
         if (!response.getStatusCode().is2xxSuccessful()) {
             return response;
@@ -115,7 +118,7 @@ public class CartService {
         }
 
         if (productOptional.get().getColors() != null && !productOptional.get().getColors().isEmpty()) {
-            if(request.getColorId() == null){
+            if (request.getColorId() == null) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body(new StatusResponse("Thiếu thông tin màu sắc", 400));
             }
@@ -188,7 +191,7 @@ public class CartService {
         return ResponseEntity.ok(new StatusResponse("Đã xóa sản phẩm khỏi giỏ hàng", 200));
     }
 
-    public ResponseEntity<?> updateCartQuantity(CartDTO request) {
+    public ResponseEntity<?> updateCartQuantity(CartRequest request) {
         ResponseEntity<?> response = getUser();
         if (!response.getStatusCode().is2xxSuccessful()) {
             return response;

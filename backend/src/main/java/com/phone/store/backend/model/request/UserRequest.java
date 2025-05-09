@@ -1,4 +1,4 @@
-package com.phone.store.backend.model.dto;
+package com.phone.store.backend.model.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
@@ -10,12 +10,15 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UpdateUserDTO {
+public class UserRequest {
     @NotEmpty(message = "Username cannot be empty")
-    private String username;
+    private String userName;
+    @NotEmpty(message = "Password cannot be empty")
+    private String password;
+    @NotEmpty(message = "Password cannot be empty")
+    private String confirmPassword;
     @Email(message = "Email should correct format")
     private String email;
     @Pattern(regexp = "^\\d{10}$", message = "Phone number must be exactly 10 digits")
     private String phone;
-    private String img;
 }
