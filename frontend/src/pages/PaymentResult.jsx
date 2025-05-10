@@ -41,8 +41,6 @@ const PaymentResult = () => {
                         if (window.refreshCartCount) {
                             window.refreshCartCount();
                         }
-                        
-                        console.log(`Đã xóa ${cartItemsToRemove.length} sản phẩm khỏi giỏ hàng sau khi thanh toán`);
                     }
                 }
             }

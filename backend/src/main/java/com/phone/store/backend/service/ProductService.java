@@ -6,13 +6,12 @@ import com.phone.store.backend.model.request.ProductDetailRequest;
 import com.phone.store.backend.model.request.ProductVariantRequest;
 import com.phone.store.backend.model.response.ProductResponse;
 import com.phone.store.backend.respository.OrderItemRepository;
+import com.phone.store.backend.respository.ProductColorRepository;
 import com.phone.store.backend.respository.ProductRepository;
-import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.JoinType;
+import com.phone.store.backend.respository.ProductVariantRepository;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
@@ -22,13 +21,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.http.HttpStatus;
 import com.phone.store.backend.model.request.ProductRequest;
 import com.phone.store.backend.model.response.StatusResponse;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class ProductService {
@@ -38,6 +36,12 @@ public class ProductService {
 
     @Autowired
     private OrderItemRepository orderItemRepository;
+
+    @Autowired
+    private ProductColorRepository productColorRepository;
+
+    @Autowired
+    private ProductVariantRepository productVariantRepository;
 
     public ResponseEntity<Page<ProductResponse>> getProducts(int page,
             int size,
@@ -218,9 +222,9 @@ public class ProductService {
     }
 
     @PreAuthorize("hasAnyRole('ADMIN')")
+    @Transactional
     public ResponseEntity<?> updateProduct(Long id, ProductRequest productRequest) {
         try {
-            // Kiểm tra xem sản phẩm tồn tại không
             Optional<ProductEntity> productOptional = productRepository.findById(id);
             if (productOptional.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -229,13 +233,11 @@ public class ProductService {
 
             ProductEntity product = productOptional.get();
 
-            // Cập nhật thông tin cơ bản
             product.setName(productRequest.getName());
             product.setDescription(productRequest.getDescription());
             product.setStock(productRequest.getStock());
             product.setCategory(productRequest.getCategory());
 
-            // Cập nhật chi tiết sản phẩm
             ProductDetailEntity productDetail = product.getProductDetail();
             if (productDetail == null) {
                 productDetail = new ProductDetailEntity();
@@ -254,17 +256,12 @@ public class ProductService {
 
             product.setProductDetail(productDetail);
 
-            // Cập nhật biến thể
-            List<ProductVariantEntity> currentVariants = product.getVariants();
 
-            // Xóa các variant cũ
-            if (currentVariants != null) {
-                currentVariants.clear();
-            } else {
-                currentVariants = new ArrayList<>();
+            if (product.getVariants() != null && !product.getVariants().isEmpty()) {
+                productVariantRepository.deleteAll(product.getVariants());
             }
 
-            // Thêm các variant mới
+            List<ProductVariantEntity> newVariants = new ArrayList<>();
             Long lowestPrice = null;
 
             for (ProductVariantRequest variantRequest : productRequest.getVariants()) {
@@ -278,50 +275,56 @@ public class ProductService {
                     lowestPrice = variantRequest.getPrice();
                 }
 
-                currentVariants.add(variant);
+                newVariants.add(variant);
             }
 
-            // Cập nhật giá thấp nhất cho sản phẩm
             product.setPrice(lowestPrice != null ? lowestPrice : 0L);
-            product.setVariants(currentVariants);
 
-            // Cập nhật màu sắc
-            List<ProductColorEntity> currentColors = product.getColors();
-
-            // Xóa các color cũ
-            if (currentColors != null) {
-                currentColors.clear();
-            } else {
-                currentColors = new ArrayList<>();
+            if (product.getColors() != null && !product.getColors().isEmpty()) {
+                productColorRepository.deleteAll(product.getColors());
             }
 
-            // Thêm các color mới
+            List<ProductColorEntity> newColors = new ArrayList<>();
+
             for (ProductColorRequest colorRequest : productRequest.getColors()) {
                 ProductColorEntity color = new ProductColorEntity();
                 color.setColorName(colorRequest.getColorName());
                 color.setProduct(product);
 
-                // Sử dụng URL ảnh từ request
                 if (colorRequest.getImageUrl() != null && !colorRequest.getImageUrl().isEmpty()) {
                     color.setImage(colorRequest.getImageUrl());
                 } else {
-                    // Nếu không có URL ảnh mới, giữ nguyên ảnh sản phẩm chính
                     color.setImage(product.getImage());
                 }
 
-                currentColors.add(color);
+                newColors.add(color);
             }
 
-            product.setColors(currentColors);
-
-            // Cập nhật ảnh chính của sản phẩm (nếu có ảnh mới)
-            if (productRequest.getColors() != null && !productRequest.getColors().isEmpty()
-                    && productRequest.getColors().get(0).getImageUrl() != null
-                    && !productRequest.getColors().get(0).getImageUrl().isEmpty()) {
-                product.setImage(productRequest.getColors().get(0).getImageUrl());
+            if (!newColors.isEmpty() && newColors.get(0).getImage() != null
+                    && !newColors.get(0).getImage().isEmpty()) {
+                product.setImage(newColors.get(0).getImage());
+            }
+            if (product.getColors() != null) {
+                product.getColors().clear();
+            }
+            if (product.getVariants() != null) {
+                product.getVariants().clear();
             }
 
-            // Lưu sản phẩm vào database
+            product = productRepository.save(product);
+
+            for (ProductVariantEntity variant : newVariants) {
+                variant.setProduct(product);
+            }
+            product.setVariants(newVariants);
+            productVariantRepository.saveAll(newVariants);
+
+            for (ProductColorEntity color : newColors) {
+                color.setProduct(product);
+            }
+            product.setColors(newColors);
+            productColorRepository.saveAll(newColors);
+
             productRepository.save(product);
 
             return ResponseEntity.ok(new StatusResponse("Cập nhật sản phẩm thành công", 200));

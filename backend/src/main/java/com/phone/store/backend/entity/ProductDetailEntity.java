@@ -35,11 +35,5 @@ public class ProductDetailEntity {
     private String cpu;
 
     @Column(nullable = false)
-    private String ram;
-
-    @Column(nullable = false)
-    private String rom;
-
-    @Column(nullable = false)
     private String battery;
 }

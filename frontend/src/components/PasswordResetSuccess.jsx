@@ -15,9 +15,6 @@ const PasswordResetSuccess = () => {
         const urlParams = new URLSearchParams(window.location.search);
         const refreshToken = urlParams.get('refreshToken');
         
-        console.log("Current URL:", window.location.href);
-        console.log("Refresh Token:", refreshToken);
-        
         if (!refreshToken) {
           setError("Token không hợp lệ hoặc đã hết hạn");
           setLoading(false);

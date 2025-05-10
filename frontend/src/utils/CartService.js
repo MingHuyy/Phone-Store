@@ -45,8 +45,7 @@ export const adRequestCart = async (productId, quantity = 1, options = null) => 
                 price: options.price
             })
         };
-        
-        console.log("Sending to server:", cartData);
+    
         
         const response = await fetch(`${API_BASE_URL}/api/carts`, {
             method: 'POST',

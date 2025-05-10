@@ -148,27 +148,22 @@ function AdminDashboard() {
         api.get('/api/admin/users')
       ]);
 
-      // Xử lý dữ liệu đơn hàng
       if (ordersRes.status === 'fulfilled') {
-        console.log('Orders response:', ordersRes.value.data);
         setOrders(Array.isArray(ordersRes.value.data) ? ordersRes.value.data : []);
       }
       
       // Xử lý dữ liệu sản phẩm
       if (productsRes.status === 'fulfilled') {
-        console.log('Products response chi tiết:', productsRes.value.data);
         setProducts(Array.isArray(productsRes.value.data) ? productsRes.value.data : []);
       }
       
       // Xử lý dữ liệu người dùng
       if (usersRes.status === 'fulfilled') {
-        console.log('Users response:', usersRes.value.data);
         setUsers(Array.isArray(usersRes.value.data) ? usersRes.value.data : []);
       }
       
       setError(null);
     } catch (err) {
-      console.error('Lỗi tải dữ liệu:', err);
       setError(
         err.response?.data?.message || 
         'Không thể tải dữ liệu. Vui lòng thử lại sau.'
@@ -223,10 +218,6 @@ function AdminDashboard() {
   const handleEditProduct = (product) => {
     setSelectedItem(product);
     
-    // In ra toàn bộ thông tin sản phẩm mà API trả về
-    console.log('Thông tin chi tiết sản phẩm:', product);
-    
-    // Khởi tạo form với dữ liệu từ sản phẩm
     setNewProduct({
       name: product.name,
       description: product.description,
@@ -250,7 +241,7 @@ function AdminDashboard() {
       colors: product.colors && product.colors.length > 0
         ? product.colors.map(color => ({
             colorName: color.colorName || '',
-            image: color.image || null
+            image: color.imageUrl || color.image || null  // Đảm bảo lấy đúng đường dẫn ảnh
           }))
         : [{ colorName: '', image: null }]
     });
@@ -386,7 +377,6 @@ function AdminDashboard() {
         
         if (color.image instanceof File) {
           hasFiles = true;
-          console.log(`Uploading file ${index}:`, color.image.name);
           
           // Tạo FormData riêng cho mỗi file để tránh trộn lẫn dữ liệu
           const fileFormData = new FormData();
@@ -455,9 +445,6 @@ function AdminDashboard() {
         throw new Error(errorData.message || 'Lỗi khi thêm sản phẩm');
       }
       
-      const responseData = await response.json();
-      console.log('Phản hồi từ server:', responseData);
-      
       setAddProductDialogOpen(false);
       showSnackbar('Đã thêm sản phẩm mới thành công', 'success');
       fetchAllData();
@@ -469,18 +456,13 @@ function AdminDashboard() {
 
   const submitEditProduct = async () => {
     try {
-      let hasFileUploads = false;
-      let uploadedImageUrls = [];
+      let uploadedImageUrls = {};
       
-      // Kiểm tra và upload các file ảnh nếu có
+      // Chỉ xử lý các ảnh mới (File)
       for (let index = 0; index < newProduct.colors.length; index++) {
         const color = newProduct.colors[index];
         
-        // Nếu image là file cần upload
         if (color.image instanceof File) {
-          hasFileUploads = true;
-          console.log(`Uploading file ${index} for edit:`, color.image.name);
-          
           // Tạo FormData riêng cho mỗi file để tránh trộn lẫn dữ liệu
           const fileFormData = new FormData();
           fileFormData.append('file', color.image);
@@ -507,11 +489,38 @@ function AdminDashboard() {
             console.error('Upload file error:', uploadError);
             throw new Error(`Lỗi tải file: ${uploadError.message}`);
           }
-        } else {
-          // Nếu là URL sẵn có, giữ nguyên
-          uploadedImageUrls[index] = typeof color.image === 'string' ? color.image : null;
         }
       }
+      
+      // Xử lý màu sắc để tránh trùng lặp
+      // Lọc ra các màu sắc có tên duy nhất
+      const uniqueColors = [];
+      const colorNames = new Set();
+      
+      newProduct.colors.forEach((color, index) => {
+        // Bỏ qua màu không có tên
+        if (!color.colorName.trim()) return;
+        
+        // Nếu tên màu chưa xuất hiện trong tập hợp, thêm vào
+        if (!colorNames.has(color.colorName.trim().toLowerCase())) {
+          colorNames.add(color.colorName.trim().toLowerCase());
+          
+          const colorData = {
+            colorName: color.colorName
+          };
+          
+          // Xử lý ảnh cho màu này
+          if (uploadedImageUrls[index]) {
+            colorData.imageUrl = uploadedImageUrls[index];
+          } else if (typeof color.image === 'string') {
+            colorData.imageUrl = color.image;
+          }
+          
+          if (colorData.imageUrl) {
+            uniqueColors.push(colorData);
+          }
+        }
+      });
       
       // Chuyển đổi dữ liệu sản phẩm sang định dạng JSON
       const productData = {
@@ -531,15 +540,9 @@ function AdminDashboard() {
           ...v,
           price: parseInt(v.price || 0)
         })),
-        colors: newProduct.colors.map((color, index) => ({
-          colorName: color.colorName,
-          imageUrl: uploadedImageUrls[index] || null
-        }))
+        colors: uniqueColors
       };
       
-      console.log('Dữ liệu cập nhật sản phẩm:', JSON.stringify(productData));
-      
-      // Gửi yêu cầu cập nhật sản phẩm tới backend
       const response = await fetch(`http://localhost:1111/api/admin/products/${selectedItem.id}`, {
         method: 'PUT',
         headers: {
@@ -549,15 +552,13 @@ function AdminDashboard() {
         body: JSON.stringify(productData)
       });
       
+      console.log(productData);
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || 'Lỗi khi cập nhật sản phẩm');
       }
       
-      const responseData = await response.json();
-      console.log('Phản hồi từ server:', responseData);
-      
-      // Cập nhật sản phẩm trong danh sách hiển thị
       setProducts(products.map(product => 
         product.id === selectedItem.id 
           ? { 

@@ -26,7 +26,6 @@ const Cart = () => {
         setLoading(true);
         try {
             const data = await getCart();
-            console.log(data)
             setCartItems(data);
             const initialSelected = {};
             data.forEach(item => {
@@ -225,13 +224,9 @@ const Cart = () => {
                 },
                 body: JSON.stringify(orderData)
             });
-            console.log("cmmmm", orderData)
-            console.log("Payment API response status:", paymentResponse.status);
             const paymentData = await paymentResponse.json();
-            console.log("Payment API response data:", paymentData);
             
             if (paymentResponse.ok && paymentData.paymentUrl) {
-                // Chuyển hướng đến trang thanh toán VNPay
                 window.location.href = paymentData.paymentUrl;
                 return true;
             } else {
@@ -291,7 +286,6 @@ const Cart = () => {
 
                 }))
             }; 
-            console.log("OrderData:", orderData);
             if (checkoutInfo.paymentMethod === "online") {
                 const paymentSuccess = await handleOnlinePayment(orderData);
                 if (paymentSuccess) return;
@@ -307,7 +301,6 @@ const Cart = () => {
                 
                 const data = await response.json();
 
-                console.log("OrderData response:", data);
                 if (!response.ok) {
                     throw new Error(data.message || 'Đặt hàng thất bại');
                 }

@@ -94,6 +94,7 @@ const Header = () => {
 
     const handleSearch = (e) => {
         e.preventDefault();
+        e.stopPropagation();
 
         if (!searchKeyword.trim()) return;
 
@@ -102,20 +103,8 @@ const Header = () => {
             const keyword = searchKeyword;
             setSearchKeyword("");
             
-            // Kiểm tra xem đang ở trang nào
-            const currentPath = location.pathname;
-            
-            // Nếu đang ở trang chủ hoặc trang khác không phải products, chuyển đến trang products
-            if (currentPath !== "/products") {
-                navigate(`/products?search=${encodeURIComponent(keyword)}`);
-            } else {
-                // Nếu đã ở trang products, chỉ cập nhật URL
-                const params = new URLSearchParams(location.search);
-                params.set("search", keyword);
-                navigate(`${currentPath}?${params.toString()}`);
-            }
-            
-            setIsSearching(false);
+            // Chuyển đến trang products với tham số tìm kiếm
+            window.location.href = `/products?search=${encodeURIComponent(keyword)}`;
         } catch (error) {
             console.error("Lỗi khi tìm kiếm:", error);
             setIsSearching(false);
@@ -127,20 +116,8 @@ const Header = () => {
             setIsSearching(true);
             setSearchKeyword("");
             
-            // Kiểm tra xem đang ở trang nào
-            const currentPath = location.pathname;
-            
-            // Nếu đang ở trang chủ hoặc trang khác không phải products, chuyển đến trang products
-            if (currentPath !== "/products") {
-                navigate(`/products?search=${encodeURIComponent(keyword)}`);
-            } else {
-                // Nếu đã ở trang products, chỉ cập nhật URL
-                const params = new URLSearchParams(location.search);
-                params.set("search", keyword);
-                navigate(`${currentPath}?${params.toString()}`);
-            }
-            
-            setIsSearching(false);
+            // Chuyển đến trang products với tham số tìm kiếm
+            window.location.href = `/products?search=${encodeURIComponent(keyword)}`;
         } catch (error) {
             console.error("Lỗi khi tìm kiếm nhanh:", error);
             setIsSearching(false);
@@ -178,7 +155,7 @@ const Header = () => {
 
                 <div className="content">
                     <div className="search-header">
-                        <form className="input-search" onSubmit={handleSearch} ref={searchFormRef}>
+                        <form className="input-search" action="/products" method="get" onSubmit={handleSearch} ref={searchFormRef}>
                             <div className="autocomplete">
                                 <input
                                     id="search-box"
@@ -189,12 +166,11 @@ const Header = () => {
                                     value={searchKeyword}
                                     onChange={(e) => setSearchKeyword(e.target.value)}
                                     disabled={isSearching}
-                                    onClick={(e) => e.stopPropagation()}
                                 />
                                 <button
                                     type="submit"
                                     disabled={isSearching}
-                                    onClick={(e) => e.stopPropagation()}
+                                    onClick={handleSearch}
                                 >
                                     {isSearching ? (
                                         <span>Đang tìm...</span>
@@ -208,20 +184,16 @@ const Header = () => {
                         </form>
                         <div className="tags">
                             <strong>Từ khóa: </strong>
-                            <span onClick={(e) => {
-                                e.stopPropagation();
+                            <span onClick={() => {
                                 if (!isSearching) handleQuickSearch("iPhone");
                             }} style={{ cursor: isSearching ? "default" : "pointer" }}>iPhone</span> •
-                            <span onClick={(e) => {
-                                e.stopPropagation();
+                            <span onClick={() => {
                                 if (!isSearching) handleQuickSearch("Samsung");
                             }} style={{ cursor: isSearching ? "default" : "pointer" }}>Samsung</span> •
-                            <span onClick={(e) => {
-                                e.stopPropagation();
+                            <span onClick={() => {
                                 if (!isSearching) handleQuickSearch("Xiaomi");
                             }} style={{ cursor: isSearching ? "default" : "pointer" }}>Xiaomi</span> •
-                            <span onClick={(e) => {
-                                e.stopPropagation();
+                            <span onClick={() => {
                                 if (!isSearching) handleQuickSearch("OPPO");
                             }} style={{ cursor: isSearching ? "default" : "pointer" }}>OPPO</span>
                         </div>

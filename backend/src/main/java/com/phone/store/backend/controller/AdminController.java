@@ -57,7 +57,6 @@ public class AdminController {
     @GetMapping("/orders")
     public ResponseEntity<?> getAllOrders() {
         List<OrderEntity> orders = orderRepository.findAll();
-        System.out.println("=================" + orders.size());
         List<OrderResponse> orderResponses = new ArrayList<>();
 
         for (OrderEntity order : orders) {

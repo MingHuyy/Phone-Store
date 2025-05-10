@@ -80,10 +80,7 @@ public class ProductController {
     public ResponseEntity<Page<ProductResponse>> searchProducts(@RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "9") int size,
             @RequestParam("keyword") String keyword) {
-        System.out.println(keyword);
         return productService.searchProduct(keyword, page, size);
     }
-
-
 
 }

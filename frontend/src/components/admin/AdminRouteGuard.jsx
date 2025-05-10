@@ -12,7 +12,6 @@ function AdminRouteGuard({ children }) {
         const token = localStorage.getItem('accessToken');
         
         if (!token) {
-          console.log('Không tìm thấy token, chuyển hướng về trang đăng nhập');
           setLoading(false);
           return;
         }
@@ -21,12 +20,9 @@ function AdminRouteGuard({ children }) {
           headers: { Authorization: `Bearer ${token}` }
         });
         
-        console.log('Dữ liệu người dùng:', response.data);
         
         if (response.data && response.data.roles) {
-          console.log('Vai trò:', response.data.roles);
           if (response.data.roles.split(',').includes('ADMIN')) {
-            console.log('Người dùng có quyền ADMIN');
             setIsAdmin(true);
           } else {
             console.log('Người dùng không có quyền ADMIN');

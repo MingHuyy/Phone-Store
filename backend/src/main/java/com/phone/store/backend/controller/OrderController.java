@@ -20,7 +20,6 @@ public class OrderController {
 
     @PostMapping
     public ResponseEntity<?> createOrder(@RequestBody OrderRequest orderRequest) {
-        System.out.println(orderRequest);
         return orderService.createOrder(orderRequest);
     }
 

@@ -30,7 +30,6 @@ const ProductDetail = () => {
       try {
         setLoading(true)
         const data = await callApiWithAuth(`/products/${productId}`)
-        console.log(data)
         
         if (data && data.description) {
           const formattedDescription = data.description.replace(/([.!?])\s+/g, "$1\n");
@@ -283,16 +282,7 @@ const ProductDetail = () => {
     setTimeout(() => setIsShaking(false), 500);
     
     try {
-      // Debug: log selectedVariant và các thông tin liên quan
-      console.log("selectedVariant:", selectedVariant);
-      console.log("colorName:", selectedColor);
-      console.log("config:", selectedConfig);
-      console.log("currentPrice:", currentPrice);
-      
-      // Sử dụng ID của biến thể nếu có, nếu không thì dùng ID sản phẩm
       const itemId = Number(productId);
-      
-      // Khởi tạo các giá trị cần thiết từ selectedVariant
       let variantId = null;
       let price = null;
       
@@ -307,11 +297,9 @@ const ProductDetail = () => {
         const colorObj = product.colors.find(c => c.colorName === selectedColor);
         if (colorObj) {
           colorId = colorObj.id;
-          console.log("Found colorObj:", colorObj);
         }
       }
       
-      // Đảm bảo price là kiểu số, không phải chuỗi hoặc có định dạng khác
       if (typeof price === 'string') {
         price = parseInt(price.replace(/[^\d]/g, ''));
       }
@@ -323,7 +311,6 @@ const ProductDetail = () => {
         price: price || currentPrice
       };
       
-      console.log("Sending options:", options);
       
       const response = await adRequestCart(itemId, quantity, options);
       
@@ -669,10 +656,6 @@ const ProductDetail = () => {
                 <div className="spec-row">
                   <div className="spec-name">Chip</div>
                   <div className="spec-value">{product.cpu}</div>
-                </div>
-                <div className="spec-row">
-                  <div className="spec-name">RAM</div>
-                  <div className="spec-value">{selectedVariant ? selectedVariant.ram : product.ram}</div>
                 </div>
                 <div className="spec-row">
                   <div className="spec-name">Bộ nhớ trong</div>
