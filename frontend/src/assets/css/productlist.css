@@ -886,6 +886,10 @@
   background: linear-gradient(135deg, #dc3545, #ff6b6b);
 }
 
+.notification.info {
+  background: linear-gradient(135deg, #17a2b8, #0dcaf0);
+}
+
 @keyframes slideIn {
   from {
     transform: translateX(100%);

@@ -14,6 +14,7 @@ import com.phone.store.backend.respository.TokenRepository;
 import com.phone.store.backend.respository.UserRepository;
 import com.phone.store.backend.utils.JWTTokenUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -50,33 +51,39 @@ public class AuthService {
     @Autowired
     private UserConverter userConverter;
 
-    private String defaultPassword = "123456";
+    @Value("${default.password}")
+    private String defaultPassword;
 
     public ResponseEntity<TokenResponse> login(LoginRequest loginRequest) {
-        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                loginRequest.getUsername(), loginRequest.getPassword());
-        Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
+        try {
+            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                    loginRequest.getUsername(), loginRequest.getPassword());
+            Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
 
-        UserEntity user = userRepository.findByUsername(loginRequest.getUsername());
+            UserEntity user = userRepository.findByUsername(loginRequest.getUsername());
 
-        Set<RoleEntity> roleEntities = user.getRoles();
-        String roles = roleEntities.stream()
-                .map(RoleEntity::getName)
-                .collect(Collectors.joining(","));
+            Set<RoleEntity> roleEntities = user.getRoles();
+            String roles = roleEntities.stream()
+                    .map(RoleEntity::getName)
+                    .collect(Collectors.joining(","));
 
-        String accessToken = jwtTokenUtil.createAccessToken(authentication);
-        String refreshToken = jwtTokenUtil.createRefreshToken(authentication);
-        tokenService.saveToken(TokenEntity.builder()
-                .userName(user.getUsername())
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .build());
-        TokenResponse jwtToken = new TokenResponse();
-        jwtToken.setAccessToken(accessToken);
-        jwtToken.setUserId(user.getId());
-        jwtToken.setRefreshToken(refreshToken);
-        jwtToken.setRole(roles);
-        return ResponseEntity.ok(jwtToken);
+            String accessToken = jwtTokenUtil.createAccessToken(authentication);
+            String refreshToken = jwtTokenUtil.createRefreshToken(authentication);
+            tokenService.saveToken(TokenEntity.builder()
+                    .userName(user.getUsername())
+                    .accessToken(accessToken)
+                    .refreshToken(refreshToken)
+                    .build());
+            TokenResponse jwtToken = new TokenResponse();
+            jwtToken.setAccessToken(accessToken);
+            jwtToken.setUserId(user.getId());
+            jwtToken.setRefreshToken(refreshToken);
+            jwtToken.setRole(roles);
+            return ResponseEntity.ok(jwtToken);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new TokenResponse("Tài khoản hoặc mật khẩu không chính xác"));
+        }
     }
 
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")

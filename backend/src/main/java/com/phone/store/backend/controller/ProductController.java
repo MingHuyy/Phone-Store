@@ -27,7 +27,7 @@ public class ProductController {
 
     @GetMapping("")
     public List<ProductResponse> products() {
-        return productRepository.findV1();
+        return productRepository.findV1().reversed();
     }
 
     @GetMapping("/oderbyprice")

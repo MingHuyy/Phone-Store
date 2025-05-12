@@ -28,7 +28,7 @@ public class MailService {
         String emailContent = String.format(
                 "Chào bạn,<br><br>" +
                         "<p>Chỉ cần nhấp vào liên kết bên dưới để xác nhận tài khoản của bạn và đặt lại mật khẩu:</p>" +
-                        "<p class='password'>Mật khẩu của bạn là: 123456</p><br>" +
+                        "<p class='password'>Mật khẩu mới của bạn là: 123456</p><br>" +
                         "<a href='%s'>Reset mật khẩu</a><br><br>Thân ái!", linkConfirm);
 
         helper.setFrom(from, "Smartphone Store");

@@ -5,21 +5,21 @@ import { getCart, updateCartQuantity, removeFromCart, removeMultipleFromCart } f
 import "../../assets/css/cart.css";
 
 const Cart = () => {
-    // State cho giỏ hàng
     const [cartItems, setCartItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [selectedItems, setSelectedItems] = useState({});
     const [isProcessing, setIsProcessing] = useState(false);
-    // State cho form thanh toán
     const [showCheckout, setShowCheckout] = useState(false);
     const [checkoutInfo, setCheckoutInfo] = useState({
         fullName: "",
         phone: "",
         address: "",
-        paymentMethod: "cod", // mặc định là COD
+        paymentMethod: "cod",
     });
     const [formErrors, setFormErrors] = useState({});
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const [orderData, setOrderData] = useState(null);
 
     // Lấy dữ liệu giỏ hàng
     const fetchCartData = async () => {
@@ -267,26 +267,31 @@ const Cart = () => {
         // Lấy danh sách sản phẩm đã chọn
         const selectedProducts = cartItems.filter(item => selectedItems[item.id]);
         
+        const orderData = {
+            fullName: checkoutInfo.fullName,
+            phone: checkoutInfo.phone,
+            address: checkoutInfo.address,
+            paymentMethod: checkoutInfo.paymentMethod,
+            totalAmount: calculateTotal(),
+            orderItems: selectedProducts.map(item => ({
+                productId: item.productId,
+                quantity: item.quantity,
+                price: parseInt(item.price),
+                productName: item.productName,
+                productImage: item.image,
+                colorName: item.colorName,
+            }))
+        };
+
+        setOrderData(orderData);
+        setShowConfirmModal(true);
+    };
+
+    const handleConfirmOrder = async () => {
         try {
             setIsProcessing(true);
             
-            const orderData = {
-                fullName: checkoutInfo.fullName,
-                phone: checkoutInfo.phone,
-                address: checkoutInfo.address,
-                paymentMethod: checkoutInfo.paymentMethod,
-                totalAmount: calculateTotal(),
-                orderItems: selectedProducts.map(item => ({
-                    productId: item.productId,
-                    quantity: item.quantity,
-                    price: parseInt(item.price),
-                    productName: item.productName,
-                    productImage: item.image,
-                    colorName: item.colorName,
-
-                }))
-            }; 
-            if (checkoutInfo.paymentMethod === "online") {
+            if (orderData.paymentMethod === "online") {
                 const paymentSuccess = await handleOnlinePayment(orderData);
                 if (paymentSuccess) return;
             } else {
@@ -305,7 +310,10 @@ const Cart = () => {
                     throw new Error(data.message || 'Đặt hàng thất bại');
                 }
                 
-                const itemsToRemove = selectedProducts.map(item => item.id);
+                const itemsToRemove = cartItems
+                    .filter(item => selectedItems[item.id])
+                    .map(item => item.id);
+                    
                 await removeMultipleFromCart(itemsToRemove);
                 
                 // Cập nhật state
@@ -318,10 +326,12 @@ const Cart = () => {
                     }
                 });
                 setSelectedItems(newSelectedItems);
-                alert("Đặt hàng thành công! Cảm ơn bạn đã mua sắm.");
+                setShowConfirmModal(false);
+                setShowCheckout(false);
+                
+                // Hiển thị thông báo thành công
+                alert("Đặt hàng thành công!\nCảm ơn bạn đã mua sắm. Chúng tôi sẽ xử lý đơn hàng của bạn trong thời gian sớm nhất.");
             }
-            setShowCheckout(false);
-            
         } catch (error) {
             console.error("Lỗi khi đặt hàng:", error);
             alert(error.message || "Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại.");
@@ -329,6 +339,11 @@ const Cart = () => {
             setIsProcessing(false);
         }
     };
+
+    // Thêm useEffect để theo dõi thay đổi của showSuccessModal
+    useEffect(() => {
+        console.log("Trạng thái showSuccessModal:", showSuccessModal);
+    }, [showSuccessModal]);
 
     // Hiển thị thông tin sản phẩm với cấu hình và màu sắc
     const renderCartItem = (item) => {
@@ -669,6 +684,44 @@ const Cart = () => {
                                     </button>
                                 </div>
                             </form>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal xác nhận đặt hàng */}
+            {showConfirmModal && (
+                <div className="confirm-order-modal">
+                    <div className="confirm-order-content">
+                        <div className="confirm-order-header">
+                            <h2>Xác nhận đặt hàng</h2>
+                        </div>
+                        <div className="confirm-order-body">
+                            <p className="confirm-order-message">
+                                Vui lòng kiểm tra lại thông tin đơn hàng trước khi xác nhận
+                            </p>
+                            <div className="confirm-order-details">
+                                <p><strong>Người nhận:</strong> {orderData.fullName}</p>
+                                <p><strong>Số điện thoại:</strong> {orderData.phone}</p>
+                                <p><strong>Địa chỉ:</strong> {orderData.address}</p>
+                                <p><strong>Phương thức thanh toán:</strong> {orderData.paymentMethod === "cod" ? "Thanh toán khi nhận hàng (COD)" : "Thanh toán trực tuyến"}</p>
+                                <p><strong>Tổng tiền:</strong> {formatCurrency(orderData.totalAmount)}</p>
+                            </div>
+                            <div className="confirm-order-actions">
+                                <button 
+                                    className="confirm-order-btn cancel"
+                                    onClick={() => setShowConfirmModal(false)}
+                                >
+                                    Hủy
+                                </button>
+                                <button 
+                                    className="confirm-order-btn confirm"
+                                    onClick={handleConfirmOrder}
+                                    disabled={isProcessing}
+                                >
+                                    <FaCheck /> Xác nhận đặt hàng
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

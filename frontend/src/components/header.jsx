@@ -83,7 +83,7 @@ const Header = () => {
             setIsLoggedIn(false);
             setShowMenu(false);
             setCartItemCount(0);
-            alert("Đăng xuất thành công");
+            alert("Đăng xuất thành công!");
             navigate("/login");
             window.location.reload();
         } catch (error) {
@@ -103,8 +103,12 @@ const Header = () => {
             const keyword = searchKeyword;
             setSearchKeyword("");
             
-            // Chuyển đến trang products với tham số tìm kiếm
-            window.location.href = `/products?search=${encodeURIComponent(keyword)}`;
+            if (location.pathname !== '/products') {
+                navigate(`/products?search=${encodeURIComponent(keyword)}`);
+            } else {
+                navigate(`?search=${encodeURIComponent(keyword)}`, { replace: true });
+            }
+            setIsSearching(false);
         } catch (error) {
             console.error("Lỗi khi tìm kiếm:", error);
             setIsSearching(false);
@@ -116,8 +120,8 @@ const Header = () => {
             setIsSearching(true);
             setSearchKeyword("");
             
-            // Chuyển đến trang products với tham số tìm kiếm
-            window.location.href = `/products?search=${encodeURIComponent(keyword)}`;
+            navigate(`/products?search=${encodeURIComponent(keyword)}`);
+            setIsSearching(false);
         } catch (error) {
             console.error("Lỗi khi tìm kiếm nhanh:", error);
             setIsSearching(false);

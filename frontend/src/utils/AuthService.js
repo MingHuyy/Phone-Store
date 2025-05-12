@@ -29,7 +29,8 @@ export const callApiWithAuth = async (url, options = {}) => {
                 response = await fetch(`${API_BASE_URL}${url}`, options);
 
                 if (!response.ok) {
-                    throw new Error(`Lỗi HTTP ${response.status}`);
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || `Lỗi HTTP ${response.status}`);
                 }
             } catch (refreshError) {
                 // Đảm bảo đăng xuất khi refresh token thất bại
@@ -40,8 +41,8 @@ export const callApiWithAuth = async (url, options = {}) => {
             let errorMessage = `Lỗi HTTP ${response.status}`;
 
             try {
-                const text = await response.text();
-                errorMessage = JSON.parse(text).message || text;
+                const errorData = await response.json();
+                errorMessage = errorData.message || errorData;
             } catch (e) {
                 // Nếu không parse được JSON, giữ nguyên errorMessage
                 console.debug("Không thể parse JSON response:", e);
