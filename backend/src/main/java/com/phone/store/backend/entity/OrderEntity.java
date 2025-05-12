@@ -40,10 +40,21 @@ public class OrderEntity {
     @Column(nullable = false)
     private PaymentStatus paymentStatus;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private OrderStatus orderStatus = OrderStatus.PROCESSING;
+
     @CreationTimestamp
     private Date createdAt;
 
     public enum PaymentStatus {
         COD, COMPLETED
+    }
+
+    public enum OrderStatus {
+        PROCESSING,
+        SHIPPING,
+        COMPLETED,
+        CANCELLED
     }
 }

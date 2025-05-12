@@ -12,6 +12,9 @@ import {
     FaUser,
     FaMapMarkerAlt,
     FaPhone,
+    FaCheckCircle,
+    FaTimesCircle,
+    FaHourglassHalf
 } from "react-icons/fa"
 import "../assets/css/orderdetail.css"
 import { callApiWithAuth } from "../utils/AuthService"
@@ -74,6 +77,36 @@ const OrderDetail = () => {
         }
     }
 
+    const getOrderStatusLabel = (status) => {
+        switch (status) {
+            case "PROCESSING":
+                return "Đang xử lý"
+            case "SHIPPING":
+                return "Đang vận chuyển"
+            case "COMPLETED":
+                return "Giao hàng thành công"
+            case "CANCELLED":
+                return "Đã hủy"
+            default:
+                return status
+        }
+    }
+
+    const getOrderStatusIcon = (status) => {
+        switch (status) {
+            case "PROCESSING":
+                return <FaHourglassHalf className="status-icon processing" />
+            case "SHIPPING":
+                return <FaTruck className="status-icon shipping" />
+            case "COMPLETED":
+                return <FaCheckCircle className="status-icon delivered" />
+            case "CANCELLED":
+                return <FaTimesCircle className="status-icon cancelled" />
+            default:
+                return <FaHourglassHalf className="status-icon" />
+        }
+    }
+
     if (loading) {
         return (
             <div className="order-detail-container loading">
@@ -115,8 +148,8 @@ const OrderDetail = () => {
                     <div className="order-detail-header">
                         <h1>Chi tiết đơn hàng #{index + 1}</h1>
                         <div className="order-status">
-                            <FaTruck className="status-icon processing" />
-                            <span>Đang vận chuyển</span>
+                            {getOrderStatusIcon(order.orderStatus)}
+                            <span>{getOrderStatusLabel(order.orderStatus)}</span>
                         </div>
                     </div>
 
@@ -146,6 +179,15 @@ const OrderDetail = () => {
                                         <div className="info-value payment-status">
                                             {getPaymentStatusIcon(order.paymentStatus)}
                                             <span>{getPaymentStatusLabel(order.paymentStatus)}</span>
+                                        </div>
+                                    </div>
+                                    <div className="info-row">
+                                        <div className="info-label">
+                                            <FaTruck /> Trạng thái vận chuyển:
+                                        </div>
+                                        <div className="info-value payment-status">
+                                            {getOrderStatusIcon(order.orderStatus)}
+                                            <span>{getOrderStatusLabel(order.orderStatus)}</span>
                                         </div>
                                     </div>
                                 </div>

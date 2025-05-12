@@ -16,9 +16,16 @@ import {
   FilterList as FilterIcon,
   Refresh as RefreshIcon,
   ArrowUpward as ArrowUpwardIcon,
-  ArrowDownward as ArrowDownwardIcon
+  ArrowDownward as ArrowDownwardIcon,
+  Close as CloseIcon,
+  Save as SaveIcon,
+  Info as InfoIcon,
+  Home as HomeIcon
 } from '@mui/icons-material';
 import axios from 'axios';
+import { FaHourglassHalf, FaTruck, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
+import '../../assets/css/adminProductForm.css';
 
 
 const api = axios.create({
@@ -64,6 +71,7 @@ function AdminDashboard() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isTablet = useMediaQuery(theme.breakpoints.down('md'));
+  const navigate = useNavigate();
   
   const [tabValue, setTabValue] = useState(0);
   const [users, setUsers] = useState([]);
@@ -115,6 +123,11 @@ function AdminDashboard() {
     totalOrders: 0,
     revenue: 0
   });
+
+  // Thêm state cho cập nhật trạng thái và message
+  const [updateStatusDialogOpen, setUpdateStatusDialogOpen] = useState(false);
+  const [newOrderStatus, setNewOrderStatus] = useState('');
+  const [statusMessage, setStatusMessage] = useState('');
 
   useEffect(() => {
     fetchAllData();
@@ -768,6 +781,80 @@ function AdminDashboard() {
     );
   };
 
+  // Thêm hàm getOrderStatusLabel vào component AdminDashboard
+  const getOrderStatusLabel = (status) => {
+    if (!status) return "Chưa xác định";
+    switch (status) {
+      case "PROCESSING":
+        return "Đang xử lý";
+      case "SHIPPING":
+        return "Đang vận chuyển";
+      case "COMPLETED":
+        return "Đã giao hàng";
+      case "CANCELLED":
+        return "Đã hủy";
+      default:
+        return status;
+    }
+  };
+
+  // Thêm hàm xử lý mở dialog cập nhật trạng thái
+  const handleOpenUpdateStatus = () => {
+    if (orderDetails) {
+      setNewOrderStatus(orderDetails.orderStatus || 'PROCESSING');
+      setStatusMessage('');
+      setUpdateStatusDialogOpen(true);
+    }
+  };
+
+  // Thêm hàm xử lý lưu trạng thái mới
+  const handleUpdateOrderStatus = async () => {
+    try {
+      if (!selectedItem || !newOrderStatus) {
+        showSnackbar('Vui lòng chọn trạng thái', 'error');
+        return;
+      }
+      
+      // Trước khi gọi API, đóng dialog
+      setUpdateStatusDialogOpen(false);
+      
+      // Gọi API cập nhật trạng thái
+      const response = await fetch(`http://localhost:1111/api/orders/${selectedItem.id}/update-status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+        },
+        body: JSON.stringify({ 
+          orderStatus: newOrderStatus,
+          message: statusMessage
+        })
+      });
+      
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.message || 'Không thể cập nhật trạng thái');
+      }
+      
+      // Cập nhật UI
+      setOrders(orders.map(order => 
+        order.id === selectedItem.id 
+          ? { ...order, orderStatus: newOrderStatus }
+          : order
+      ));
+      
+      showSnackbar('Cập nhật trạng thái đơn hàng thành công', 'success');
+      
+    } catch (error) {
+      console.error('Lỗi cập nhật trạng thái:', error);
+      showSnackbar(error.message || 'Lỗi cập nhật trạng thái đơn hàng', 'error');
+    } finally {
+      setNewOrderStatus('');
+      setStatusMessage('');
+    }
+  };
+
   return (
     <Box sx={{ 
       width: '100%', 
@@ -775,15 +862,44 @@ function AdminDashboard() {
       backgroundColor: '#f5f5f5',
       minHeight: '100vh'
     }}>
-      <Typography variant="h4" gutterBottom sx={{ 
-        fontWeight: 'bold',
-        color: '#1976d2',
-        borderBottom: '2px solid #1976d2',
-        paddingBottom: 1,
-        marginBottom: 3
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center',
+        mb: 3
       }}>
-        Trang Quản Trị
-      </Typography>
+        <Typography variant="h4" sx={{ 
+          fontWeight: 'bold',
+          color: '#1976d2',
+          borderBottom: '2px solid #1976d2',
+          paddingBottom: 1
+        }}>
+          Trang Quản Trị
+        </Typography>
+        
+        <Button
+          variant="contained"
+          color="primary"
+          startIcon={<HomeIcon />}
+          onClick={() => navigate('/')}
+          sx={{
+            borderRadius: '10px',
+            background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
+            boxShadow: '0 3px 5px 2px rgba(33, 203, 243, .3)',
+            color: 'white',
+            padding: '10px 16px',
+            fontWeight: 'bold',
+            transition: 'all 0.3s',
+            '&:hover': {
+              background: 'linear-gradient(45deg, #1E88E5 30%, #00ACC1 90%)',
+              transform: 'translateY(-3px)',
+              boxShadow: '0 6px 10px 2px rgba(33, 203, 243, .3)'
+            }
+          }}
+        >
+          Về Trang Chủ
+        </Button>
+      </Box>
       
       {renderStats()}
       
@@ -951,11 +1067,11 @@ function AdminDashboard() {
                               </Box>
                             </TableCell>
                             <TableCell 
-                              onClick={() => handleSort('status')}
+                              onClick={() => handleSort('orderStatus')}
                               sx={{ cursor: 'pointer', fontWeight: 'bold', whiteSpace: 'nowrap' }}
                             >
                               <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                Thanh toán {renderSortIcon('status')}
+                                Trạng thái đơn hàng {renderSortIcon('orderStatus')}
                               </Box>
                             </TableCell>
                             <TableCell sx={{ fontWeight: 'bold', whiteSpace: 'nowrap' }}>Thao tác</TableCell>
@@ -993,12 +1109,12 @@ function AdminDashboard() {
                               </TableCell>
                               <TableCell>
                                 <Chip 
-                                  label={order.status || order.paymentStatus} 
+                                  label={getOrderStatusLabel(order.orderStatus)} 
                                   color={
-                                    (order.status || order.paymentStatus) === 'Đã giao hàng' ? 'success' :
-                                    (order.status || order.paymentStatus) === 'Đang giao hàng' ? 'info' :
-                                    (order.status || order.paymentStatus) === 'Đang xử lý' ? 'warning' :
-                                    (order.status || order.paymentStatus) === 'Đã hủy' ? 'error' : 'default'
+                                    order.orderStatus === 'COMPLETED' ? 'success' :
+                                    order.orderStatus === 'SHIPPING' ? 'info' :
+                                    order.orderStatus === 'PROCESSING' ? 'warning' :
+                                    order.orderStatus === 'CANCELLED' ? 'error' : 'default'
                                   }
                                   sx={{ 
                                     fontWeight: 'medium',
@@ -1371,14 +1487,14 @@ function AdminDashboard() {
                     <Typography><strong>Ngày đặt:</strong> {new Date(orderDetails.createdAt).toLocaleString('vi-VN')}</Typography>
                     <Typography><strong>Tổng tiền:</strong> {(orderDetails.totalAmount || orderDetails.totalPrice).toLocaleString('vi-VN')}₫</Typography>
                     <Typography>
-                      <strong>Thanh toán:</strong> 
+                      <strong>Trạng thái đơn hàng:</strong> 
                       <Chip 
-                        label={orderDetails.status || orderDetails.paymentStatus} 
+                        label={getOrderStatusLabel(orderDetails.orderStatus)} 
                         color={
-                          (orderDetails.status || orderDetails.paymentStatus) === 'Đã giao hàng' ? 'success' :
-                          (orderDetails.status || orderDetails.paymentStatus) === 'Đang giao hàng' ? 'info' :
-                          (orderDetails.status || orderDetails.paymentStatus) === 'Đang xử lý' ? 'warning' :
-                          (orderDetails.status || orderDetails.paymentStatus) === 'Đã hủy' ? 'error' : 'default'
+                          orderDetails.orderStatus === 'COMPLETED' ? 'success' :
+                          orderDetails.orderStatus === 'SHIPPING' ? 'info' :
+                          orderDetails.orderStatus === 'PROCESSING' ? 'warning' :
+                          orderDetails.orderStatus === 'CANCELLED' ? 'error' : 'default'
                         }
                         size="small"
                         sx={{ ml: 1, borderRadius: '16px' }}
@@ -1443,16 +1559,26 @@ function AdminDashboard() {
         </DialogContent>
         <DialogActions sx={{ p: 2, borderTop: '1px solid #e0e0e0' }}>
           <Button 
-            onClick={() => setOrderDialogOpen(false)}
             variant="contained"
+            color="primary"
+            onClick={handleOpenUpdateStatus}
             sx={{ 
               borderRadius: '8px',
+              marginRight: 'auto',
               boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-              transition: 'all 0.2s',
               '&:hover': {
                 transform: 'translateY(-2px)',
                 boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
               }
+            }}
+          >
+            Cập nhật trạng thái
+          </Button>
+          <Button 
+            onClick={() => setOrderDialogOpen(false)}
+            variant="outlined"
+            sx={{ 
+              borderRadius: '8px'
             }}
           >
             Đóng
@@ -1572,400 +1698,359 @@ function AdminDashboard() {
       <Dialog
         open={addProductDialogOpen}
         onClose={() => setAddProductDialogOpen(false)}
-        maxWidth="sm"
-        fullWidth
+        maxWidth={false}
+        className="product-dialog"
         PaperProps={{
-          sx: {
-            borderRadius: '12px',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.2)'
-          }
+          className: "product-dialog-paper",
+          sx: { overflow: 'visible' }
         }}
       >
-        <DialogTitle sx={{ 
-          borderBottom: '1px solid #e0e0e0',
-          fontWeight: 'bold',
-          bgcolor: '#f5f5f5'
-        }}>
+        <DialogTitle className="product-dialog-title">
           Thêm sản phẩm mới
+          <IconButton
+            onClick={() => setAddProductDialogOpen(false)}
+            className="product-dialog-close"
+            sx={{ position: 'absolute', right: 8, top: 8 }}
+          >
+            <CloseIcon />
+          </IconButton>
         </DialogTitle>
-        <DialogContent sx={{ p: 3 }}>
+        <DialogContent className="product-dialog-content">
           {/* Thông tin cơ bản */}
-          <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1, mt: 1 }}>
-            Thông tin cơ bản
-          </Typography>
-          <Grid container spacing={2}>
-            <Grid container item spacing={2}>
-              <Grid item xs={12} md={6}>
+          <div className="product-form-section">
+            <Typography className="product-form-section-title">
+              <InfoIcon /> Thông tin cơ bản
+            </Typography>
+            <Grid container spacing={3}>
+              <Grid item xs={12} md={4}>
                 <TextField
                   label="Tên sản phẩm"
                   fullWidth
                   name="name"
                   value={newProduct.name}
                   onChange={handleProductInputChange}
-                  variant="outlined"
-                  InputProps={{
-                    sx: { borderRadius: '8px' }
-                  }}
+                  variant="filled"
+                  className="product-form-field"
+                  required
                 />
               </Grid>
-              <Grid item xs={12} md={6}>
+              <Grid item xs={12} md={4}>
                 <TextField
                   label="Danh mục"
                   fullWidth
                   name="category"
                   value={newProduct.category}
                   onChange={handleProductInputChange}
-                  variant="outlined"
-                  InputProps={{
-                    sx: { borderRadius: '8px' }
-                  }}
+                  variant="filled"
+                  className="product-form-field"
+                />
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <TextField
+                  label="Số lượng"
+                  fullWidth
+                  type="number"
+                  name="stock"
+                  value={newProduct.stock}
+                  onChange={handleProductInputChange}
+                  variant="filled"
+                  className="product-form-field"
+                  required
                 />
               </Grid>
             </Grid>
-            
-            <Grid item xs={12}>
-              <TextField
-                label="Mô tả"
-                fullWidth
-                multiline
-                rows={3}
-                name="description"
-                value={newProduct.description}
-                onChange={handleProductInputChange}
-                variant="outlined"
-                InputProps={{
-                  sx: { borderRadius: '8px' }
-                }}
-              />
-            </Grid>
-            
-            <Grid item xs={12} md={6}>
-              <TextField
-                label="Số lượng"
-                fullWidth
-                type="number"
-                name="stock"
-                value={newProduct.stock}
-                onChange={handleProductInputChange}
-                variant="outlined"
-                InputProps={{
-                  sx: { borderRadius: '8px' }
-                }}
-              />
-            </Grid>
-          </Grid>
+          </div>
+          
+          {/* Mô tả sản phẩm */}
+          <div className="product-form-section">
+            <Typography className="product-form-section-title">
+              <InfoIcon /> Mô tả sản phẩm
+            </Typography>
+            <TextField
+              label="Mô tả"
+              fullWidth
+              multiline
+              rows={6}
+              name="description"
+              value={newProduct.description}
+              onChange={handleProductInputChange}
+              variant="filled"
+              className="product-form-field product-description-field"
+            />
+          </div>
           
           {/* Thông tin chi tiết */}
-          <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1, mt: 3 }}>
-            Thông số kỹ thuật
-          </Typography>
-          <Grid container spacing={2}>
-            <Grid item xs={12} md={6}>
-              <TextField
-                label="Màn hình"
-                fullWidth
-                name="detail.screen"
-                value={newProduct.detail.screen}
-                onChange={handleProductInputChange}
-                variant="outlined"
-                InputProps={{
-                  sx: { borderRadius: '8px' }
-                }}
-              />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <TextField
-                label="Hệ điều hành"
-                fullWidth
-                name="detail.os"
-                value={newProduct.detail.os}
-                onChange={handleProductInputChange}
-                variant="outlined"
-                InputProps={{
-                  sx: { borderRadius: '8px' }
-                }}
-              />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <TextField
-                label="Camera sau"
-                fullWidth
-                name="detail.camera"
-                value={newProduct.detail.camera}
-                onChange={handleProductInputChange}
-                variant="outlined"
-                InputProps={{
-                  sx: { borderRadius: '8px' }
-                }}
-              />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <TextField
-                label="Camera trước"
-                fullWidth
-                name="detail.cameraFront"
-                value={newProduct.detail.cameraFront}
-                onChange={handleProductInputChange}
-                variant="outlined"
-                InputProps={{
-                  sx: { borderRadius: '8px' }
-                }}
-              />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <TextField
-                label="Chip"
-                fullWidth
-                name="detail.cpu"
-                value={newProduct.detail.cpu}
-                onChange={handleProductInputChange}
-                variant="outlined"
-                InputProps={{
-                  sx: { borderRadius: '8px' }
-                }}
-              />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <TextField
-                label="Pin"
-                fullWidth
-                name="detail.battery"
-                value={newProduct.detail.battery}
-                onChange={handleProductInputChange}
-                variant="outlined"
-                InputProps={{
-                  sx: { borderRadius: '8px' }
-                }}
-              />
-            </Grid>
-          </Grid>
-          
-          {/* Phiên bản */}
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 3, mb: 1 }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-              Phiên bản
+          <div className="product-form-section">
+            <Typography className="product-form-section-title">
+              <InfoIcon /> Thông số kỹ thuật
             </Typography>
-            <Button 
-              size="small" 
-              variant="outlined"
-              onClick={() => setNewProduct(prev => ({
-                ...prev,
-                variants: [...prev.variants, { ram: '', rom: '', price: '' }]
-              }))}
-            >
-              Thêm phiên bản
-            </Button>
-          </Box>
-          
-          {newProduct.variants.map((variant, index) => (
-            <Box key={index} sx={{ mb: 2, p: 2, border: '1px solid #e0e0e0', borderRadius: '8px' }}>
-              <Grid container spacing={2}>
-                <Grid item xs={4}>
-                  <TextField
-                    label="RAM"
-                    fullWidth
-                    name={`variants[${index}].ram`}
-                    value={variant.ram}
-                    onChange={handleProductInputChange}
-                    variant="outlined"
-                    size="small"
-                  />
-                </Grid>
-                <Grid item xs={4}>
-                  <TextField
-                    label="ROM"
-                    fullWidth
-                    name={`variants[${index}].rom`}
-                    value={variant.rom}
-                    onChange={handleProductInputChange}
-                    variant="outlined"
-                    size="small"
-                  />
-                </Grid>
-                <Grid item xs={4}>
-                  <TextField
-                    label="Giá (VND)"
-                    fullWidth
-                    type="number"
-                    name={`variants[${index}].price`}
-                    value={variant.price}
-                    onChange={handleProductInputChange}
-                    variant="outlined"
-                    size="small"
-                  />
-                </Grid>
+            <Grid container spacing={3}>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Màn hình"
+                  fullWidth
+                  name="detail.screen"
+                  value={newProduct.detail.screen}
+                  onChange={handleProductInputChange}
+                  variant="filled"
+                  className="product-form-field"
+                />
               </Grid>
-              {index > 0 && (
-                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
-                  <Button 
-                    size="small" 
-                    color="error"
-                    onClick={() => {
-                      setNewProduct(prev => {
-                        const newVariants = [...prev.variants];
-                        newVariants.splice(index, 1);
-                        return { ...prev, variants: newVariants };
-                      });
-                    }}
-                  >
-                    Xóa
-                  </Button>
-                </Box>
-              )}
-            </Box>
-          ))}
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Hệ điều hành"
+                  fullWidth
+                  name="detail.os"
+                  value={newProduct.detail.os}
+                  onChange={handleProductInputChange}
+                  variant="filled"
+                  className="product-form-field"
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Camera sau"
+                  fullWidth
+                  name="detail.camera"
+                  value={newProduct.detail.camera}
+                  onChange={handleProductInputChange}
+                  variant="filled"
+                  className="product-form-field"
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Camera trước"
+                  fullWidth
+                  name="detail.cameraFront"
+                  value={newProduct.detail.cameraFront}
+                  onChange={handleProductInputChange}
+                  variant="filled"
+                  className="product-form-field"
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="CPU"
+                  fullWidth
+                  name="detail.cpu"
+                  value={newProduct.detail.cpu}
+                  onChange={handleProductInputChange}
+                  variant="filled"
+                  className="product-form-field"
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Pin"
+                  fullWidth
+                  name="detail.battery"
+                  value={newProduct.detail.battery}
+                  onChange={handleProductInputChange}
+                  variant="filled"
+                  className="product-form-field"
+                />
+              </Grid>
+            </Grid>
+          </div>
           
-          {/* Màu sắc */}
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 3, mb: 1 }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-              Màu sắc
+          {/* Biến thể sản phẩm */}
+          <div className="product-form-section">
+            <Typography className="product-form-section-title">
+              <InfoIcon /> Biến thể sản phẩm
             </Typography>
+            <div className="product-variants-container">
+              {newProduct.variants.map((variant, index) => (
+                <div key={index} className="product-variant-item">
+                  {index > 0 && (
+                    <IconButton 
+                      size="small" 
+                      color="error"
+                      className="product-variant-remove"
+                      onClick={() => {
+                        setNewProduct(prev => {
+                          const newVariants = [...prev.variants];
+                          newVariants.splice(index, 1);
+                          return { ...prev, variants: newVariants };
+                        });
+                      }}
+                    >
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  )}
+                  <Grid container spacing={3}>
+                    <Grid item xs={12} md={4}>
+                      <TextField
+                        label="RAM"
+                        fullWidth
+                        name={`variants[${index}].ram`}
+                        value={variant.ram}
+                        onChange={handleProductInputChange}
+                        variant="filled"
+                        className="product-form-field"
+                      />
+                    </Grid>
+                    <Grid item xs={12} md={4}>
+                      <TextField
+                        label="ROM"
+                        fullWidth
+                        name={`variants[${index}].rom`}
+                        value={variant.rom}
+                        onChange={handleProductInputChange}
+                        variant="filled"
+                        className="product-form-field"
+                      />
+                    </Grid>
+                    <Grid item xs={12} md={4}>
+                      <TextField
+                        label="Giá"
+                        fullWidth
+                        type="number"
+                        name={`variants[${index}].price`}
+                        value={variant.price}
+                        onChange={handleProductInputChange}
+                        variant="filled"
+                        className="product-form-field"
+                        InputProps={{
+                          endAdornment: <InputAdornment position="end">₫</InputAdornment>
+                        }}
+                      />
+                    </Grid>
+                  </Grid>
+                </div>
+              ))}
+            </div>
             <Button 
-              size="small" 
-              variant="outlined"
-              onClick={() => setNewProduct(prev => ({
-                ...prev,
-                colors: [...prev.colors, { colorName: '', image: null }]
-              }))}
+              startIcon={<AddIcon />}
+              onClick={() => {
+                setNewProduct(prev => ({
+                  ...prev,
+                  variants: [...prev.variants, { ram: '', rom: '', price: '' }]
+                }));
+              }}
+              className="product-form-button-add"
             >
-              Thêm màu sắc
+              Thêm biến thể
             </Button>
-          </Box>
+          </div>
           
-          {newProduct.colors.map((color, index) => (
-            <Box key={index} sx={{ mb: 2, p: 2, border: '1px solid #e0e0e0', borderRadius: '8px' }}>
-              <Grid container spacing={2}>
-                <Grid item xs={6}>
-                  <TextField
-                    label="Tên màu"
-                    fullWidth
-                    name={`colors[${index}].colorName`}
-                    value={color.colorName}
-                    onChange={handleProductInputChange}
-                    variant="outlined"
-                    size="small"
-                  />
-                </Grid>
-                <Grid item xs={6}>
-                  <input
-                    accept="image/*"
-                    type="file"
-                    id={`colors-image-${index}`}
-                    style={{ display: 'none' }}
-                    onChange={(e) => handleFileChange(e, `colors[${index}].image`)}
-                  />
-                  <Box sx={{ 
-                    border: '1px dashed #bdbdbd', 
-                    borderRadius: '8px', 
-                    p: 2, 
-                    textAlign: 'center',
-                    backgroundColor: '#f5f5f5',
-                    transition: 'all 0.3s ease',
-                    '&:hover': {
-                      borderColor: '#1976d2',
-                      backgroundColor: '#e3f2fd'
-                    }
-                  }}>
-                    {color.image ? (
-                      <Box>
-                        {typeof color.image === 'string' ? (
-                          <Box sx={{ mb: 1 }}>
-                            <img 
-                              src={color.image} 
-                              alt={`Màu ${color.colorName}`} 
-                              style={{ 
-                                height: '70px', 
-                                objectFit: 'contain',
-                                borderRadius: '4px',
-                                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                              }}
-                            />
-                          </Box>
-                        ) : (
-                          <Box sx={{ mb: 1 }}>
-                            {color.image instanceof File && color.image.type.startsWith('image/') && (
-                              <img 
-                                src={URL.createObjectURL(color.image)} 
-                                alt={`Màu ${color.colorName}`} 
-                                style={{ 
-                                  height: '70px', 
-                                  objectFit: 'contain',
-                                  borderRadius: '4px',
-                                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                                }}
+          {/* Thêm màu sắc và hình ảnh */}
+          <div className="product-form-section">
+            <Typography className="product-form-section-title">
+              <InfoIcon /> Màu sắc và hình ảnh
+            </Typography>
+            <div className="product-colors-container">
+              {newProduct.colors.map((color, index) => (
+                <div key={index} className="product-color-item">
+                  {index > 0 && (
+                    <IconButton 
+                      size="small" 
+                      color="error"
+                      className="product-color-remove"
+                      onClick={() => {
+                        setNewProduct(prev => {
+                          const newColors = [...prev.colors];
+                          newColors.splice(index, 1);
+                          return { ...prev, colors: newColors };
+                        });
+                      }}
+                    >
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  )}
+                  <Grid container spacing={3}>
+                    <Grid item xs={12} md={6}>
+                      <TextField
+                        label="Tên màu"
+                        fullWidth
+                        name={`colors[${index}].colorName`}
+                        value={color.colorName}
+                        onChange={handleProductInputChange}
+                        variant="filled"
+                        className="product-form-field"
+                        required
+                      />
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                      <input
+                        accept="image/*"
+                        style={{ display: 'none' }}
+                        id={`colors-image-${index}`}
+                        type="file"
+                        onChange={(e) => handleFileChange(e, `colors[${index}].image`)}
+                      />
+                      
+                      {color.image ? (
+                        <Box sx={{ textAlign: 'center' }}>
+                          <Box>
+                            {typeof color.image === 'string' ? (
+                              <img
+                                src={color.image}
+                                alt={`Color ${color.colorName}`}
+                                className="product-image-preview"
+                              />
+                            ) : (
+                              <img
+                                src={URL.createObjectURL(color.image)}
+                                alt={`Color ${color.colorName}`}
+                                className="product-image-preview"
                               />
                             )}
                             <Typography variant="caption" display="block" sx={{ mt: 1 }}>
-                              {color.image.name}
+                              {typeof color.image === 'string' ? color.image.split('/').pop() : color.image.name}
                             </Typography>
                           </Box>
-                        )}
-                        <label htmlFor={`colors-image-${index}`}>
-                          <Button
-                            variant="outlined"
-                            component="span"
-                            size="small"
-                            sx={{ 
-                              mt: 1,
-                              borderRadius: '20px',
-                              fontSize: '0.7rem'
-                            }}
-                          >
-                            Thay đổi ảnh
-                          </Button>
-                        </label>
-                      </Box>
-                    ) : (
-                      <label htmlFor={`colors-image-${index}`} style={{ cursor: 'pointer' }}>
-                        <Box sx={{ py: 2 }}>
-                          <Box sx={{ 
-                            display: 'flex', 
-                            justifyContent: 'center', 
-                            mb: 1,
-                            color: '#9e9e9e'
-                          }}>
+                          <label htmlFor={`colors-image-${index}`}>
+                            <Button
+                              variant="outlined"
+                              component="span"
+                              size="small"
+                              sx={{ mt: 1, borderRadius: '20px', fontSize: '0.7rem' }}
+                            >
+                              Thay đổi ảnh
+                            </Button>
+                          </label>
+                        </Box>
+                      ) : (
+                        <label htmlFor={`colors-image-${index}`} className="product-image-upload">
+                          <div className="product-image-upload-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 16 16">
                               <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
                               <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z"/>
                             </svg>
-                          </Box>
+                          </div>
                           <Typography variant="body2" color="primary">
                             Chọn ảnh màu sắc
                           </Typography>
                           <Typography variant="caption" color="text.secondary">
                             (PNG, JPG tối đa 5MB)
                           </Typography>
-                        </Box>
-                      </label>
-                    )}
-                  </Box>
-                </Grid>
-              </Grid>
-              {index > 0 && (
-                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
-                  <Button 
-                    size="small" 
-                    color="error"
-                    onClick={() => {
-                      setNewProduct(prev => {
-                        const newColors = [...prev.colors];
-                        newColors.splice(index, 1);
-                        return { ...prev, colors: newColors };
-                      });
-                    }}
-                  >
-                    Xóa
-                  </Button>
-                </Box>
-              )}
-            </Box>
-          ))}
+                        </label>
+                      )}
+                    </Grid>
+                  </Grid>
+                </div>
+              ))}
+            </div>
+            <Button 
+              startIcon={<AddIcon />}
+              onClick={() => {
+                setNewProduct(prev => ({
+                  ...prev,
+                  colors: [...prev.colors, { colorName: '', image: null }]
+                }));
+              }}
+              className="product-form-button-add"
+            >
+              Thêm màu sắc
+            </Button>
+          </div>
         </DialogContent>
-        <DialogActions sx={{ p: 2, borderTop: '1px solid #e0e0e0' }}>
+        <DialogActions className="product-form-actions">
           <Button 
             onClick={() => setAddProductDialogOpen(false)}
             variant="outlined"
-            sx={{ borderRadius: '8px' }}
+            className="product-form-button-cancel"
           >
             Hủy
           </Button>
@@ -1973,17 +2058,9 @@ function AdminDashboard() {
             onClick={submitNewProduct} 
             color="primary"
             variant="contained"
-            sx={{ 
-              borderRadius: '8px',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-              transition: 'all 0.2s',
-              '&:hover': {
-                transform: 'translateY(-2px)',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
-              }
-            }}
+            className="product-form-button-submit"
           >
-            Thêm
+            Thêm sản phẩm
           </Button>
         </DialogActions>
       </Dialog>
@@ -1992,400 +2069,359 @@ function AdminDashboard() {
       <Dialog
         open={editProductDialogOpen}
         onClose={() => setEditProductDialogOpen(false)}
-        maxWidth="sm"
-        fullWidth
+        maxWidth={false}
+        className="product-dialog"
         PaperProps={{
-          sx: {
-            borderRadius: '12px',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.2)'
-          }
+          className: "product-dialog-paper",
+          sx: { overflow: 'visible' }
         }}
       >
-        <DialogTitle sx={{ 
-          borderBottom: '1px solid #e0e0e0',
-          fontWeight: 'bold',
-          bgcolor: '#f5f5f5'
-        }}>
+        <DialogTitle className="product-dialog-title">
           Sửa sản phẩm
+          <IconButton
+            onClick={() => setEditProductDialogOpen(false)}
+            className="product-dialog-close"
+            sx={{ position: 'absolute', right: 8, top: 8 }}
+          >
+            <CloseIcon />
+          </IconButton>
         </DialogTitle>
-        <DialogContent sx={{ p: 3 }}>
+        <DialogContent className="product-dialog-content">
           {/* Thông tin cơ bản */}
-          <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1, mt: 1 }}>
-            Thông tin cơ bản
-          </Typography>
-          <Grid container spacing={2}>
-            <Grid container item spacing={2}>
-              <Grid item xs={12} md={6}>
+          <div className="product-form-section">
+            <Typography className="product-form-section-title">
+              <InfoIcon /> Thông tin cơ bản
+            </Typography>
+            <Grid container spacing={3}>
+              <Grid item xs={12} md={4}>
                 <TextField
                   label="Tên sản phẩm"
                   fullWidth
                   name="name"
                   value={newProduct.name}
                   onChange={handleProductInputChange}
-                  variant="outlined"
-                  InputProps={{
-                    sx: { borderRadius: '8px' }
-                  }}
+                  variant="filled"
+                  className="product-form-field"
+                  required
                 />
               </Grid>
-              <Grid item xs={12} md={6}>
+              <Grid item xs={12} md={4}>
                 <TextField
                   label="Danh mục"
                   fullWidth
                   name="category"
                   value={newProduct.category}
                   onChange={handleProductInputChange}
-                  variant="outlined"
-                  InputProps={{
-                    sx: { borderRadius: '8px' }
-                  }}
+                  variant="filled"
+                  className="product-form-field"
+                />
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <TextField
+                  label="Số lượng"
+                  fullWidth
+                  type="number"
+                  name="stock"
+                  value={newProduct.stock}
+                  onChange={handleProductInputChange}
+                  variant="filled"
+                  className="product-form-field"
+                  required
                 />
               </Grid>
             </Grid>
-            
-            <Grid item xs={12}>
-              <TextField
-                label="Mô tả"
-                fullWidth
-                multiline
-                rows={3}
-                name="description"
-                value={newProduct.description}
-                onChange={handleProductInputChange}
-                variant="outlined"
-                InputProps={{
-                  sx: { borderRadius: '8px' }
-                }}
-              />
-            </Grid>
-            
-            <Grid item xs={12} md={6}>
-              <TextField
-                label="Số lượng"
-                fullWidth
-                type="number"
-                name="stock"
-                value={newProduct.stock}
-                onChange={handleProductInputChange}
-                variant="outlined"
-                InputProps={{
-                  sx: { borderRadius: '8px' }
-                }}
-              />
-            </Grid>
-          </Grid>
+          </div>
+          
+          {/* Mô tả sản phẩm */}
+          <div className="product-form-section">
+            <Typography className="product-form-section-title">
+              <InfoIcon /> Mô tả sản phẩm
+            </Typography>
+            <TextField
+              label="Mô tả"
+              fullWidth
+              multiline
+              rows={3}
+              name="description"
+              value={newProduct.description}
+              onChange={handleProductInputChange}
+              variant="filled"
+              className="product-form-field product-description-field"
+            />
+          </div>
           
           {/* Thông tin chi tiết */}
-          <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1, mt: 3 }}>
-            Thông số kỹ thuật
-          </Typography>
-          <Grid container spacing={2}>
-            <Grid item xs={12} md={6}>
-              <TextField
-                label="Màn hình"
-                fullWidth
-                name="detail.screen"
-                value={newProduct.detail.screen}
-                onChange={handleProductInputChange}
-                variant="outlined"
-                InputProps={{
-                  sx: { borderRadius: '8px' }
-                }}
-              />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <TextField
-                label="Hệ điều hành"
-                fullWidth
-                name="detail.os"
-                value={newProduct.detail.os}
-                onChange={handleProductInputChange}
-                variant="outlined"
-                InputProps={{
-                  sx: { borderRadius: '8px' }
-                }}
-              />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <TextField
-                label="Camera sau"
-                fullWidth
-                name="detail.camera"
-                value={newProduct.detail.camera}
-                onChange={handleProductInputChange}
-                variant="outlined"
-                InputProps={{
-                  sx: { borderRadius: '8px' }
-                }}
-              />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <TextField
-                label="Camera trước"
-                fullWidth
-                name="detail.cameraFront"
-                value={newProduct.detail.cameraFront}
-                onChange={handleProductInputChange}
-                variant="outlined"
-                InputProps={{
-                  sx: { borderRadius: '8px' }
-                }}
-              />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <TextField
-                label="Chip"
-                fullWidth
-                name="detail.cpu"
-                value={newProduct.detail.cpu}
-                onChange={handleProductInputChange}
-                variant="outlined"
-                InputProps={{
-                  sx: { borderRadius: '8px' }
-                }}
-              />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <TextField
-                label="Pin"
-                fullWidth
-                name="detail.battery"
-                value={newProduct.detail.battery}
-                onChange={handleProductInputChange}
-                variant="outlined"
-                InputProps={{
-                  sx: { borderRadius: '8px' }
-                }}
-              />
-            </Grid>
-          </Grid>
-          
-          {/* Phiên bản */}
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 3, mb: 1 }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-              Phiên bản
+          <div className="product-form-section">
+            <Typography className="product-form-section-title">
+              <InfoIcon /> Thông số kỹ thuật
             </Typography>
-            <Button 
-              size="small" 
-              variant="outlined"
-              onClick={() => setNewProduct(prev => ({
-                ...prev,
-                variants: [...prev.variants, { ram: '', rom: '', price: '' }]
-              }))}
-            >
-              Thêm phiên bản
-            </Button>
-          </Box>
-          
-          {newProduct.variants.map((variant, index) => (
-            <Box key={index} sx={{ mb: 2, p: 2, border: '1px solid #e0e0e0', borderRadius: '8px' }}>
-              <Grid container spacing={2}>
-                <Grid item xs={4}>
-                  <TextField
-                    label="RAM"
-                    fullWidth
-                    name={`variants[${index}].ram`}
-                    value={variant.ram}
-                    onChange={handleProductInputChange}
-                    variant="outlined"
-                    size="small"
-                  />
-                </Grid>
-                <Grid item xs={4}>
-                  <TextField
-                    label="ROM"
-                    fullWidth
-                    name={`variants[${index}].rom`}
-                    value={variant.rom}
-                    onChange={handleProductInputChange}
-                    variant="outlined"
-                    size="small"
-                  />
-                </Grid>
-                <Grid item xs={4}>
-                  <TextField
-                    label="Giá (VND)"
-                    fullWidth
-                    type="number"
-                    name={`variants[${index}].price`}
-                    value={variant.price}
-                    onChange={handleProductInputChange}
-                    variant="outlined"
-                    size="small"
-                  />
-                </Grid>
+            <Grid container spacing={3}>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Màn hình"
+                  fullWidth
+                  name="detail.screen"
+                  value={newProduct.detail.screen}
+                  onChange={handleProductInputChange}
+                  variant="filled"
+                  className="product-form-field"
+                />
               </Grid>
-              {index > 0 && (
-                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
-                  <Button 
-                    size="small" 
-                    color="error"
-                    onClick={() => {
-                      setNewProduct(prev => {
-                        const newVariants = [...prev.variants];
-                        newVariants.splice(index, 1);
-                        return { ...prev, variants: newVariants };
-                      });
-                    }}
-                  >
-                    Xóa
-                  </Button>
-                </Box>
-              )}
-            </Box>
-          ))}
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Hệ điều hành"
+                  fullWidth
+                  name="detail.os"
+                  value={newProduct.detail.os}
+                  onChange={handleProductInputChange}
+                  variant="filled"
+                  className="product-form-field"
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Camera sau"
+                  fullWidth
+                  name="detail.camera"
+                  value={newProduct.detail.camera}
+                  onChange={handleProductInputChange}
+                  variant="filled"
+                  className="product-form-field"
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Camera trước"
+                  fullWidth
+                  name="detail.cameraFront"
+                  value={newProduct.detail.cameraFront}
+                  onChange={handleProductInputChange}
+                  variant="filled"
+                  className="product-form-field"
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="CPU"
+                  fullWidth
+                  name="detail.cpu"
+                  value={newProduct.detail.cpu}
+                  onChange={handleProductInputChange}
+                  variant="filled"
+                  className="product-form-field"
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  label="Pin"
+                  fullWidth
+                  name="detail.battery"
+                  value={newProduct.detail.battery}
+                  onChange={handleProductInputChange}
+                  variant="filled"
+                  className="product-form-field"
+                />
+              </Grid>
+            </Grid>
+          </div>
           
-          {/* Màu sắc */}
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 3, mb: 1 }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-              Màu sắc
+          {/* Biến thể sản phẩm */}
+          <div className="product-form-section">
+            <Typography className="product-form-section-title">
+              <InfoIcon /> Biến thể sản phẩm
             </Typography>
+            <div className="product-variants-container">
+              {newProduct.variants.map((variant, index) => (
+                <div key={index} className="product-variant-item">
+                  {index > 0 && (
+                    <IconButton 
+                      size="small" 
+                      color="error"
+                      className="product-variant-remove"
+                      onClick={() => {
+                        setNewProduct(prev => {
+                          const newVariants = [...prev.variants];
+                          newVariants.splice(index, 1);
+                          return { ...prev, variants: newVariants };
+                        });
+                      }}
+                    >
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  )}
+                  <Grid container spacing={3}>
+                    <Grid item xs={12} md={4}>
+                      <TextField
+                        label="RAM"
+                        fullWidth
+                        name={`variants[${index}].ram`}
+                        value={variant.ram}
+                        onChange={handleProductInputChange}
+                        variant="filled"
+                        className="product-form-field"
+                      />
+                    </Grid>
+                    <Grid item xs={12} md={4}>
+                      <TextField
+                        label="ROM"
+                        fullWidth
+                        name={`variants[${index}].rom`}
+                        value={variant.rom}
+                        onChange={handleProductInputChange}
+                        variant="filled"
+                        className="product-form-field"
+                      />
+                    </Grid>
+                    <Grid item xs={12} md={4}>
+                      <TextField
+                        label="Giá"
+                        fullWidth
+                        type="number"
+                        name={`variants[${index}].price`}
+                        value={variant.price}
+                        onChange={handleProductInputChange}
+                        variant="filled"
+                        className="product-form-field"
+                        InputProps={{
+                          endAdornment: <InputAdornment position="end">₫</InputAdornment>
+                        }}
+                      />
+                    </Grid>
+                  </Grid>
+                </div>
+              ))}
+            </div>
             <Button 
-              size="small" 
-              variant="outlined"
-              onClick={() => setNewProduct(prev => ({
-                ...prev,
-                colors: [...prev.colors, { colorName: '', image: null }]
-              }))}
+              startIcon={<AddIcon />}
+              onClick={() => {
+                setNewProduct(prev => ({
+                  ...prev,
+                  variants: [...prev.variants, { ram: '', rom: '', price: '' }]
+                }));
+              }}
+              className="product-form-button-add"
             >
-              Thêm màu sắc
+              Thêm biến thể
             </Button>
-          </Box>
+          </div>
           
-          {newProduct.colors.map((color, index) => (
-            <Box key={index} sx={{ mb: 2, p: 2, border: '1px solid #e0e0e0', borderRadius: '8px' }}>
-              <Grid container spacing={2}>
-                <Grid item xs={6}>
-                  <TextField
-                    label="Tên màu"
-                    fullWidth
-                    name={`colors[${index}].colorName`}
-                    value={color.colorName}
-                    onChange={handleProductInputChange}
-                    variant="outlined"
-                    size="small"
-                  />
-                </Grid>
-                <Grid item xs={6}>
-                  <input
-                    accept="image/*"
-                    type="file"
-                    id={`colors-image-${index}`}
-                    style={{ display: 'none' }}
-                    onChange={(e) => handleFileChange(e, `colors[${index}].image`)}
-                  />
-                  <Box sx={{ 
-                    border: '1px dashed #bdbdbd', 
-                    borderRadius: '8px', 
-                    p: 2, 
-                    textAlign: 'center',
-                    backgroundColor: '#f5f5f5',
-                    transition: 'all 0.3s ease',
-                    '&:hover': {
-                      borderColor: '#1976d2',
-                      backgroundColor: '#e3f2fd'
-                    }
-                  }}>
-                    {color.image ? (
-                      <Box>
-                        {typeof color.image === 'string' ? (
-                          <Box sx={{ mb: 1 }}>
-                            <img 
-                              src={color.image} 
-                              alt={`Màu ${color.colorName}`} 
-                              style={{ 
-                                height: '70px', 
-                                objectFit: 'contain',
-                                borderRadius: '4px',
-                                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                              }}
-                            />
-                          </Box>
-                        ) : (
-                          <Box sx={{ mb: 1 }}>
-                            {color.image instanceof File && color.image.type.startsWith('image/') && (
-                              <img 
-                                src={URL.createObjectURL(color.image)} 
-                                alt={`Màu ${color.colorName}`} 
-                                style={{ 
-                                  height: '70px', 
-                                  objectFit: 'contain',
-                                  borderRadius: '4px',
-                                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                                }}
+          {/* Thêm màu sắc và hình ảnh */}
+          <div className="product-form-section">
+            <Typography className="product-form-section-title">
+              <InfoIcon /> Màu sắc và hình ảnh
+            </Typography>
+            <div className="product-colors-container">
+              {newProduct.colors.map((color, index) => (
+                <div key={index} className="product-color-item">
+                  {index > 0 && (
+                    <IconButton 
+                      size="small" 
+                      color="error"
+                      className="product-color-remove"
+                      onClick={() => {
+                        setNewProduct(prev => {
+                          const newColors = [...prev.colors];
+                          newColors.splice(index, 1);
+                          return { ...prev, colors: newColors };
+                        });
+                      }}
+                    >
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  )}
+                  <Grid container spacing={3}>
+                    <Grid item xs={12} md={6}>
+                      <TextField
+                        label="Tên màu"
+                        fullWidth
+                        name={`colors[${index}].colorName`}
+                        value={color.colorName}
+                        onChange={handleProductInputChange}
+                        variant="filled"
+                        className="product-form-field"
+                        required
+                      />
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                      <input
+                        accept="image/*"
+                        style={{ display: 'none' }}
+                        id={`edit-colors-image-${index}`}
+                        type="file"
+                        onChange={(e) => handleFileChange(e, `colors[${index}].image`)}
+                      />
+                      
+                      {color.image ? (
+                        <Box sx={{ textAlign: 'center' }}>
+                          <Box>
+                            {typeof color.image === 'string' ? (
+                              <img
+                                src={color.image}
+                                alt={`Color ${color.colorName}`}
+                                className="product-image-preview"
+                              />
+                            ) : (
+                              <img
+                                src={URL.createObjectURL(color.image)}
+                                alt={`Color ${color.colorName}`}
+                                className="product-image-preview"
                               />
                             )}
                             <Typography variant="caption" display="block" sx={{ mt: 1 }}>
-                              {color.image.name}
+                              {typeof color.image === 'string' ? color.image.split('/').pop() : color.image.name}
                             </Typography>
                           </Box>
-                        )}
-                        <label htmlFor={`colors-image-${index}`}>
-                          <Button
-                            variant="outlined"
-                            component="span"
-                            size="small"
-                            sx={{ 
-                              mt: 1,
-                              borderRadius: '20px',
-                              fontSize: '0.7rem'
-                            }}
-                          >
-                            Thay đổi ảnh
-                          </Button>
-                        </label>
-                      </Box>
-                    ) : (
-                      <label htmlFor={`colors-image-${index}`} style={{ cursor: 'pointer' }}>
-                        <Box sx={{ py: 2 }}>
-                          <Box sx={{ 
-                            display: 'flex', 
-                            justifyContent: 'center', 
-                            mb: 1,
-                            color: '#9e9e9e'
-                          }}>
+                          <label htmlFor={`edit-colors-image-${index}`}>
+                            <Button
+                              variant="outlined"
+                              component="span"
+                              size="small"
+                              sx={{ mt: 1, borderRadius: '20px', fontSize: '0.7rem' }}
+                            >
+                              Thay đổi ảnh
+                            </Button>
+                          </label>
+                        </Box>
+                      ) : (
+                        <label htmlFor={`edit-colors-image-${index}`} className="product-image-upload">
+                          <div className="product-image-upload-icon">
                             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 16 16">
                               <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
                               <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z"/>
                             </svg>
-                          </Box>
+                          </div>
                           <Typography variant="body2" color="primary">
                             Chọn ảnh màu sắc
                           </Typography>
                           <Typography variant="caption" color="text.secondary">
                             (PNG, JPG tối đa 5MB)
                           </Typography>
-                        </Box>
-                      </label>
-                    )}
-                  </Box>
-                </Grid>
-              </Grid>
-              {index > 0 && (
-                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
-                  <Button 
-                    size="small" 
-                    color="error"
-                    onClick={() => {
-                      setNewProduct(prev => {
-                        const newColors = [...prev.colors];
-                        newColors.splice(index, 1);
-                        return { ...prev, colors: newColors };
-                      });
-                    }}
-                  >
-                    Xóa
-                  </Button>
-                </Box>
-              )}
-            </Box>
-          ))}
+                        </label>
+                      )}
+                    </Grid>
+                  </Grid>
+                </div>
+              ))}
+            </div>
+            <Button 
+              startIcon={<AddIcon />}
+              onClick={() => {
+                setNewProduct(prev => ({
+                  ...prev,
+                  colors: [...prev.colors, { colorName: '', image: null }]
+                }));
+              }}
+              className="product-form-button-add"
+            >
+              Thêm màu sắc
+            </Button>
+          </div>
         </DialogContent>
-        <DialogActions sx={{ p: 2, borderTop: '1px solid #e0e0e0' }}>
+        <DialogActions className="product-form-actions">
           <Button 
             onClick={() => setEditProductDialogOpen(false)}
             variant="outlined"
-            sx={{ borderRadius: '8px' }}
+            className="product-form-button-cancel"
           >
             Hủy
           </Button>
@@ -2393,17 +2429,9 @@ function AdminDashboard() {
             onClick={submitEditProduct} 
             color="primary"
             variant="contained"
-            sx={{ 
-              borderRadius: '8px',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-              transition: 'all 0.2s',
-              '&:hover': {
-                transform: 'translateY(-2px)',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
-              }
-            }}
+            className="product-form-button-submit"
           >
-            Lưu thay đổi
+            Cập nhật sản phẩm
           </Button>
         </DialogActions>
       </Dialog>
@@ -2427,6 +2455,161 @@ function AdminDashboard() {
           {snackbar.message}
         </Alert>
       </Snackbar>
+      
+      {/* Dialog cập nhật trạng thái đơn hàng */}
+      <Dialog
+        open={updateStatusDialogOpen}
+        onClose={() => setUpdateStatusDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: '12px',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
+            overflow: 'hidden'
+          }
+        }}
+      >
+        <DialogTitle sx={{ 
+          borderBottom: '1px solid #e0e0e0',
+          fontWeight: 'bold',
+          background: 'linear-gradient(135deg, #4e54c8, #8f94fb)',
+          color: 'white',
+          py: 2
+        }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <EditIcon fontSize="small" />
+            Cập nhật trạng thái đơn hàng #{orderDetails?.id}
+          </Box>
+        </DialogTitle>
+        <DialogContent sx={{ p: 3, mt: 2 }}>
+          <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 'medium', color: '#555' }}>
+            Chọn trạng thái mới
+          </Typography>
+          <FormControl 
+            fullWidth 
+            variant="outlined" 
+            sx={{ 
+              mb: 3,
+              '& .MuiOutlinedInput-root': {
+                borderRadius: '10px',
+                transition: 'all 0.2s',
+                '&:hover': {
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+                },
+                '&.Mui-focused': {
+                  boxShadow: '0 0 0 2px rgba(78, 84, 200, 0.2)'
+                }
+              }
+            }}
+          >
+            <InputLabel>Trạng thái đơn hàng</InputLabel>
+            <Select
+              value={newOrderStatus}
+              onChange={(e) => setNewOrderStatus(e.target.value)}
+              label="Trạng thái đơn hàng"
+            >
+              <MenuItem value="PROCESSING" sx={{ py: 1.5 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                  <FaHourglassHalf style={{ color: '#ffc107', fontSize: '1.2rem' }} />
+                  <Typography>Đang xử lý</Typography>
+                </Box>
+              </MenuItem>
+              <MenuItem value="SHIPPING" sx={{ py: 1.5 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                  <FaTruck style={{ color: '#17a2b8', fontSize: '1.2rem' }} />
+                  <Typography>Đang vận chuyển</Typography>
+                </Box>
+              </MenuItem>
+              <MenuItem value="COMPLETED" sx={{ py: 1.5 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                  <FaCheckCircle style={{ color: '#28a745', fontSize: '1.2rem' }} />
+                  <Typography>Đã giao hàng</Typography>
+                </Box>
+              </MenuItem>
+              <MenuItem value="CANCELLED" sx={{ py: 1.5 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                  <FaTimesCircle style={{ color: '#dc3545', fontSize: '1.2rem' }} />
+                  <Typography>Đã hủy</Typography>
+                </Box>
+              </MenuItem>
+            </Select>
+          </FormControl>
+          
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 'medium', color: '#555' }}>
+              Tin nhắn thông báo
+            </Typography>
+            <TextField
+              fullWidth
+              multiline
+              rows={4}
+              value={statusMessage}
+              onChange={(e) => setStatusMessage(e.target.value)}
+              variant="outlined"
+              placeholder="Ví dụ: Đơn hàng của bạn đang được vận chuyển và sẽ đến trong 2-3 ngày tới..."
+              sx={{ 
+                mb: 2,
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: '10px',
+                  transition: 'all 0.2s',
+                  '&:hover': {
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+                  },
+                  '&.Mui-focused': {
+                    boxShadow: '0 0 0 2px rgba(78, 84, 200, 0.2)'
+                  }
+                }
+              }}
+            />
+          </Box>
+          
+          <Box sx={{ 
+            p: 2, 
+            bgcolor: '#f8f9fa', 
+            borderRadius: '10px',
+            border: '1px dashed #dee2e6',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1.5
+          }}>
+            <InfoIcon color="primary" fontSize="small" />
+            <Typography variant="caption" color="text.secondary">
+              Tin nhắn này sẽ được gửi qua email đến khách hàng khi trạng thái đơn hàng được cập nhật.
+            </Typography>
+          </Box>
+        </DialogContent>
+        <DialogActions sx={{ p: 2.5, borderTop: '1px solid #e0e0e0', bgcolor: '#f8f9fa' }}>
+          <Button 
+            onClick={() => setUpdateStatusDialogOpen(false)}
+            variant="outlined"
+            startIcon={<CloseIcon />}
+            sx={{ 
+              borderRadius: '8px',
+              px: 2.5
+            }}
+          >
+            Hủy
+          </Button>
+          <Button 
+            onClick={handleUpdateOrderStatus}
+            variant="contained"
+            color="primary"
+            startIcon={<SaveIcon />}
+            sx={{ 
+              borderRadius: '8px',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+              px: 3,
+              '&:hover': {
+                transform: 'translateY(-2px)',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+              }
+            }}
+          >
+            Cập nhật
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

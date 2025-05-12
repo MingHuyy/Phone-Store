@@ -39,5 +39,28 @@ public class MailService {
         mailSender.send(mimeMessage);
     }
 
+    public void sendOrderStatusMessage(@Email String email, Long orderCode, String receiverName, String shippingAddress, String orderStatus, String adminMessage) throws MessagingException, UnsupportedEncodingException {
+        MimeMessage mimeMessage = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED, "UTF-8");
+
+        String emailContent = String.format(
+                "Chào bạn,<br><br>" +
+                        "Đơn hàng có mã <strong>%s</strong> được gửi đến <strong>%s</strong> với địa chỉ <strong>%s</strong> đã được cập nhật trạng thái <strong>%s</strong> với thông báo:<br>" +
+                        "<p><strong>%s</strong></p><br>" +
+                        "Nếu có bất kỳ thắc mắc nào, vui lòng liên hệ lại với chúng tôi.<br><br>Xin cảm ơn!",
+                orderCode, receiverName, shippingAddress, orderStatus, adminMessage);
+
+        helper.setFrom(from, "Smartphone Store");
+        helper.setTo(email);
+        helper.setSubject("Cập nhật trạng thái đơn hàng");
+        helper.setText(emailContent, true);
+
+        mailSender.send(mimeMessage);
+    }
+
+
+
+
+
 
 }

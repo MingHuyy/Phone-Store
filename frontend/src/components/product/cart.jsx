@@ -20,6 +20,7 @@ const Cart = () => {
     const [formErrors, setFormErrors] = useState({});
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [orderData, setOrderData] = useState(null);
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
 
     // Lấy dữ liệu giỏ hàng
     const fetchCartData = async () => {
@@ -328,6 +329,7 @@ const Cart = () => {
                 setSelectedItems(newSelectedItems);
                 setShowConfirmModal(false);
                 setShowCheckout(false);
+                setShowSuccessModal(true);
                 
                 // Hiển thị thông báo thành công
                 alert("Đặt hàng thành công!\nCảm ơn bạn đã mua sắm. Chúng tôi sẽ xử lý đơn hàng của bạn trong thời gian sớm nhất.");
@@ -340,7 +342,6 @@ const Cart = () => {
         }
     };
 
-    // Thêm useEffect để theo dõi thay đổi của showSuccessModal
     useEffect(() => {
         console.log("Trạng thái showSuccessModal:", showSuccessModal);
     }, [showSuccessModal]);
@@ -721,6 +722,34 @@ const Cart = () => {
                                 >
                                     <FaCheck /> Xác nhận đặt hàng
                                 </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal thông báo đặt hàng thành công */}
+            {showSuccessModal && (
+                <div className="success-modal-overlay">
+                    <div className="success-modal">
+                        <div className="success-modal-header">
+                            <h2>Đặt hàng thành công</h2>
+                            <button className="close-btn" onClick={() => setShowSuccessModal(false)}>&times;</button>
+                        </div>
+                        <div className="success-modal-body">
+                            <div className="success-icon">
+                                <FaCheck />
+                            </div>
+                            <p className="success-message">Cảm ơn bạn đã mua sắm!</p>
+                            <p>Đơn hàng của bạn đã được đặt thành công.</p>
+                            <p>Chúng tôi sẽ xử lý đơn hàng của bạn trong thời gian sớm nhất.</p>
+                            <div className="success-modal-actions">
+                                <Link to="/" className="success-btn" onClick={() => setShowSuccessModal(false)}>
+                                    Tiếp tục mua sắm
+                                </Link>
+                                <Link to="/account/orders" className="view-order-btn">
+                                    Xem đơn hàng
+                                </Link>
                             </div>
                         </div>
                     </div>

@@ -32,6 +32,7 @@ public class OrderConverter {
         response.setAddress(order.getAddress());
         response.setTotalPrice(order.getTotalPrice());
         response.setPaymentStatus(order.getPaymentStatus().toString());
+        response.setOrderStatus(order.getOrderStatus().toString());
         response.setCreatedAt(order.getCreatedAt());
 
         List<OrderItemEntity> orderItems = orderItemRepository.findByOrderEntityId(order.getId());

@@ -103,6 +103,10 @@
     color: var(--warning-color);
 }
 
+.status-icon.cancelled {
+    color: var(--error-color);
+}
+
 .order-detail-content {
     display: flex;
     flex-direction: column;

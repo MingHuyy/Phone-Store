@@ -1,0 +1,317 @@
+/* CSS cho form thêm mới và cập nhật sản phẩm */
+
+/* Dialog và container */
+.product-dialog {
+  width: 90vw !important;
+  max-width: 1200px !important;
+  margin: 20px auto;
+  overflow: visible !important;
+}
+
+.product-dialog-paper {
+  border-radius: 12px !important;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.15) !important;
+  overflow: visible !important;
+}
+
+.product-dialog-content {
+  padding: 24px !important;
+  overflow-x: hidden;
+  max-height: 80vh;
+}
+
+.product-dialog-title {
+  background: linear-gradient(135deg, #4e54c8, #8f94fb) !important;
+  color: white !important;
+  padding: 16px 24px !important;
+  font-size: 1.5rem !important;
+  font-weight: bold !important;
+  border-bottom: none !important;
+}
+
+.product-dialog-close {
+  color: white !important;
+}
+
+/* Sections */
+.product-form-section {
+  margin-bottom: 32px;
+  padding: 24px;
+  border-radius: 12px;
+  background-color: #f9f9f9;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  position: relative;
+}
+
+/* Section riêng cho mô tả */
+.product-form-section:nth-child(2) {
+  width: 100% !important;
+  padding: 20px 24px !important;
+}
+
+.product-form-section-title {
+  font-size: 1.2rem !important;
+  font-weight: 600 !important;
+  color: #4e54c8;
+  margin-bottom: 16px !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #4e54c8;
+}
+
+/* Fields */
+.product-form-field {
+  margin-bottom: 24px !important;
+}
+
+/* Đưa label ra ngoài */
+.product-form-field .MuiInputLabel-root {
+  position: static !important;
+  transform: none !important;
+  color: #333 !important;
+  font-size: 0.95rem !important;
+  font-weight: 600 !important;
+  margin-bottom: 8px !important;
+  display: block !important;
+}
+
+/* Chỉnh ô input filled */
+.product-form-field .MuiFilledInput-root {
+  background-color: white !important;
+  border-radius: 8px !important;
+  border: 1px solid #e0e0e0 !important;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.03) !important;
+  transition: all 0.3s ease !important;
+}
+
+/* Bỏ underline mặc định */
+.product-form-field .MuiFilledInput-underline:before,
+.product-form-field .MuiFilledInput-underline:after {
+  display: none !important;
+}
+
+/* Chỉnh kích thước và padding cho input */
+.product-form-field .MuiFilledInput-input {
+  padding: 16px !important;
+  min-height: 56px !important;
+  font-size: 1rem !important;
+}
+
+/* Trạng thái hover và focus */
+.product-form-field .MuiFilledInput-root:hover {
+  background-color: white !important;
+  border-color: #b8b9e6 !important;
+}
+
+.product-form-field .MuiFilledInput-root.Mui-focused {
+  background-color: white !important;
+  border-color: #4e54c8 !important;
+  box-shadow: 0 0 0 2px rgba(78, 84, 200, 0.2) !important;
+}
+
+/* Trường textarea */
+.product-form-field .MuiFilledInput-multiline {
+  padding: 0 !important;
+}
+
+.product-form-field .MuiFilledInput-inputMultiline {
+  min-height: 60px !important;
+  padding: 16px !important;
+}
+
+/* Chỉnh kiểu cho ô mô tả */
+.product-form-field textarea.MuiFilledInput-input {
+  min-height: 60px !important;
+  font-size: 1rem !important;
+  line-height: 1.6 !important;
+  width: 100% !important;
+}
+
+/* Style đặc biệt cho ô mô tả */
+.product-form-section:nth-child(2) .product-form-field textarea.MuiFilledInput-input {
+  min-height: 60px !important;
+  max-height: 150px !important;
+  padding: 12px 14px !important;
+  font-size: 0.95rem !important;
+  overflow-y: auto;
+  width: 100% !important;
+}
+
+/* Đảm bảo ô mô tả chiếm toàn bộ chiều rộng */
+.product-form-section:nth-child(2) .MuiGrid-container,
+.product-form-section:nth-child(2) .MuiGrid-item,
+.product-form-section:nth-child(2) .MuiFormControl-root {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* Style class riêng cho ô mô tả */
+.product-description-field {
+  width: 100% !important;
+  margin: 0 !important;
+}
+
+.product-description-field .MuiInputBase-root {
+  width: 100% !important;
+  margin: 0 !important;
+}
+
+.product-description-field textarea {
+  width: 100% !important;
+}
+
+/* Variants section */
+.product-variants-container {
+  margin-top: 16px;
+  margin-bottom: 16px;
+}
+
+.product-variant-item {
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  background-color: white;
+  margin-bottom: 16px;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.product-variant-item:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.product-variant-remove {
+  position: absolute !important;
+  top: 8px;
+  right: 8px;
+  color: #f44336 !important;
+}
+
+/* Colors section */
+.product-colors-container {
+  margin-top: 16px;
+  margin-bottom: 16px;
+}
+
+.product-color-item {
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  background-color: white;
+  margin-bottom: 16px;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.product-color-item:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.product-color-remove {
+  position: absolute !important;
+  top: 8px;
+  right: 8px;
+  color: #f44336 !important;
+}
+
+/* Image upload */
+.product-image-upload {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  border: 2px dashed #bdbdbd;
+  border-radius: 8px;
+  background-color: #fafafa;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.product-image-upload:hover {
+  border-color: #4e54c8;
+  background-color: rgba(78, 84, 200, 0.05);
+}
+
+.product-image-upload-icon {
+  font-size: 2.5rem;
+  color: #9e9e9e;
+  margin-bottom: 12px;
+}
+
+.product-image-preview {
+  width: 100%;
+  height: 150px;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 12px;
+}
+
+/* Buttons */
+.product-form-button-add {
+  margin-top: 16px !important;
+  padding: 8px 24px !important;
+  color: #4e54c8 !important;
+  background-color: rgba(78, 84, 200, 0.1) !important;
+  border-radius: 20px !important;
+  transition: all 0.3s ease !important;
+}
+
+.product-form-button-add:hover {
+  background-color: rgba(78, 84, 200, 0.2) !important;
+  transform: translateY(-2px);
+}
+
+.product-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 16px 24px;
+  background-color: #f5f5f5;
+  border-top: 1px solid #e0e0e0;
+  gap: 16px;
+  position: sticky;
+  bottom: 0;
+}
+
+.product-form-button-cancel {
+  padding: 8px 24px !important;
+  border-radius: 8px !important;
+}
+
+.product-form-button-submit {
+  padding: 8px 32px !important;
+  border-radius: 8px !important;
+  background: linear-gradient(135deg, #4e54c8, #8f94fb) !important;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(78, 84, 200, 0.3) !important;
+  transition: all 0.3s ease !important;
+}
+
+.product-form-button-submit:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 16px rgba(78, 84, 200, 0.4) !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .product-dialog {
+    width: 95vw !important;
+    margin: 10px auto;
+  }
+  
+  .product-form-section {
+    padding: 16px;
+  }
+  
+  .product-dialog-content {
+    padding: 16px !important;
+  }
+  
+  .product-color-item,
+  .product-variant-item {
+    padding: 16px 12px;
+  }
+} 
