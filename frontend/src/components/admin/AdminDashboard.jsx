@@ -129,6 +129,9 @@ function AdminDashboard() {
   const [newOrderStatus, setNewOrderStatus] = useState('');
   const [statusMessage, setStatusMessage] = useState('');
 
+  // Thêm state cho ID đơn hàng đang chọn
+  const [selectedOrderId, setSelectedOrderId] = useState(null);
+
   useEffect(() => {
     fetchAllData();
   }, []);
@@ -196,6 +199,7 @@ function AdminDashboard() {
   };
 
   const handleViewOrderDetails = (order) => {
+    console.log("View order details:", order);
     setOrderDetails(order);
     setOrderDialogOpen(true);
   };
@@ -426,7 +430,6 @@ function AdminDashboard() {
         return;
       }
       
-      // Bước 2: Tạo sản phẩm với các URL ảnh đã upload
       // Tạo đối tượng JSON để gửi đi thay vì FormData
       const productData = {
         name: newProduct.name,
@@ -801,6 +804,13 @@ function AdminDashboard() {
   // Thêm hàm xử lý mở dialog cập nhật trạng thái
   const handleOpenUpdateStatus = () => {
     if (orderDetails) {
+      console.log("Opening update status dialog - Order details:", orderDetails);
+      
+      // Lưu ID vào state riêng để đảm bảo có giá trị
+      setSelectedOrderId(orderDetails.id);
+      console.log("Setting selected order ID:", orderDetails.id);
+      
+      setSelectedItem(orderDetails);
       setNewOrderStatus(orderDetails.orderStatus || 'PROCESSING');
       setStatusMessage('');
       setUpdateStatusDialogOpen(true);
@@ -810,28 +820,66 @@ function AdminDashboard() {
   // Thêm hàm xử lý lưu trạng thái mới
   const handleUpdateOrderStatus = async () => {
     try {
-      if (!selectedItem || !newOrderStatus) {
+      console.log("===== UPDATE STATUS DEBUGGING =====");
+      console.log("Selected item:", selectedItem);
+      console.log("Order details:", orderDetails);
+      console.log("Selected order ID:", selectedOrderId);
+      
+      // Sử dụng orderDetails nếu selectedItem là null
+      const orderToUpdate = selectedItem || orderDetails;
+      
+      if (!orderToUpdate) {
+        console.error("ERROR: Không tìm thấy thông tin đơn hàng");
+        showSnackbar('Không tìm thấy đơn hàng', 'error');
+        return;
+      }
+      
+      if (!newOrderStatus) {
+        console.error("ERROR: newOrderStatus is empty");
         showSnackbar('Vui lòng chọn trạng thái', 'error');
         return;
       }
       
+      // Lưu giá trị trước khi đóng dialog để tránh bị reset
+      // Ưu tiên sử dụng selectedOrderId, sau đó đến ID từ orderToUpdate
+      const orderId = selectedOrderId || orderToUpdate.id;
+      const statusToUpdate = newOrderStatus;
+      const messageToSend = statusMessage;
+      
+      console.log("Values to be sent:");
+      console.log("- Order ID:", orderId);
+      console.log("- Status to update:", statusToUpdate);
+      console.log("- Message:", messageToSend);
+      
       // Trước khi gọi API, đóng dialog
       setUpdateStatusDialogOpen(false);
       
+      // Kiểm tra ID một lần nữa
+      if (!orderId) {
+        console.error("ERROR: Order ID is missing");
+        showSnackbar('Thiếu ID đơn hàng', 'error');
+        return;
+      }
+      
+      // Cập nhật URL với status như một query parameter
+      const apiUrl = `http://localhost:1111/api/admin/orders/${orderId}/status?status=${statusToUpdate}`;
+      console.log("Sending API request to:", apiUrl);
+      
       // Gọi API cập nhật trạng thái
-      const response = await fetch(`http://localhost:1111/api/orders/${selectedItem.id}/update-status`, {
+      const response = await fetch(apiUrl, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
         },
+        // Message có thể vẫn gửi trong body (nếu backend cần)
         body: JSON.stringify({ 
-          orderStatus: newOrderStatus,
-          message: statusMessage
+          message: messageToSend
         })
       });
       
       const result = await response.json();
+      console.log("API Response:", result);
       
       if (!response.ok) {
         throw new Error(result.message || 'Không thể cập nhật trạng thái');
@@ -839,10 +887,15 @@ function AdminDashboard() {
       
       // Cập nhật UI
       setOrders(orders.map(order => 
-        order.id === selectedItem.id 
-          ? { ...order, orderStatus: newOrderStatus }
+        order.id === orderId
+          ? { ...order, orderStatus: statusToUpdate }
           : order
       ));
+      
+      // Cập nhật orderDetails nếu đang hiển thị
+      if (orderDetails && orderDetails.id === orderId) {
+        setOrderDetails({...orderDetails, orderStatus: statusToUpdate});
+      }
       
       showSnackbar('Cập nhật trạng thái đơn hàng thành công', 'success');
       
@@ -852,6 +905,7 @@ function AdminDashboard() {
     } finally {
       setNewOrderStatus('');
       setStatusMessage('');
+      setSelectedOrderId(null);
     }
   };
 
@@ -1080,7 +1134,7 @@ function AdminDashboard() {
                   <TableBody>
                           {paginatedData.map((order) => (
                             <TableRow 
-                              key={order._id || order.id}
+                              key={order.id}
                               sx={{ 
                                 '&:hover': { 
                                   backgroundColor: 'rgba(0, 0, 0, 0.04)',
@@ -1089,7 +1143,7 @@ function AdminDashboard() {
                               }}
                             >
                               <TableCell sx={{ whiteSpace: 'nowrap' }}>
-                                {(order._id || order.id).toString().substring(0, 8)}
+                                {order.id.toString().substring(0, 8)}
                               </TableCell>
                               <TableCell sx={{ whiteSpace: 'nowrap' }}>
                                 {new Date(order.createdAt).toLocaleDateString('vi-VN')}
@@ -2505,7 +2559,7 @@ function AdminDashboard() {
           >
             <InputLabel>Trạng thái đơn hàng</InputLabel>
             <Select
-              value={newOrderStatus}
+              value={newOrderStatus || ''}
               onChange={(e) => setNewOrderStatus(e.target.value)}
               label="Trạng thái đơn hàng"
             >
